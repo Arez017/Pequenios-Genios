@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pequeños Genios</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --board-green: #0b3d2e;
+    --board-green-2: #124e3b;
+    --copper: #ff8a3d;
+    --copper-2: #ffb454;
+    --led-red: #ff4d5e;
+    --led-blue: #4dd8ff;
+    --cream: #fef8ec;
+    --ink: #0b1f18;
+    --wire-yellow: #ffd23f;
+    --ok-green: #4ade80;
+    --bad-red: #ff5c5c;
+    --panel: #0e2a20;
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 12% 6%, rgba(255,138,61,0.22), transparent 42%),
+      radial-gradient(circle at 88% 12%, rgba(77,216,255,0.20), transparent 42%),
+      radial-gradient(circle at 50% 95%, rgba(255,210,63,0.14), transparent 50%),
+      linear-gradient(160deg, #0c4231 0%, #0b3d2e 45%, #082c21 100%);
+    color:var(--cream);
+    font-family:'Baloo 2', sans-serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+  .mono{font-family:'Space Mono', monospace;}
+
+  /* circuit trace background pattern */
+  .traces{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.22;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,180,84,0.55) 0 2px, transparent 2px 90px),
+      repeating-linear-gradient(90deg, rgba(255,180,84,0.55) 0 2px, transparent 2px 90px);
+  }
+  .traces::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(77,216,255,0.9) 1.5px, transparent 1.6px);
+    background-size:90px 90px;
+    animation: dotshift 6s linear infinite;
+    opacity:0.5;
+  }
+  @keyframes dotshift{
+    0%{background-position:0 0;}
+    100%{background-position:90px 90px;}
+  }
+  /* glowing current pulses that travel across the screen */
+  .pulse-layer{position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;}
+  .pulse{
+    position:absolute; width:5px; height:5px; border-radius:50%;
+    background:var(--wire-yellow);
+    box-shadow:0 0 10px 3px var(--wire-yellow), 0 0 22px 6px rgba(255,210,63,0.5);
+    animation: travel linear infinite;
+  }
+  .pulse.blue{background:var(--led-blue); box-shadow:0 0 10px 3px var(--led-blue), 0 0 22px 6px rgba(77,216,255,0.5);}
+  .pulse.red{background:var(--led-red); box-shadow:0 0 10px 3px var(--led-red), 0 0 22px 6px rgba(255,77,94,0.5);}
+  @keyframes travel{
+    0%{transform:translateX(-10px);}
+    100%{transform:translateX(110vw);}
+  }
+  /* rotating conic glow behind everything, slow and hypnotic */
+  .glow-spin{
+    position:fixed; top:-40vh; left:50%; width:160vmax; height:160vmax; z-index:0; pointer-events:none;
+    transform:translateX(-50%);
+    background: conic-gradient(from 0deg, rgba(255,138,61,0.10), rgba(77,216,255,0.08), rgba(255,210,63,0.10), rgba(255,77,94,0.06), rgba(255,138,61,0.10));
+    animation: spinslow 40s linear infinite;
+    opacity:0.6;
+  }
+  @keyframes spinslow{ to{ transform:translateX(-50%) rotate(360deg); } }
+  /* drifting emoji icons for a playful, alive feel */
+  .drift-layer{position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;}
+  .drift-icon{
+    position:absolute; font-size:28px; opacity:0.18;
+    animation: driftup linear infinite;
+    filter: drop-shadow(0 0 8px rgba(255,210,63,0.35));
+  }
+  @keyframes driftup{
+    0%{transform:translateY(10vh) rotate(0deg); opacity:0;}
+    10%{opacity:0.22;}
+    90%{opacity:0.22;}
+    100%{transform:translateY(-115vh) rotate(25deg); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .traces::after, .pulse, .glow-spin, .drift-icon{animation:none;}
+  }
+
+  header{
+    position:relative; z-index:2;
+    text-align:center;
+    padding:70px 20px 50px;
+  }
+  .badge{
+    display:inline-block;
+    font-family:'Space Mono', monospace;
+    letter-spacing:3px;
+    font-size:12px;
+    background:var(--copper);
+    color:var(--ink);
+    padding:6px 16px;
+    border-radius:999px;
+    margin-bottom:22px;
+    font-weight:700;
+  }
+  h1{
+    font-size:clamp(2.4rem, 6vw, 4.6rem);
+    margin:0 0 14px;
+    font-weight:800;
+    line-height:1.02;
+    text-shadow: 0 0 30px rgba(255,180,84,0.25);
+  }
+  h1 span{color:var(--wire-yellow);}
+  header p{
+    max-width:560px; margin:0 auto; font-size:1.15rem; opacity:0.85; line-height:1.5;
+  }
+  .cta-row{margin-top:34px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  .btn{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:1rem;
+    border:none; cursor:pointer; padding:14px 26px; border-radius:14px;
+    background:var(--wire-yellow); color:var(--ink);
+    box-shadow: 0 6px 0 #b6900f;
+    transition: transform .12s, box-shadow .12s;
+  }
+  .btn:active{transform:translateY(6px); box-shadow:0 0 0 #b6900f;}
+  .btn.ghost{
+    background:transparent; color:var(--cream); border:2px solid rgba(255,248,236,0.4);
+    box-shadow:none;
+  }
+  .btn.ghost:active{transform:translateY(2px);}
+
+  /* mascot */
+  .mascot{
+    width:120px; height:120px; margin:34px auto 0; position:relative;
+    animation: floaty 3.2s ease-in-out infinite;
+  }
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,61,46,0.88); backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(255,180,84,0.25);
+    display:flex; gap:4px; justify-content:center; flex-wrap:wrap;
+    padding:10px 12px;
+  }
+  nav a{
+    color:var(--cream); text-decoration:none; font-size:0.85rem; font-weight:700;
+    padding:8px 12px; border-radius:10px; opacity:0.75; font-family:'Space Mono',monospace;
+    letter-spacing:0.5px;
+  }
+  nav a:hover{opacity:1; background:rgba(255,180,84,0.12);}
+
+  section{
+    position:relative; z-index:2;
+    max-width:1080px; margin:0 auto; padding:80px 20px;
+  }
+  .section-head{text-align:center; margin-bottom:44px;}
+  .eyebrow{
+    font-family:'Space Mono',monospace; color:var(--copper-2); letter-spacing:3px;
+    font-size:12px; font-weight:700; text-transform:uppercase;
+  }
+  .section-head h2{font-size:clamp(1.7rem,4vw,2.6rem); margin:8px 0 10px; font-weight:800;}
+  .section-head p{opacity:0.75; max-width:520px; margin:0 auto; line-height:1.5;}
+
+  /* component cards */
+  .comp-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px;
+  }
+  .comp-card{
+    background:linear-gradient(160deg, var(--board-green-2), var(--panel));
+    border:1px solid rgba(255,180,84,0.2);
+    border-radius:var(--radius);
+    padding:20px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .15s, border-color .15s;
+  }
+  .comp-card:hover{transform:translateY(-5px); border-color:var(--copper);}
+   .comp-card .component-photo{
+    width:100%; height:125px; object-fit:contain; background:#fff;
+    border-radius:12px; margin-bottom:8px; padding:8px; display:block;
+  }
+  .comp-card .figure{
+    display:block; margin:4px 0 7px; font-family:'Space Mono',monospace;
+    font-size:10px; color:var(--copper-2); letter-spacing:.5px;
+  }
+  .comp-card .symbol-label{
+    display:inline-block; margin-top:7px; font-size:.72rem; opacity:.8;
+  }
+  .comp-card h3{margin:0 0 6px; font-size:1.05rem;}
+  .comp-card p{margin:0; font-size:0.82rem; opacity:0.7; line-height:1.4; display:none;}
+  .comp-card.open p{display:block;}
+  .pol-tag{
+    display:inline-block; margin-top:8px; font-family:'Space Mono',monospace; font-size:10px;
+    padding:3px 8px; border-radius:6px; letter-spacing:1px;
+  }
+  .pol-tag.si{background:rgba(255,92,92,0.18); color:#ff9b9b;}
+  .pol-tag.no{background:rgba(74,222,128,0.18); color:#8ff0b0;}
+
+  /* game panels */
+  .panel{
+    background:linear-gradient(160deg, var(--board-green-2), var(--panel));
+    border:1px solid rgba(255,180,84,0.22);
+    border-radius:24px;
+    padding:32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+  .panel-top{display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px;}
+  .stat{font-family:'Space Mono',monospace; font-size:0.85rem; background:rgba(0,0,0,0.25); padding:8px 14px; border-radius:10px;}
+  .stat b{color:var(--wire-yellow);}
+
+  /* GAME 1 memory */
+  .memo-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;}
+  .memo-card{
+    aspect-ratio:1/1; border-radius:14px; cursor:pointer; position:relative;
+    perspective:600px;
+  }
+  .memo-inner{
+    position:absolute; inset:0; transform-style:preserve-3d; transition:transform .45s;
+    border-radius:14px;
+  }
+  .memo-card.flip .memo-inner{transform:rotateY(180deg);}
+  .memo-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:14px;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; padding:6px;
+  }
+  .memo-front{
+    background:repeating-linear-gradient(45deg, var(--panel), var(--panel) 10px, #0a2019 10px, #0a2019 20px);
+    border:2px solid var(--copper);
+  }
+  .memo-front::after{content:"⚡"; font-size:1.8rem;}
+  .memo-back{
+    background:var(--cream); color:var(--ink); transform:rotateY(180deg);
+    font-size:0.68rem; font-weight:700; text-align:center; line-height:1.2; gap:4px;
+  }
+  .memo-back svg{width:34px;height:34px;}
+  .memo-card.matched .memo-back{background:var(--ok-green); color:#04310f;}
+
+  /* GAME 2 circuit builder */
+  .cb-wrap{display:flex; flex-wrap:wrap; gap:26px;}
+  .cb-tray{flex:1; min-width:220px;}
+  .cb-tray h4, .cb-track h4{font-family:'Space Mono',monospace; font-size:0.75rem; letter-spacing:2px; opacity:0.65; margin:0 0 10px;}
+  .cb-parts{display:flex; flex-wrap:wrap; gap:10px;}
+  .cb-part{
+    background:var(--cream); color:var(--ink); border-radius:12px; padding:10px 14px;
+    font-weight:700; font-size:0.85rem; cursor:grab; display:flex; align-items:center; gap:8px;
+    border:2px solid transparent; user-select:none;
+  }
+  .cb-part.used{opacity:0.25; pointer-events:none;}
+  .cb-part svg{width:26px;height:26px;}
+  .cb-track{flex:2; min-width:280px;}
+  .cb-slots{display:flex; align-items:center; gap:6px; flex-wrap:wrap; background:rgba(0,0,0,0.25); border-radius:16px; padding:20px; min-height:100px;}
+  .cb-slot{
+    width:84px; height:84px; border:2px dashed rgba(255,248,236,0.35); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; font-size:0.6rem;
+    color:rgba(255,248,236,0.5); text-align:center; gap:4px; position:relative; font-weight:700;
+  }
+  .cb-slot.filled{border-style:solid; border-color:var(--copper); color:var(--cream);}
+  .cb-slot svg{width:30px;height:30px;}
+  .cb-wire{width:22px; height:3px; background:var(--wire-yellow); border-radius:2px;}
+  .led-visual{width:80px;height:80px;margin:0 auto;display:block;}
+  .cb-result{margin-top:18px; text-align:center; font-weight:700; min-height:26px;}
+  .cb-result.ok{color:var(--ok-green);}
+  .cb-result.bad{color:var(--bad-red);}
+
+  /* GAME 3 polarity */
+  .pol-stage{display:flex; flex-direction:column; align-items:center; gap:18px;}
+  .pol-item svg{width:180px; height:180px;}
+  .pol-choices{display:flex; gap:16px;}
+  .pol-btn{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:1rem; padding:14px 28px;
+    border-radius:12px; border:2px solid rgba(255,248,236,0.35); background:transparent; color:var(--cream);
+    cursor:pointer; transition:all .12s;
+  }
+  .pol-btn:hover{border-color:var(--copper); background:rgba(255,138,61,0.12);}
+  .feedback{min-height:26px; font-weight:700; text-align:center;}
+  .feedback.ok{color:var(--ok-green);}
+  .feedback.bad{color:var(--bad-red);}
+
+  /* GAME 4 series/parallel */
+  .sp-tabs{display:flex; gap:10px; justify-content:center; margin-bottom:26px;}
+  .sp-tab{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:0.8rem; padding:10px 18px;
+    border-radius:10px; border:2px solid rgba(255,248,236,0.3); background:transparent; color:var(--cream); cursor:pointer;
+  }
+  .sp-tab.active{background:var(--copper); color:var(--ink); border-color:var(--copper);}
+  .sp-view{display:none;}
+  .sp-view.active{display:block;}
+  .sp-circuit{display:flex; justify-content:center; align-items:center; gap:0; flex-wrap:wrap; min-height:220px;}
+  .sp-note{text-align:center; margin-top:18px; font-size:0.9rem; opacity:0.8; max-width:520px; margin-left:auto; margin-right:auto;}
+
+  /* GAME 5 quiz */
+  .quiz-q{font-size:1.15rem; font-weight:700; margin-bottom:14px; line-height:1.4;}
+  .quiz-diagram{
+    display:flex; justify-content:center; margin:6px 0 22px; padding:18px;
+    background:rgba(0,0,0,0.22); border:1px solid rgba(255,180,84,0.2); border-radius:14px;
+  }
+  .quiz-diagram svg{width:auto; max-width:100%; height:110px;}
+  .quiz-opts{display:grid; gap:10px;}
+  .quiz-opt{
+    text-align:left; background:rgba(0,0,0,0.22); border:2px solid rgba(255,248,236,0.15); color:var(--cream);
+    padding:14px 16px; border-radius:12px; cursor:pointer; font-family:'Baloo 2',sans-serif; font-size:0.95rem;
+  }
+  .quiz-opt:hover{border-color:var(--copper);}
+  .quiz-opt.correct{border-color:var(--ok-green); background:rgba(74,222,128,0.15);}
+  .quiz-opt.wrong{border-color:var(--bad-red); background:rgba(255,92,92,0.15);}
+  .quiz-progress{display:flex; gap:6px; margin-bottom:22px;}
+  .quiz-progress div{flex:1; height:6px; border-radius:3px; background:rgba(255,248,236,0.15);}
+  .quiz-progress div.done{background:var(--copper);}
+  .quiz-final{text-align:center;}
+  .quiz-final .score{font-size:3rem; font-weight:800; color:var(--wire-yellow);}
+
+  /* ============ SELECTOR DE NIVELES ============ */
+  #niveles{padding-top:20px; padding-bottom:20px;}
+  .level-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:900px; margin:0 auto;
+  }
+  .level-card{
+    background:linear-gradient(160deg, var(--board-green-2), var(--panel));
+    border:2px solid rgba(255,180,84,0.22);
+    border-radius:20px; padding:22px 18px; text-align:center; cursor:pointer;
+    transition:transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .level-card:hover{transform:translateY(-4px); border-color:var(--copper);}
+  .level-card.active{
+    border-color:var(--wire-yellow); box-shadow:0 0 0 3px rgba(255,210,63,0.25), 0 14px 30px rgba(0,0,0,0.35);
+    background:linear-gradient(160deg, #1a5a41, var(--panel));
+  }
+  .level-card .emoji{font-size:2.6rem; display:block; margin-bottom:8px;}
+  .level-card h3{margin:0 0 4px; font-size:1.15rem;}
+  .level-card .age{font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--copper-2); letter-spacing:1px;}
+  .level-card p{margin:8px 0 0; font-size:0.82rem; opacity:0.7; line-height:1.4;}
+  .level-card .check{
+    display:inline-block; margin-top:10px; font-family:'Space Mono',monospace; font-size:0.7rem;
+    padding:4px 10px; border-radius:8px; background:rgba(74,222,128,0.15); color:var(--ok-green); opacity:0;
+  }
+  .level-card.active .check{opacity:1;}
+  @media(max-width:640px){ .level-grid{grid-template-columns:1fr;} }
+
+  /* small level pill tabs reused inside teoria/juegos to mirror selection */
+  .level-pills{display:flex; gap:8px; justify-content:center; margin-bottom:26px; flex-wrap:wrap;}
+  .level-pill{
+    font-family:'Space Mono',monospace; font-size:0.75rem; font-weight:700; padding:8px 16px;
+    border-radius:999px; border:2px solid rgba(255,248,236,0.25); background:transparent; color:var(--cream);
+    cursor:pointer; opacity:0.6;
+  }
+  .level-pill.active{opacity:1; background:var(--wire-yellow); color:var(--ink); border-color:var(--wire-yellow);}
+  .theory-list{display:flex; flex-direction:column; gap:12px;}
+  .theory-item{
+    background:linear-gradient(160deg, var(--board-green-2), var(--panel));
+    border:1px solid rgba(255,180,84,0.22);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  .theory-head{
+    display:flex; align-items:center; gap:14px; justify-content:space-between;
+    padding:18px 22px; cursor:pointer; user-select:none;
+  }
+  .theory-head-left{display:flex; align-items:center; gap:14px;}
+  .theory-num{
+    font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--copper-2);
+    background:rgba(255,138,61,0.12); border-radius:8px; padding:4px 8px;
+  }
+  .theory-head h3{margin:0; font-size:1.08rem;}
+  .theory-chevron{font-size:1.2rem; color:var(--copper); transition:transform .25s;}
+  .theory-item.open .theory-chevron{transform:rotate(180deg);}
+  .theory-body{
+    max-height:0; overflow:hidden; transition:max-height .35s ease;
+    padding:0 22px;
+  }
+  .theory-item.open .theory-body{max-height:400px; padding:0 22px 20px;}
+  .theory-body p{margin:0 0 10px; opacity:0.85; line-height:1.6; font-size:0.94rem;}
+  .theory-body p:last-child{margin-bottom:0;}
+  .theory-mini-diagram{margin:6px 0 14px; display:flex; justify-content:center;}
+  .theory-mini-diagram svg{max-width:280px; width:100%; height:auto;}
+
+  /* ============ ZONA DE JUEGOS: tabs ============ */
+  .game-tabs{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:30px;
+  }
+  .game-tab{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:0.78rem;
+    padding:12px 16px; border-radius:12px; border:2px solid rgba(255,180,84,0.25);
+    background:rgba(0,0,0,0.2); color:var(--cream); cursor:pointer;
+    display:flex; align-items:center; gap:8px; transition:all .15s;
+  }
+  .game-tab .n{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; background:rgba(255,180,84,0.2); font-size:0.7rem;
+  }
+  .game-tab:hover{border-color:var(--copper);}
+  .game-tab.active{background:var(--copper); color:var(--ink); border-color:var(--copper);}
+  .game-tab.active .n{background:rgba(11,31,24,0.25);}
+  .game-view{display:none;}
+  .game-view.active{display:block; animation: fadein .3s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .game-view-head{text-align:center; margin-bottom:22px;}
+  .game-view-head h3{margin:0 0 6px; font-size:1.4rem;}
+  .game-view-head p{margin:0; opacity:0.75; font-size:0.92rem; max-width:520px; margin:0 auto;}
+
+  /* ============ JUEGO 6: CONECTA LOS CABLES ============ */
+  .wire-board{
+    background:rgba(0,0,0,0.28); border-radius:18px; padding:10px;
+    border:1px solid rgba(255,180,84,0.2);
+  }
+  .wire-board svg{width:100%; height:auto; display:block; touch-action:none; user-select:none;}
+  .wire-comp-box{fill:rgba(255,248,236,0.04); stroke:rgba(255,180,84,0.5); stroke-width:2;}
+  .wire-comp-label{fill:var(--cream); font-family:'Space Mono',monospace; font-size:13px; font-weight:700;}
+  .wire-comp-sub{fill:rgba(255,248,236,0.55); font-family:'Space Mono',monospace; font-size:10px;}
+  .wire-terminal{fill:var(--panel); stroke:var(--copper-2); stroke-width:3; cursor:pointer; transition:fill .15s;}
+  .wire-terminal:hover{stroke:var(--wire-yellow);}
+  .wire-terminal.connected{fill:var(--ok-green); stroke:var(--ok-green);}
+  .wire-line{stroke:var(--wire-yellow); stroke-width:4; stroke-linecap:round; fill:none;}
+  .wire-line.done{stroke:var(--ok-green);}
+  .wire-line.temp{stroke:var(--wire-yellow); stroke-dasharray:6 6; opacity:0.85;}
+  .wire-line.bad{stroke:var(--bad-red);}
+  .wire-led-glow circle{transition:opacity .3s;}
+  .wire-hint{
+    margin-top:16px; padding:14px 18px; border-radius:12px; background:rgba(77,216,255,0.08);
+    border:1px solid rgba(77,216,255,0.25); font-size:0.85rem; line-height:1.5; display:none;
+  }
+  .wire-hint.show{display:block;}
+
+  /* ============ LABORATORIO DE CIRCUITOS ============ */
+  .lab-toolbar{display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
+  #labSvg{touch-action:none;}
+  .lab-comp-box{fill:rgba(255,248,236,0.05); stroke:rgba(255,180,84,0.55); stroke-width:2; cursor:grab;}
+  .lab-comp-box.switch-open{stroke:#ff5c5c;}
+  .lab-comp-box.switch-closed{stroke:#4ade80;}
+  .lab-comp-box.lit{fill:rgba(255,77,94,0.28); stroke:#ff4d5e;}
+  .lab-comp-box.danger{stroke:#ff2b2b; stroke-width:3; animation:labDangerPulse 0.6s ease-in-out infinite;}
+  @keyframes labDangerPulse{0%,100%{stroke-opacity:1;} 50%{stroke-opacity:0.35;}}
+  .lab-presets{margin-top:26px; border-top:1px solid rgba(255,180,84,0.2); padding-top:22px;}
+  .lab-presets h4{margin:0 0 12px; font-size:0.92rem; text-align:center; opacity:0.85; font-weight:700;}
+  .lab-materials{
+    margin-top:16px; padding:14px 18px; border-radius:12px; background:rgba(77,216,255,0.08);
+    border:1px solid rgba(77,216,255,0.25); font-size:0.85rem; line-height:1.6;
+  }
+  .lab-materials ul{margin:8px 0 0; padding-left:18px;}
+
+  footer{
+    position:relative; z-index:2; text-align:center; padding:50px 20px 70px; opacity:0.6; font-size:0.85rem;
+  }
+
+  @media(max-width:640px){
+    .memo-grid{grid-template-columns:repeat(3,1fr);}
+    section{padding:56px 16px;}
+    .panel{padding:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="glow-spin"></div>
+<div class="traces"></div>
+<div class="drift-layer" id="driftLayer"></div>
+<div class="pulse-layer" id="pulseLayer"></div>
+
+<nav>
+  <a href="#inicio">Inicio</a>
+  <a href="#componentes">Componentes</a>
+  <a href="#teoria">Centro de teoría</a>
+  <a href="#juegos">Zona de juegos</a>
+  <a href="#laboratorio">Laboratorio</a>
+</nav>
+
+<header id="inicio">
+  <div class="badge mono">PROYECTO DE INNOVACIÓN · U.E. LA PRIMERA</div>
+  <h1>Pequeños Genios<br><span>electrónica básica jugando</span></h1>
+  <p>Descubre los componentes, la polaridad y los circuitos eléctricos con juegos interactivos hechos para explorar, equivocarte y volver a intentar.</p>
+  <div class="cta-row">
+    <button class="btn" onclick="document.getElementById('teoria').scrollIntoView()">Ver la teoría 📖</button>
+    <button class="btn ghost" onclick="document.getElementById('juegos').scrollIntoView()">Ir a jugar ⚡</button>
+  </div>
+  <svg class="mascot" viewBox="0 0 120 120">
+    <circle cx="60" cy="60" r="52" fill="#124e3b" stroke="#ff8a3d" stroke-width="3"/>
+    <polygon points="66,20 40,62 58,62 52,100 84,52 64,52" fill="#ffd23f"/>
+  </svg>
+</header>
+
+<!-- ===================== COMPONENTES ===================== -->
+<section id="componentes">
+  <div class="section-head">
+    <div class="eyebrow">Toca cada tarjeta</div>
+    <h2>Componentes electrónicos</h2>
+    <p>Componentes básicos trabajados en el proyecto. Cada uno incluye su imagen, figura, símbolo y explicación. Haz clic para ampliar la información.</p>
+  </div>
+  <div class="comp-grid" id="compGrid"></div>
+  <p style="text-align:center;opacity:.55;font-size:.75rem;margin-top:18px;">
+    Imágenes de referencia: Wikimedia Commons. Las figuras se numeran para facilitar su identificación en el proyecto.
+  </p>
+</section>
+
+<!-- ===================== CENTRO DE TEORÍA ===================== -->
+<section id="teoria">
+  <div class="section-head">
+    <div class="eyebrow">Contenido para primaria</div>
+    <h2>Centro de teoría</h2>
+    <p>Conceptos de electrónica básica explicados de forma sencilla para estudiantes de primaria.</p>
+  </div>
+  <div class="theory-list" id="theoryList"></div>
+</section>
+
+<!-- ===================== ZONA DE JUEGOS (un solo apartado con pestañas) ===================== -->
+<section id="juegos">
+  <div class="section-head">
+    <div class="eyebrow">Pon a prueba lo aprendido</div>
+    <h2>Zona de juegos</h2>
+    <p>Actividades interactivas diseñadas exclusivamente para primaria.</p>
+  </div>
+
+  <div class="panel">
+    <div class="game-tabs" id="gameTabs">
+      <button class="game-tab active" data-game="memorama" onclick="switchGame('memorama')">🧠 Memorama</button>
+      <button class="game-tab" data-game="armado" onclick="switchGame('armado')">🔌 Arma el circuito</button>
+      <button class="game-tab" data-game="polaridad" onclick="switchGame('polaridad')">🔋 Polaridad</button>
+      <button class="game-tab" data-game="serieparalelo" onclick="switchGame('serieparalelo')">💡 Serie / Paralelo</button>
+      <button class="game-tab" data-game="cables" onclick="switchGame('cables')">🔗 Conecta los cables</button>
+      <button class="game-tab" data-game="quiz" onclick="switchGame('quiz')">🏆 Quiz final</button>
+    </div>
+
+    <!-- JUEGO 1: MEMORAMA -->
+    <div class="game-view active" id="game-memorama">
+      <div class="game-view-head">
+        <h3>🧠 Memorama de símbolos</h3>
+        <p>Encuentra la pareja: el nombre del componente con su símbolo de circuito.</p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Movimientos: <b id="memoMoves">0</b></div>
+        <div class="stat">Parejas: <b id="memoPairs">0</b>/6</div>
+        <button class="btn ghost" onclick="initMemory()">🔄 Reiniciar</button>
+      </div>
+      <div class="memo-grid" id="memoGrid"></div>
+    </div>
+
+    <!-- JUEGO 2: ARMA EL CIRCUITO -->
+    <div class="game-view" id="game-armado">
+      <div class="game-view-head">
+        <h3>🔌 Arma el circuito en serie</h3>
+        <p>Arrastra las piezas al riel en el orden correcto: pila → interruptor → resistencia → LED. Sin resistencia, ¡el LED se quema!</p>
+      </div>
+      <div class="cb-wrap">
+        <div class="cb-tray">
+          <h4>PIEZAS DISPONIBLES</h4>
+          <div class="cb-parts" id="cbParts"></div>
+        </div>
+        <div class="cb-track">
+          <h4>RIEL DEL CIRCUITO</h4>
+          <div class="cb-slots" id="cbSlots"></div>
+          <div class="cb-result" id="cbResult"></div>
+          <div class="cta-row" style="margin-top:14px;">
+            <button class="btn" onclick="testCircuit()">🔋 Probar circuito</button>
+            <button class="btn ghost" onclick="initCircuitBuilder()">🔄 Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUEGO 3: POLARIDAD -->
+    <div class="game-view" id="game-polaridad">
+      <div class="game-view-head">
+        <h3>🔋 ¿Cuál es el terminal positivo?</h3>
+        <p>Algunos componentes deben conectarse en un solo sentido. Adivina el terminal <b>positivo</b> o identifica correctamente la polaridad.</p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Puntaje: <b id="polScore">0</b>/3</div>
+        <button class="btn ghost" onclick="initPolarity()">🔄 Reiniciar</button>
+      </div>
+      <div class="pol-stage">
+        <div class="pol-item" id="polItem"></div>
+        <div class="pol-choices">
+          <button class="pol-btn" onclick="answerPolarity('A')">Terminal A</button>
+          <button class="pol-btn" onclick="answerPolarity('B')">Terminal B</button>
+        </div>
+        <div class="feedback" id="polFeedback"></div>
+      </div>
+    </div>
+
+    <!-- JUEGO 4: SERIE / PARALELO -->
+    <div class="game-view" id="game-serieparalelo">
+      <div class="game-view-head">
+        <h3>💡 Simulador: Serie vs Paralelo</h3>
+        <p>Apaga y enciende los interruptores y observa qué le pasa a los LEDs en cada tipo de circuito.</p>
+      </div>
+      <div class="sp-tabs">
+        <button class="sp-tab active" data-view="serie" onclick="switchSP('serie')">Circuito en Serie</button>
+        <button class="sp-tab" data-view="paralelo" onclick="switchSP('paralelo')">Circuito en Paralelo</button>
+      </div>
+
+      <div class="sp-view active" id="view-serie">
+        <div class="sp-circuit" id="serieCircuit"></div>
+        <p class="sp-note">En <b>serie</b> hay un solo camino y cada LED se muestra con una <b>resistencia de 330 Ω</b>; si apagas cualquier interruptor, <b>todos</b> los LEDs se apagan.</p>
+      </div>
+
+      <div class="sp-view" id="view-paralelo">
+        <div class="sp-circuit" id="paraleloCircuit"></div>
+        <p class="sp-note">En <b>paralelo</b> cada rama tiene su <b>propia resistencia</b> y su LED; apagar una rama <b>no afecta</b> a las demás.</p>
+      </div>
+    </div>
+
+    <!-- JUEGO 5: CONECTA LOS CABLES -->
+    <div class="game-view" id="game-cables">
+      <div class="game-view-head">
+        <h3>🔗 Conecta los cables</h3>
+        <p>Toca una terminal y arrastra hasta otra para tender el cable. Cierra el lazo completo: pila → interruptor → resistencia → LED → pila.</p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Cables tendidos: <b id="wireCount">0</b>/4</div>
+        <button class="btn ghost" onclick="toggleWireHint()">💡 Pista</button>
+        <button class="btn ghost" onclick="initWireGame()">🔄 Reiniciar</button>
+      </div>
+      <div class="wire-board">
+        <svg id="wireSvg" viewBox="0 0 640 320"></svg>
+      </div>
+      <div class="cb-result" id="wireResult"></div>
+      <div class="wire-hint" id="wireHint">
+        Cada componente tiene dos terminales (los círculos). Necesitas 4 cables para cerrar el circuito:<br>
+        1) Pila (+) → Interruptor · 2) Interruptor → Resistencia · 3) Resistencia → LED (+) · 4) LED (−) → Pila (−)
+      </div>
+    </div>
+
+    <!-- JUEGO: QUIZ -->
+    <div class="game-view" id="game-quiz">
+      <div class="game-view-head">
+        <h3>🏆 Quiz de electrónica básica</h3>
+        <p>6 preguntas sobre componentes y circuitos de primaria.</p>
+      </div>
+      <div id="quizPanel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LABORATORIO DE CIRCUITOS ===================== -->
+<section id="laboratorio">
+  <div class="section-head">
+    <div class="eyebrow">Sin registro, sin instalar nada</div>
+    <h2>Laboratorio de circuitos</h2>
+    <p>Arrastra componentes al tablero, conéctalos con cables tocando sus terminales y pulsa "Simular" para ver si tu circuito enciende. Copia el resultado con tus componentes reales en casa.</p>
+  </div>
+  <div class="panel">
+    <div class="lab-toolbar">
+      <button class="btn ghost" onclick="labAddComponent('bateria')">🔋 + Pila</button>
+      <button class="btn ghost" onclick="labAddComponent('resistencia')">🟧 + Resistencia</button>
+      <button class="btn ghost" onclick="labAddComponent('led')">💡 + LED</button>
+      <button class="btn ghost" onclick="labAddComponent('interruptor')">🔀 + Interruptor</button>
+      <button class="btn ghost" onclick="labAddComponent('motor')">⚙️ + Motor</button>
+      <button class="btn ghost" onclick="labAddComponent('buzzer')">🔊 + Buzzer</button>
+      <button class="btn" onclick="simulateLab()">⚡ Simular</button>
+      <button class="btn ghost" onclick="clearLab()">🗑️ Borrar todo</button>
+    </div>
+    <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
+      Toca y arrastra una pieza para moverla · Dos patitas alineadas en la misma columna quedan conectadas automáticamente, como en una protoboard real · Arrastra desde un círculo (terminal) a otro para cablear entre columnas distintas · Un toque corto cambia el valor de resistencia/voltaje/color o abre/cierra el interruptor · Toca la × para borrar una pieza
+    </p>
+    <div class="wire-board" style="margin-top:14px;">
+      <svg id="labSvg" viewBox="0 0 700 380"></svg>
+    </div>
+    <div class="cb-result" id="labResult"></div>
+
+    <div class="lab-presets">
+      <h4>💡 O empieza desde una receta lista:</h4>
+      <div class="cta-row">
+        <button class="btn ghost" onclick="loadPreset('simple')">LED simple</button>
+        <button class="btn ghost" onclick="loadPreset('interruptor')">LED con interruptor</button>
+        <button class="btn ghost" onclick="loadPreset('paralelo')">2 LEDs en paralelo</button>
+      </div>
+      <div id="labMaterials"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="mono">
+  ⚡ CIRCUITECA — Proyecto de innovación "Página web para facilitar la comprensión de la electrónica básica en niños de primaria" — U.E. La Primera, Fe y Alegría, El Alto - Bolivia
+</footer>
+
+<script>
+/* ============================================================
+   DATA: componentes con SVG inline (sin imágenes externas)
+   ============================================================ */
+const ICONS = {
+  resistencia: `<svg viewBox="0 0 64 64" aria-label="Símbolo de resistencia">
+    <polyline points="4,32 12,32 17,20 25,44 33,20 41,44 47,32 60,32" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`,
+  led: `<svg viewBox="0 0 64 64" aria-label="Símbolo de LED">
+    <line x1="4" y1="32" x2="20" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <polygon points="20,16 20,48 44,32" fill="none" stroke="#ff4d5e" stroke-width="3" stroke-linejoin="round"/>
+    <line x1="44" y1="16" x2="44" y2="48" stroke="#ff4d5e" stroke-width="3"/>
+    <line x1="44" y1="32" x2="60" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <g stroke="#ff4d5e" stroke-width="2" fill="none" stroke-linecap="round">
+      <line x1="34" y1="12" x2="42" y2="4"/><polyline points="35,4 42,4 42,11"/>
+      <line x1="42" y1="18" x2="50" y2="10"/><polyline points="43,10 50,10 50,17"/>
+    </g>
+  </svg>`,
+  bateria: `<svg viewBox="0 0 64 64" aria-label="Símbolo de pila">
+    <line x1="4" y1="32" x2="20" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="20" y1="14" x2="20" y2="50" stroke="#ff8a3d" stroke-width="3"/>
+    <line x1="28" y1="22" x2="28" y2="42" stroke="#ff8a3d" stroke-width="6"/>
+    <line x1="28" y1="32" x2="36" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="36" y1="14" x2="36" y2="50" stroke="#ff8a3d" stroke-width="3"/>
+    <line x1="44" y1="22" x2="44" y2="42" stroke="#ff8a3d" stroke-width="6"/>
+    <line x1="44" y1="32" x2="60" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <text x="14" y="11" fill="#fef8ec" font-size="11">+</text>
+    <text x="50" y="11" fill="#fef8ec" font-size="11">−</text>
+  </svg>`,
+  interruptor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de interruptor">
+    <line x1="4" y1="42" x2="16" y2="42" stroke="#ffd23f" stroke-width="3"/>
+    <circle cx="16" cy="42" r="4" fill="#ff8a3d"/>
+    <circle cx="48" cy="42" r="4" fill="#ff8a3d"/>
+    <line x1="48" y1="42" x2="60" y2="42" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="16" y1="42" x2="43" y2="20" stroke="#ff8a3d" stroke-width="3"/>
+  </svg>`,
+  capacitor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de capacitor electrolítico">
+    <line x1="6" y1="32" x2="26" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="26" y1="16" x2="26" y2="48" stroke="#4dd8ff" stroke-width="4"/>
+    <path d="M38 16 Q34 32 38 48" fill="none" stroke="#4dd8ff" stroke-width="4"/>
+    <line x1="38" y1="32" x2="58" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <text x="19" y="11" fill="#fef8ec" font-size="10">+</text>
+  </svg>`,
+  ldr: `<svg viewBox="0 0 64 64" aria-label="Símbolo de LDR">
+    <polyline points="4,34 10,34 15,24 22,42 29,24 36,42 41,34 48,34" fill="none" stroke="#4dd8ff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <g stroke="#ffd23f" stroke-width="2" fill="none" stroke-linecap="round">
+      <line x1="12" y1="8" x2="22" y2="18"/><polyline points="14,18 22,18 22,10"/>
+      <line x1="22" y1="5" x2="32" y2="15"/><polyline points="24,15 32,15 32,7"/>
+    </g>
+  </svg>`,
+  buzzer: `<svg viewBox="0 0 64 64" aria-label="Símbolo de buzzer">
+    <line x1="4" y1="46" x2="16" y2="46" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="16" y1="46" x2="16" y2="52" stroke="#ffd23f" stroke-width="3"/>
+    <circle cx="30" cy="34" r="20" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+    <path d="M40 22 Q50 34 40 46" fill="none" stroke="#4dd8ff" stroke-width="3"/>
+    <path d="M46 16 Q60 34 46 52" fill="none" stroke="#4dd8ff" stroke-width="2"/>
+  </svg>`,
+  motor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de motor DC">
+    <line x1="4" y1="32" x2="14" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="50" y1="32" x2="60" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <circle cx="32" cy="32" r="18" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+    <text x="32" y="39" text-anchor="middle" fill="#fef8ec" font-size="16" font-family="monospace">M</text>
+  </svg>`,
+  potenciometro: `<svg viewBox="0 0 64 64" aria-label="Símbolo de potenciómetro">
+    <polyline points="4,40 10,40 15,30 22,48 29,30 36,48 41,40 48,40" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="26" y1="10" x2="26" y2="30" stroke="#4dd8ff" stroke-width="3"/>
+    <polygon points="19,16 26,6 33,16" fill="#4dd8ff"/>
+  </svg>`,
+  transistor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de transistor NPN">
+    <circle cx="32" cy="32" r="22" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+    <line x1="6" y1="32" x2="20" y2="32" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="20" y1="18" x2="20" y2="46" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="20" y1="24" x2="42" y2="12" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="42" y1="12" x2="42" y2="4" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="20" y1="40" x2="42" y2="52" stroke="#ffd23f" stroke-width="3"/>
+    <line x1="42" y1="52" x2="42" y2="60" stroke="#ffd23f" stroke-width="3"/>
+    <polygon points="34,44 43,53 32,49" fill="#ffd23f"/>
+  </svg>`
+,
+  jumper: `<svg viewBox='0 0 64 64'><path d='M10 46 C10 16 54 16 54 46' fill='none' stroke='#ffd23f' stroke-width='4'/><circle cx='10' cy='46' r='5' fill='#ff8a3d'/><circle cx='54' cy='46' r='5' fill='#ff8a3d'/></svg>`,
+  pulsador: `<svg viewBox='0 0 64 64'><line x1='5' y1='44' x2='20' y2='44' stroke='#ffd23f' stroke-width='3'/><line x1='44' y1='44' x2='59' y2='44' stroke='#ffd23f' stroke-width='3'/><circle cx='20' cy='44' r='4' fill='#ff8a3d'/><circle cx='44' cy='44' r='4' fill='#ff8a3d'/><line x1='20' y1='44' x2='44' y2='44' stroke='#4dd8ff' stroke-width='3'/><line x1='32' y1='44' x2='32' y2='20' stroke='#ff8a3d' stroke-width='4'/><circle cx='32' cy='17' r='5' fill='#ff8a3d'/></svg>`,
+  fusible: `<svg viewBox='0 0 64 64'><line x1='5' y1='32' x2='18' y2='32' stroke='#ffd23f' stroke-width='3'/><rect x='18' y='22' width='28' height='20' rx='5' fill='none' stroke='#ff8a3d' stroke-width='3'/><line x1='24' y1='32' x2='40' y2='32' stroke='#4dd8ff' stroke-width='3'/><line x1='46' y1='32' x2='59' y2='32' stroke='#ffd23f' stroke-width='3'/></svg>`,
+  rele: `<svg viewBox='0 0 64 64'><rect x='12' y='12' width='40' height='40' rx='6' fill='none' stroke='#ff8a3d' stroke-width='3'/><path d='M18 40 Q26 24 34 40' fill='none' stroke='#4dd8ff' stroke-width='3'/><line x1='34' y1='40' x2='48' y2='22' stroke='#ffd23f' stroke-width='3'/></svg>`,
+  diodo: `<svg viewBox='0 0 64 64'><line x1='5' y1='32' x2='20' y2='32' stroke='#ffd23f' stroke-width='3'/><polygon points='20,16 20,48 44,32' fill='none' stroke='#4dd8ff' stroke-width='3'/><line x1='44' y1='16' x2='44' y2='48' stroke='#ff8a3d' stroke-width='4'/><line x1='44' y1='32' x2='59' y2='32' stroke='#ffd23f' stroke-width='3'/></svg>`,
+  transformador: `<svg viewBox='0 0 64 64'><path d='M8 20 Q16 26 8 32 Q16 38 8 44' fill='none' stroke='#4dd8ff' stroke-width='3'/><path d='M56 20 Q48 26 56 32 Q48 38 56 44' fill='none' stroke='#4dd8ff' stroke-width='3'/><line x1='24' y1='12' x2='24' y2='52' stroke='#ff8a3d' stroke-width='3'/><line x1='40' y1='12' x2='40' y2='52' stroke='#ff8a3d' stroke-width='3'/></svg>`,
+  microcontrolador: `<svg viewBox='0 0 64 64'><rect x='16' y='16' width='32' height='32' rx='4' fill='none' stroke='#ff8a3d' stroke-width='3'/><text x='32' y='37' text-anchor='middle' fill='#ffd23f' font-size='11' font-family='monospace'>MCU</text><g stroke='#4dd8ff' stroke-width='3'><line x1='8' y1='22' x2='16' y2='22'/><line x1='8' y1='32' x2='16' y2='32'/><line x1='8' y1='42' x2='16' y2='42'/><line x1='48' y1='22' x2='56' y2='22'/><line x1='48' y1='32' x2='56' y2='32'/><line x1='48' y1='42' x2='56' y2='42'/></g></svg>`
+
+};
+
+const COMPONENTS = [
+{id:'resistencia',name:'Resistencia (Resistor)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20resistors.jpg',figure:'Figura 1. Resistencia',desc:'Componente pasivo que presenta oposición al paso de la corriente eléctrica, medida en ohms (Ω). Se emplea para proteger otros elementos (como los LEDs) de corrientes excesivas.'},
+{id:'led',name:'Diodo Emisor de Luz (LED)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Red-LED.jpg',figure:'Figura 2. LED',desc:'Componente semiconductor que emite luz cuando la corriente eléctrica lo atraviesa en el sentido directo de polarización.'},
+{id:'capacitor',name:'Capacitor (Condensador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20capacitors.jpg',figure:'Figura 3. Capacitor',desc:'Componente pasivo capaz de almacenar energía eléctrica en un campo electrostático generado entre dos placas conductoras separadas por un material dieléctrico (incluye tipos cerámicos, de poliéster y electrolíticos).'},
+{id:'transistor',name:'Transistor (Transistor bipolar)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Through-Hole-Transistor.jpg',figure:'Figura 4. Transistor',desc:'Dispositivo semiconductor de tres terminales (emisor, base y colector) que actúa como amplificador de señales o como interruptor controlado por corriente.'},
+{id:'ldr',name:'Fotoresistencia (LDR / Sensor óptico pasivo)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Photoresistors.jpg',figure:'Figura 5. Fotoresistencia LDR',desc:'Componente pasivo cuya resistencia eléctrica varía de forma inversa en función de la intensidad luminosa incidente sobre su superficie.'},
+{id:'jumper',name:'Jumpers (Cables de conexión)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Jumper_wires.jpg',figure:'Figura 6. Jumpers',desc:'Cables conductores de corta longitud utilizados para establecer conexiones temporales y rápidas entre componentes montados en una protoboard sin necesidad de soldadura.'},
+{id:'pulsador',name:'Pulsador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Tactile_switch.jpg',figure:'Figura 7. Pulsador',desc:'Dispositivo electromecánico de accionamiento temporal que establece o interrumpe una conexión eléctrica únicamente mientras se mantiene presionado, retornando a su posición original al ser liberado.'},
+{id:'interruptor',name:'Interruptor',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Eight-Switch.jpg',figure:'Figura 8. Interruptor',desc:'Dispositivo electromecánico que permite abrir o cerrar un circuito eléctrico de manera intencionada y sostenida, manteniendo el estado seleccionado hasta una nueva manipulación.'},
+{id:'buzzer',name:'Buzzer (Zumbador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20piezo.jpg',figure:'Figura 9. Buzzer',desc:'Dispositivo electroacústico que convierte señales eléctricas en sonido audible, funcionando como indicador sonoro (activo o pasivo).'},
+{id:'motor',name:'Motor de Corriente Continua (Motor DC)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Screw-DC-Motor.jpg',figure:'Figura 10. Motor DC',desc:'Dispositivo electromecánico que transforma la energía eléctrica en movimiento rotacional mediante la interacción entre campos magnéticos.'},
+{id:'bateria',name:'Batería (Fuente de alimentación)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/BateriaAA.jpg',figure:'Figura 11. Batería',desc:'Dispositivo electroquímico que almacena energía química y la convierte en energía eléctrica continua mediante reacciones de oxidación-reducción (como pilas alcalinas de 1.5 V o baterías cuadradas de 9 V).'},
+{id:'potenciometro',name:'Potenciómetro',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Potentiometer.jpg',figure:'Figura 12. Potenciómetro',desc:'Resistencia variable que permite ajustar la oposición al flujo de corriente mediante un cursor mecánico.'},
+{id:'fusible',name:'Fusible',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Glass_fuse.jpg',figure:'Figura 13. Fusible',desc:'Componente de protección diseñado para interrumpir la corriente del circuito en caso de sobrecargas.'},
+{id:'rele',name:'Relé',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Relay.jpg',figure:'Figura 14. Relé',desc:'Interruptor electromagnético controlado por un circuito de menor potencia.'},
+{id:'diodo',name:'Diodo rectificador',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/1N4007_diodes.jpg',figure:'Figura 15. Diodo rectificador',desc:'Diodo semiconductor utilizado principalmente para permitir el flujo de corriente en una sola dirección.'},
+{id:'transformador',name:'Transformador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Transformer.jpg',figure:'Figura 16. Transformador',desc:'Dispositivo eléctrico que permite aumentar o disminuir la tensión en un circuito de corriente alterna.'},
+{id:'microcontrolador',name:'Microcontrolador básico',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Arduino_Uno_-_R3.jpg',figure:'Figura 17. Microcontrolador',desc:'Circuito integrado programable que concentra las unidades principales de un computador para el control de sistemas electrónicos.'}
+];
+
+const SYMBOL_LABELS = {
+  resistencia:'R', led:'LED', capacitor:'C', transistor:'Q', ldr:'LDR', jumper:'J',
+  pulsador:'PB', interruptor:'SW', buzzer:'BZ', motor:'M', bateria:'B', potenciometro:'POT',
+  fusible:'F', rele:'K', diodo:'D', transformador:'T', microcontrolador:'MCU'
+};
+
+/* ============================================================
+   FONDO: pulsos de corriente viajando por la pantalla
+   ============================================================ */
+(function spawnPulses(){
+  const layer = document.getElementById('pulseLayer');
+  const colors = ['', 'blue', 'red'];
+  for(let i=0;i<16;i++){
+    const p = document.createElement('div');
+    const c = colors[i % colors.length];
+    p.className = 'pulse ' + c;
+    p.style.top = (6 + Math.random()*88) + 'vh';
+    p.style.animationDuration = (6 + Math.random()*9) + 's';
+    p.style.animationDelay = (-Math.random()*10) + 's';
+    layer.appendChild(p);
+  }
+})();
+(function spawnDrift(){
+  const layer = document.getElementById('driftLayer');
+  const icons = ['⚡','🔋','💡','🔌','🧲','⚙️','📡','🔧'];
+  for(let i=0;i<14;i++){
+    const d = document.createElement('div');
+    d.className = 'drift-icon';
+    d.textContent = icons[i % icons.length];
+    d.style.left = (Math.random()*96) + 'vw';
+    d.style.fontSize = (18 + Math.random()*22) + 'px';
+    d.style.animationDuration = (14 + Math.random()*16) + 's';
+    d.style.animationDelay = (-Math.random()*20) + 's';
+    layer.appendChild(d);
+  }
+})();
+
+/* ============================================================
+   CENTRO DE TEORÍA — un set de contenido por nivel
+   ============================================================ */
+const THEORY_PRIMARIA = [
+  {
+    title:'¿Qué es un circuito eléctrico?',
+    body:`<p>Un circuito eléctrico es un camino cerrado por donde viajan los electrones. Necesita tres cosas: una <b>fuente</b> (como una pila, con su terminal <b>positivo +</b> y su terminal <b>negativo −</b>) que da la energía, una <b>carga</b> (como un LED) que la consume, y <b>conductores</b> (cables) que conectan todo en un lazo continuo.</p>
+      <p>Casi siempre se agrega una <b>resistencia</b> antes del LED, porque el LED por sí solo no limita la corriente y se quema. Con una pila de 9V, una resistencia de <b>330 Ω</b> es un valor típico y seguro.</p>
+      <p>La corriente sale del terminal <b>+</b> de la pila, pasa por la resistencia, atraviesa el <b>ánodo</b> del LED (el triángulo) y sale por el <b>cátodo</b> (la barra), hasta regresar al terminal <b>−</b> de la pila. Si el camino se interrumpe en cualquier punto, la corriente deja de fluir y nada funciona.</p>`,
+    diagram:`<svg viewBox="0 0 280 150">
+      <line x1="40" y1="20" x2="230" y2="20" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="40" y1="130" x2="230" y2="130" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="40" y1="20" x2="40" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="40" y1="55" x2="40" y2="63" stroke="#4ade80" stroke-width="3"/>
+      <line x1="40" y1="69" x2="40" y2="77" stroke="#4ade80" stroke-width="8"/>
+      <line x1="40" y1="77" x2="40" y2="130" stroke="#ffd23f" stroke-width="3"/>
+      <text x="24" y="63" fill="#fef8ec" font-size="13">+</text>
+      <text x="24" y="80" fill="#fef8ec" font-size="13">−</text>
+      <line x1="230" y1="20" x2="230" y2="40" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="230,40 230,43.75 218,46.7 242,49.6 218,52.5 242,55.4 218,58.3 230,61.25 230,65" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="252" y="57" fill="#fef8ec" font-size="11">330 Ω</text>
+      <line x1="230" y1="65" x2="230" y2="80" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="215,80 245,80 230,100" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="215" y1="100" x2="245" y2="100" stroke="#ff4d5e" stroke-width="4"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="248" y1="82" x2="260" y2="70"/><polyline points="249,70 260,70 260,81"/>
+        <line x1="248" y1="93" x2="260" y2="81"/><polyline points="249,81 260,81 260,92"/>
+      </g>
+      <line x1="230" y1="100" x2="230" y2="130" stroke="#ffd23f" stroke-width="3"/>
+      <text x="248" y="87" fill="#fef8ec" font-size="10">ánodo</text>
+      <text x="248" y="115" fill="#fef8ec" font-size="10">cátodo</text></svg>`
+  },
+  {
+    title:'Circuito en serie',
+    body:`<p>Los componentes se conectan uno detrás del otro, formando <b>un solo camino</b> para la corriente. La energía sale del <b>+</b> de la pila, pasa por una <b>resistencia</b> (basta una sola, porque la corriente es la misma en todo el lazo), luego por el ánodo de cada LED (triángulo) hacia su cátodo (barra), uno tras otro, y regresa al <b>−</b> de la pila. Es como una fila de amigos tomados de la mano: si uno suelta la mano, se rompe la cadena.</p>
+      <p>Por eso, si un foco de una guirnalda antigua se funde, toda la cadena de luces se apaga.</p>`,
+    diagram:`<svg viewBox="0 0 340 100">
+      <line x1="10" y1="55" x2="10" y2="90" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="10" y1="90" x2="310" y2="90" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="310" y1="90" x2="310" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="10" y1="55" x2="30" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="30" y1="40" x2="30" y2="70" stroke="#4ade80" stroke-width="3"/>
+      <line x1="42" y1="47" x2="42" y2="63" stroke="#4ade80" stroke-width="8"/>
+      <text x="24" y="32" fill="#fef8ec" font-size="12">+</text>
+      <text x="38" y="32" fill="#fef8ec" font-size="12">−</text>
+      <line x1="42" y1="55" x2="65" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="65,55 69.5,55 73.0,46 76.5,64 80.0,46 83.5,64 87.0,46 90.5,55 95,55" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="80" y="35" text-anchor="middle" fill="#fef8ec" font-size="10">330Ω</text>
+      <line x1="95" y1="55" x2="115" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="115,40 115,70 145,55" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="145" y1="40" x2="145" y2="70" stroke="#ff4d5e" stroke-width="4"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="136" y1="32" x2="146" y2="18"/><polyline points="138,18 146,18 146,28"/>
+        <line x1="149" y1="32" x2="159" y2="18"/><polyline points="151,18 159,18 159,28"/>
+      </g>
+      <line x1="147" y1="55" x2="180" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="180,40 180,70 210,55" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
+      <line x1="210" y1="40" x2="210" y2="70" stroke="#4dd8ff" stroke-width="4"/>
+      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="201" y1="32" x2="211" y2="18"/><polyline points="203,18 211,18 211,28"/>
+        <line x1="214" y1="32" x2="224" y2="18"/><polyline points="216,18 224,18 224,28"/>
+      </g>
+      <line x1="212" y1="55" x2="310" y2="55" stroke="#ffd23f" stroke-width="3"/>
+      <text x="130" y="30" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
+      <text x="195" y="30" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
+  },
+  {
+    title:'Circuito en paralelo',
+    body:`<p>Cada componente tiene <b>su propia rama</b>, conectada a los mismos dos puntos (los mismos dos rieles que salen de la pila, uno unido al <b>+</b> y otro al <b>−</b>). A diferencia del circuito en serie, aquí <b>cada rama necesita su propia resistencia</b>, porque cada una es un camino independiente con su propia corriente. Si un LED falla, los demás siguen encendidos porque tienen caminos independientes hacia la fuente.</p>
+      <p>Así funciona la instalación eléctrica de una casa: puedes apagar una luz sin que se apaguen las demás.</p>`,
+    diagram:`<svg viewBox="0 0 280 160">
+      <line x1="30" y1="20" x2="230" y2="20" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="30" y1="140" x2="230" y2="140" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="230" y1="20" x2="230" y2="140" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="30" y1="20" x2="30" y2="48" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="15" y1="48" x2="45" y2="48" stroke="#4ade80" stroke-width="3"/>
+      <line x1="15" y1="60" x2="45" y2="60" stroke="#4ade80" stroke-width="8"/>
+      <line x1="30" y1="60" x2="30" y2="140" stroke="#ffd23f" stroke-width="3"/>
+      <text x="5" y="44" fill="#fef8ec" font-size="12">+</text>
+      <text x="5" y="72" fill="#fef8ec" font-size="12">−</text>
+      <line x1="110" y1="20" x2="110" y2="35" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="110,35 110,37.7 98,39.8 122,41.9 98,44.0 122,46.1 98,48.2 110,50.3 110,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="110" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">330Ω</text>
+      <line x1="110" y1="53" x2="110" y2="65" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="95,65 125,65 110,85" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="95" y1="85" x2="125" y2="85" stroke="#ff4d5e" stroke-width="4"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="118" y1="60" x2="130" y2="48"/><polyline points="120,48 130,48 130,58"/>
+        <line x1="127" y1="68" x2="139" y2="56"/><polyline points="129,56 139,56 139,66"/>
+      </g>
+      <line x1="110" y1="85" x2="110" y2="140" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="190" y1="20" x2="190" y2="35" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="190,35 190,37.7 178,39.8 202,41.9 178,44.0 202,46.1 178,48.2 190,50.3 190,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="190" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">220Ω</text>
+      <line x1="190" y1="53" x2="190" y2="65" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="175,65 205,65 190,85" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
+      <line x1="175" y1="85" x2="205" y2="85" stroke="#4dd8ff" stroke-width="4"/>
+      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="198" y1="60" x2="210" y2="48"/><polyline points="200,48 210,48 210,58"/>
+        <line x1="207" y1="68" x2="219" y2="56"/><polyline points="209,56 219,56 219,66"/>
+      </g>
+      <line x1="190" y1="85" x2="190" y2="140" stroke="#ffd23f" stroke-width="3"/>
+      <text x="110" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
+      <text x="190" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
+  },
+  {
+    title:'Circuito mixto',
+    body:`<p>Combina conexiones en serie y en paralelo dentro de la misma red. La energía sale del <b>+</b> de la pila, pasa primero por una <b>resistencia principal</b> en serie, y luego se reparte en dos ramas en paralelo. Como cada rama es independiente, <b>cada una lleva además su propia resistencia</b> junto a su LED (ánodo y cátodo), antes de volver al <b>−</b> de la pila.</p>
+      <p>Para entenderlo, se analiza por partes: primero se resuelven las secciones en serie, luego las paralelas, hasta simplificar todo el circuito.</p>`,
+    diagram:`<svg viewBox="0 -8 380 148">
+      <line x1="20" y1="20" x2="20" y2="48" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="5" y1="48" x2="35" y2="48" stroke="#4ade80" stroke-width="3"/>
+      <line x1="5" y1="60" x2="35" y2="60" stroke="#4ade80" stroke-width="8"/>
+      <line x1="20" y1="60" x2="20" y2="120" stroke="#ffd23f" stroke-width="3"/>
+      <text x="0" y="44" fill="#fef8ec" font-size="11">+</text>
+      <text x="0" y="72" fill="#fef8ec" font-size="11">−</text>
+      <line x1="20" y1="20" x2="90" y2="20" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="90,20 96.0,20 100.7,11 105.3,29 110.0,11 114.7,29 119.3,11 124.0,20 130,20" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="110" y="8" text-anchor="middle" fill="#fef8ec" font-size="9">100Ω</text>
+      <line x1="130" y1="20" x2="310" y2="20" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="310" y1="20" x2="310" y2="120" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="20" y1="120" x2="310" y2="120" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="220" y1="20" x2="220" y2="35" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="220,35 220,37.7 208,39.8 232,41.9 208,44.0 232,46.1 208,48.2 220,50.3 220,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="220" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">220Ω</text>
+      <line x1="220" y1="53" x2="220" y2="65" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="205,65 235,65 220,85" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="205" y1="85" x2="235" y2="85" stroke="#ff4d5e" stroke-width="4"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="228" y1="60" x2="240" y2="48"/><polyline points="230,48 240,48 240,58"/>
+        <line x1="237" y1="68" x2="249" y2="56"/><polyline points="239,56 249,56 249,66"/>
+      </g>
+      <line x1="220" y1="85" x2="220" y2="120" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="280" y1="20" x2="280" y2="35" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="280,35 280,37.7 268,39.8 292,41.9 268,44.0 292,46.1 268,48.2 280,50.3 280,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="280" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">330Ω</text>
+      <line x1="280" y1="53" x2="280" y2="65" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="265,65 295,65 280,85" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
+      <line x1="265" y1="85" x2="295" y2="85" stroke="#4dd8ff" stroke-width="4"/>
+      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="288" y1="60" x2="300" y2="48"/><polyline points="290,48 300,48 300,58"/>
+        <line x1="297" y1="68" x2="309" y2="56"/><polyline points="299,56 309,56 309,66"/>
+      </g>
+      <line x1="280" y1="85" x2="280" y2="120" stroke="#ffd23f" stroke-width="3"/>
+      <text x="220" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
+      <text x="280" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
+  },
+  {
+    title:'Polaridad: cuidado con el sentido',
+    body:`<p>Algunos componentes son <b>polarizados</b>: solo funcionan si los conectas en el sentido correcto (LED, batería y capacitor electrolítico). Otros, como la resistencia o el interruptor, son <b>no polarizados</b> y funcionan en cualquier sentido.</p>
+      <p>Conectar al revés un LED o un capacitor electrolítico puede dañarlo o incluso hacer que se caliente peligrosamente, así que siempre hay que revisar el terminal positivo (+) y el negativo (−) antes de conectar.</p>`,
+    diagram:`<svg viewBox="0 0 260 100"><line x1="60" y1="55" x2="95" y2="55" stroke="#ffd23f" stroke-width="4"/>
+      <polygon points="95,35 95,75 135,55" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="135" y1="35" x2="135" y2="75" stroke="#ff4d5e" stroke-width="4"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="125" y1="28" x2="135" y2="14"/><polyline points="127,14 135,14 135,24"/>
+        <line x1="138" y1="28" x2="148" y2="14"/><polyline points="140,14 148,14 148,24"/>
+      </g>
+      <line x1="135" y1="55" x2="170" y2="55" stroke="#ffd23f" stroke-width="4"/>
+      <text x="60" y="20" text-anchor="middle" fill="#fef8ec" font-size="12">ánodo (+)</text>
+      <text x="170" y="20" text-anchor="middle" fill="#fef8ec" font-size="12">cátodo (−)</text>
+      <text x="95" y="94" text-anchor="middle" fill="#fef8ec" font-size="12">triángulo</text>
+      <text x="135" y="94" text-anchor="middle" fill="#fef8ec" font-size="12">barra</text></svg>`
+  },
+  {
+    title:'Simbología electrónica',
+    body:`<p>Cada componente tiene un símbolo estándar para dibujar esquemas: un <b>zigzag (como un rayito)</b> para la resistencia, un <b>triángulo apuntando a una barra</b> para el LED (el lado de entrada corresponde al ánodo y la barra al cátodo), dos placas para el capacitor, líneas largas y cortas para la pila, una abertura para el interruptor y una resistencia en zigzag con flechas de luz para la LDR.</p>
+      <p>Aprender estos símbolos te permite leer cualquier esquema de circuito, incluso antes de tener los componentes físicos en la mano. ¡Practica en el juego de Memorama!</p>`,
+    diagram:`<svg viewBox="0 0 260 90"><line x1="8" y1="45" x2="20" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="20,45 26.0,45 30.7,35 35.3,55 40.0,35 44.7,55 49.3,35 54.0,45 60,45" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="60" y1="45" x2="72" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="100" y1="45" x2="115" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="115,28 115,62 145,45" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="145" y1="28" x2="145" y2="62" stroke="#ff4d5e" stroke-width="3"/>
+      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
+        <line x1="136" y1="20" x2="146" y2="6"/><polyline points="138,6 146,6 146,16"/>
+        <line x1="149" y1="20" x2="159" y2="6"/><polyline points="151,6 159,6 159,16"/>
+      </g>
+      <line x1="145" y1="45" x2="160" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="190" y1="25" x2="190" y2="65" stroke="#4dd8ff" stroke-width="4"/><path d="M205 25 Q198 45 205 65" fill="none" stroke="#4dd8ff" stroke-width="4"/></svg>`
+  }
+];
+const theoryList = document.getElementById('theoryList');
+function renderTheory(){
+  const set = THEORY_PRIMARIA;
+  theoryList.innerHTML = '';
+  set.forEach((t,i)=>{
+    const item = document.createElement('div');
+    item.className = 'theory-item';
+    item.innerHTML = `
+      <div class="theory-head" onclick="this.parentElement.classList.toggle('open')">
+        <div class="theory-head-left">
+          <span class="theory-num mono">0${i+1}</span>
+          <h3>${t.title}</h3>
+        </div>
+        <span class="theory-chevron">⌄</span>
+      </div>
+      <div class="theory-body">
+        <div class="theory-mini-diagram">${t.diagram}</div>
+        ${t.body}
+      </div>`;
+    theoryList.appendChild(item);
+  });
+  if(theoryList.firstElementChild) theoryList.firstElementChild.classList.add('open');
+}
+
+
+/* ============================================================
+   ZONA DE JUEGOS: cambio de pestaña
+   ============================================================ */
+function switchGame(name){
+  document.querySelectorAll('.game-tab').forEach(t=>t.classList.toggle('active', t.dataset.game===name));
+  document.querySelectorAll('.game-view').forEach(v=>v.classList.toggle('active', v.id === 'game-'+name));
+  if(name==='cables' && !wireInitDone){ initWireGame(); wireInitDone = true; }
+}
+
+/* ============================================================
+   JUEGO 5 (nuevo): CONECTA LOS CABLES
+   ============================================================ */
+let wireInitDone = false;
+const WIRE_COMPONENTS = [
+  {id:'bateria', label:'PILA', x:20, y:30, w:130, h:60,
+    terms:[{id:'batt_neg', tag:'−', dx:0, dy:30},{id:'batt_pos', tag:'+', dx:130, dy:30}]},
+  {id:'interruptor', label:'INTERRUPTOR', x:490, y:20, w:130, h:60,
+    terms:[{id:'sw_l', tag:'', dx:0, dy:30},{id:'sw_r', tag:'', dx:130, dy:30}]},
+  {id:'resistencia', label:'RESISTENCIA', x:490, y:230, w:130, h:60,
+    terms:[{id:'res_l', tag:'', dx:0, dy:30},{id:'res_r', tag:'', dx:130, dy:30}]},
+  {id:'led', label:'LED', x:20, y:230, w:130, h:60,
+    terms:[{id:'led_neg', tag:'−', dx:0, dy:30},{id:'led_pos', tag:'+', dx:130, dy:30}]}
+];
+const WIRE_PAIRS = [
+  ['batt_pos','sw_l'],
+  ['sw_r','res_r'],
+  ['res_l','led_pos'],
+  ['led_neg','batt_neg']
+];
+let wireConnected = []; // array of [a,b] arrays already made
+let wireDrag = null; // {fromId, x1,y1}
+
+function wireTermPos(termId){
+  for(const c of WIRE_COMPONENTS){
+    for(const t of c.terms){
+      if(t.id===termId) return {x:c.x+t.dx, y:c.y+t.dy};
+    }
+  }
+  return null;
+}
+function wirePairMatches(a,b){
+  return WIRE_PAIRS.some(p => (p[0]===a&&p[1]===b) || (p[0]===b&&p[1]===a));
+}
+function wireAlreadyConnected(a,b){
+  return wireConnected.some(p => (p[0]===a&&p[1]===b) || (p[0]===b&&p[1]===a));
+}
+
+function initWireGame(){
+  wireConnected = [];
+  wireDrag = null;
+  document.getElementById('wireCount').textContent = '0';
+  document.getElementById('wireResult').textContent = '';
+  document.getElementById('wireResult').className = 'cb-result';
+  renderWireBoard();
+}
+function toggleWireHint(){
+  document.getElementById('wireHint').classList.toggle('show');
+}
+
+function renderWireBoard(){
+  const svg = document.getElementById('wireSvg');
+  const complete = wireConnected.length === WIRE_PAIRS.length;
+  let parts = '';
+
+  // permanent wires
+  wireConnected.forEach(([a,b])=>{
+    const p1 = wireTermPos(a), p2 = wireTermPos(b);
+    parts += `<path class="wire-line done" d="M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}"/>`;
+  });
+
+  // components
+  WIRE_COMPONENTS.forEach(c=>{
+    const isLed = c.id === 'led';
+    const glow = isLed && complete;
+    parts += `<rect class="wire-comp-box" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="10" style="${glow?'fill:rgba(255,77,94,0.28);stroke:#ff4d5e;':''}"/>`;
+    if(glow){
+      parts += `<text x="${c.x+c.w/2}" y="${c.y-8}" text-anchor="middle" font-size="20">✨</text>`;
+    }
+    parts += `<text class="wire-comp-label" x="${c.x+c.w/2}" y="${c.y+c.h/2+4}" text-anchor="middle" style="${glow?'fill:#ffd23f;':''}">${c.label}${glow?' 💡':''}</text>`;
+    c.terms.forEach(t=>{
+      const isConn = wireConnected.some(p=>p.includes(t.id));
+      const tx = c.x+t.dx, ty = c.y+t.dy;
+      if(t.tag) parts += `<text class="wire-comp-sub" x="${tx + (t.dx===0?14:-14)}" y="${ty-10}" text-anchor="${t.dx===0?'start':'end'}">${t.tag}</text>`;
+      parts += `<circle class="wire-terminal ${isConn?'connected':''}" data-term="${t.id}" cx="${tx}" cy="${ty}" r="10"></circle>`;
+    });
+  });
+
+  svg.innerHTML = parts;
+
+  // attach pointer handlers to terminals
+  svg.querySelectorAll('.wire-terminal').forEach(circle=>{
+    circle.addEventListener('pointerdown', onWirePointerDown);
+  });
+  svg.onpointermove = onWirePointerMove;
+  svg.onpointerup = onWirePointerUp;
+  svg.onpointerleave = ()=>{ if(wireDrag){ cancelWireDrag(); } };
+}
+
+function svgPoint(svg, clientX, clientY){
+  const pt = svg.createSVGPoint();
+  pt.x = clientX; pt.y = clientY;
+  const ctm = svg.getScreenCTM();
+  if(!ctm) return {x:0,y:0};
+  const loc = pt.matrixTransform(ctm.inverse());
+  return {x:loc.x, y:loc.y};
+}
+
+function onWirePointerDown(e){
+  e.preventDefault();
+  const termId = e.target.dataset.term;
+  const svg = document.getElementById('wireSvg');
+  const pos = wireTermPos(termId);
+  wireDrag = {fromId: termId, x:pos.x, y:pos.y};
+  drawTempWire(pos.x, pos.y);
+}
+function onWirePointerMove(e){
+  if(!wireDrag) return;
+  const svg = document.getElementById('wireSvg');
+  const p = svgPoint(svg, e.clientX, e.clientY);
+  drawTempWire(p.x, p.y);
+}
+function drawTempWire(x2,y2){
+  const svg = document.getElementById('wireSvg');
+  let temp = svg.querySelector('.wire-line.temp');
+  if(!temp){
+    temp = document.createElementNS('http://www.w3.org/2000/svg','path');
+    temp.setAttribute('class','wire-line temp');
+    svg.appendChild(temp);
+  }
+  temp.setAttribute('d', `M${wireDrag.x},${wireDrag.y} L${x2},${y2}`);
+}
+function onWirePointerUp(e){
+  if(!wireDrag) return;
+  const svg = document.getElementById('wireSvg');
+  const p = svgPoint(svg, e.clientX, e.clientY);
+  // find nearest terminal within threshold
+  let best = null, bestDist = 26;
+  WIRE_COMPONENTS.forEach(c=>{
+    c.terms.forEach(t=>{
+      if(t.id === wireDrag.fromId) return;
+      const pos = wireTermPos(t.id);
+      const d = Math.hypot(pos.x-p.x, pos.y-p.y);
+      if(d < bestDist){ bestDist = d; best = t.id; }
+    });
+  });
+  const result = document.getElementById('wireResult');
+  if(best){
+    if(wireAlreadyConnected(wireDrag.fromId, best)){
+      result.textContent = 'Ese cable ya está conectado.';
+      result.className = 'cb-result';
+    } else if(wirePairMatches(wireDrag.fromId, best)){
+      wireConnected.push([wireDrag.fromId, best]);
+      document.getElementById('wireCount').textContent = wireConnected.length;
+      result.textContent = '';
+      if(wireConnected.length === WIRE_PAIRS.length){
+        result.innerHTML = '✅ ¡Circuito cerrado! La corriente ya puede fluir y el LED enciende.';
+        result.className = 'cb-result ok';
+      }
+    } else {
+      flashBadWire(wireDrag.fromId, best);
+      result.textContent = '❌ Esa conexión no cierra el circuito. Piénsalo de nuevo.';
+      result.className = 'cb-result bad';
+    }
+  }
+  wireDrag = null;
+  renderWireBoard();
+}
+function cancelWireDrag(){
+  wireDrag = null;
+  renderWireBoard();
+}
+function flashBadWire(a,b){
+  const svg = document.getElementById('wireSvg');
+  const p1 = wireTermPos(a), p2 = wireTermPos(b);
+  const bad = document.createElementNS('http://www.w3.org/2000/svg','path');
+  bad.setAttribute('class','wire-line bad');
+  bad.setAttribute('d', `M${p1.x},${p1.y} L${p2.x},${p2.y}`);
+  svg.appendChild(bad);
+  setTimeout(()=>{ bad.remove(); }, 500);
+}
+
+/* ============================================================
+   RENDER: tarjetas de componentes
+   ============================================================ */
+const compGrid = document.getElementById('compGrid');
+COMPONENTS.forEach(c=>{
+  const card = document.createElement('div');
+  card.className='comp-card';
+  card.innerHTML = `
+    <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
+         onerror="this.style.display='none'">
+    ${ICONS[c.id]}
+    <span class="figure">${c.figure}</span>
+    <h3>${c.name}</h3>
+    <span class="pol-tag ${c.pol?'si':'no'}">${c.pol?'⚡ POLARIZADO':'○ NO POLARIZADO'}</span>
+    <span class="symbol-label">Símbolo: ${SYMBOL_LABELS[c.id] || c.id.toUpperCase()}</span>
+    <p>${c.desc}</p>`;
+  card.onclick=()=>card.classList.toggle('open');
+  compGrid.appendChild(card);
+});
+
+/* ============================================================
+   JUEGO 1: MEMORAMA
+   ============================================================ */
+let memoState = {flipped:[], matched:0, moves:0, lock:false};
+function initMemory(){
+  memoState = {flipped:[], matched:0, moves:0, lock:false};
+  document.getElementById('memoMoves').textContent = 0;
+  document.getElementById('memoPairs').textContent = 0;
+  const pool = [...COMPONENTS].sort(()=>Math.random()-0.5).slice(0,6);
+  let cards = [];
+  pool.forEach(c=>{
+    cards.push({type:'name', id:c.id, label:c.name});
+    cards.push({type:'icon', id:c.id, label:c.name});
+  });
+  cards = cards.sort(()=>Math.random()-0.5);
+  const grid = document.getElementById('memoGrid');
+  grid.innerHTML='';
+  cards.forEach((c,i)=>{
+    const el = document.createElement('div');
+    el.className='memo-card';
+    el.dataset.id = c.id;
+    el.dataset.index = i;
+    el.innerHTML = `<div class="memo-inner">
+      <div class="memo-face memo-front"></div>
+      <div class="memo-face memo-back">${c.type==='icon'?ICONS[c.id]:''}<span>${c.type==='name'?c.label:''}</span></div>
+    </div>`;
+    el.onclick=()=>flipMemo(el);
+    grid.appendChild(el);
+  });
+}
+function flipMemo(el){
+  if(memoState.lock || el.classList.contains('flip') || el.classList.contains('matched')) return;
+  el.classList.add('flip');
+  memoState.flipped.push(el);
+  if(memoState.flipped.length===2){
+    memoState.moves++;
+    document.getElementById('memoMoves').textContent = memoState.moves;
+    memoState.lock = true;
+    const [a,b] = memoState.flipped;
+    if(a.dataset.id === b.dataset.id){
+      setTimeout(()=>{
+        a.classList.add('matched'); b.classList.add('matched');
+        memoState.matched++;
+        document.getElementById('memoPairs').textContent = memoState.matched;
+        memoState.flipped=[]; memoState.lock=false;
+      },400);
+    } else {
+      setTimeout(()=>{
+        a.classList.remove('flip'); b.classList.remove('flip');
+        memoState.flipped=[]; memoState.lock=false;
+      },800);
+    }
+  }
+}
+initMemory();
+
+/* ============================================================
+   JUEGO 2: ARMA EL CIRCUITO (drag & drop)
+   ============================================================ */
+const CIRCUIT_PARTS = [
+  {id:'bateria', label:'Pila', icon:ICONS.bateria},
+  {id:'interruptor', label:'Interruptor', icon:ICONS.interruptor},
+  {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
+  {id:'led', label:'LED', icon:ICONS.led}
+];
+const CORRECT_ORDER = ['bateria','interruptor','resistencia','led'];
+
+function initCircuitBuilder(){
+  const tray = document.getElementById('cbParts');
+  const slotsWrap = document.getElementById('cbSlots');
+  document.getElementById('cbResult').textContent='';
+  document.getElementById('cbResult').className='cb-result';
+  tray.innerHTML='';
+  const shuffled = [...CIRCUIT_PARTS].sort(()=>Math.random()-0.5);
+  shuffled.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='cb-part';
+    el.draggable = true;
+    el.dataset.id = p.id;
+    el.innerHTML = `${p.icon}<span>${p.label}</span>`;
+    el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', p.id); });
+    tray.appendChild(el);
+  });
+  slotsWrap.innerHTML='';
+  for(let i=0;i<4;i++){
+    const slot = document.createElement('div');
+    slot.className='cb-slot';
+    slot.dataset.index = i;
+    slot.dataset.filled = '';
+    slot.textContent = `Espacio ${i+1}`;
+    slot.addEventListener('dragover', e=>e.preventDefault());
+    slot.addEventListener('drop', e=>{
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      placeInSlot(slot, id);
+    });
+    slotsWrap.appendChild(slot);
+    if(i<3){
+      const wire = document.createElement('div');
+      wire.className='cb-wire';
+      slotsWrap.appendChild(wire);
+    }
+  }
+}
+function placeInSlot(slot, id){
+  if(slot.dataset.filled) return;
+  const part = CIRCUIT_PARTS.find(p=>p.id===id);
+  if(!part) return;
+  const trayItem = document.querySelector(`#cbParts .cb-part[data-id="${id}"]`);
+  if(!trayItem || trayItem.classList.contains('used')) return;
+  slot.dataset.filled = id;
+  slot.classList.add('filled');
+  slot.innerHTML = `${part.icon}<span>${part.label}</span>`;
+  trayItem.classList.add('used');
+}
+function testCircuit(){
+  const slots = [...document.querySelectorAll('.cb-slot')];
+  const order = slots.map(s=>s.dataset.filled);
+  const result = document.getElementById('cbResult');
+  if(order.includes('')){
+    result.textContent = '⚠️ Coloca las 4 piezas antes de probar el circuito.';
+    result.className = 'cb-result bad';
+    return;
+  }
+  const correct = JSON.stringify(order) === JSON.stringify(CORRECT_ORDER);
+  if(correct){
+    result.innerHTML = '✅ ¡Circuito correcto! La corriente fluye y el LED enciende sin quemarse.';
+    result.className = 'cb-result ok';
+    slots.forEach(s=>s.style.borderColor='#4ade80');
+  } else {
+    result.innerHTML = '❌ Ese orden no funciona. Recuerda: Pila → Interruptor → Resistencia → LED.';
+    result.className = 'cb-result bad';
+    slots.forEach(s=>s.style.borderColor='#ff5c5c');
+  }
+}
+initCircuitBuilder();
+
+/* ============================================================
+   JUEGO 3: POLARIDAD
+   ============================================================ */
+const POL_ITEMS = [
+  {name:'LED', correct:'A', svg:(hi)=>`<svg viewBox="0 0 200 180">
+    <polygon points="70,55 70,105 110,80" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+    <line x1="110" y1="55" x2="110" y2="105" stroke="#ff4d5e" stroke-width="4"/>
+    <line x1="30" y1="80" x2="70" y2="80" stroke="#ffd23f" stroke-width="4"/>
+    <line x1="110" y1="80" x2="150" y2="80" stroke="#ffd23f" stroke-width="4"/>
+    <g stroke="#ff4d5e" stroke-width="2" fill="none" stroke-linecap="round">
+      <line x1="95" y1="35" x2="103" y2="27"/><polyline points="96,27 103,27 103,34"/>
+      <line x1="103" y1="41" x2="111" y2="33"/><polyline points="104,33 111,33 111,40"/>
+    </g>
+    <line x1="30" y1="80" x2="30" y2="150" stroke="${hi==='A'?'#ffd23f':'#7a7a7a'}" stroke-width="5"/>
+    <line x1="150" y1="80" x2="150" y2="150" stroke="${hi==='B'?'#ffd23f':'#7a7a7a'}" stroke-width="5"/>
+    <text x="30" y="168" fill="#fef8ec" text-anchor="middle" font-size="16">A</text>
+    <text x="150" y="168" fill="#fef8ec" text-anchor="middle" font-size="16">B</text>
+    <text x="30" y="20" fill="#fef8ec" text-anchor="middle" font-size="12">ánodo (+)</text>
+    <text x="150" y="20" fill="#fef8ec" text-anchor="middle" font-size="12">cátodo (−)</text>
+  </svg>`, hint:'El ánodo (+) está en el lado de entrada del diodo y el cátodo (−) se identifica con la barra.'},
+  {name:'Pila / Batería', correct:'B', svg:(hi)=>`<svg viewBox="0 0 200 180">
+    <rect x="50" y="60" width="100" height="60" rx="6" fill="none" stroke="#ff8a3d" stroke-width="4"/>
+    <rect x="150" y="78" width="16" height="24" fill="#ff8a3d"/>
+    <text x="65" y="98" fill="${hi==='A'?'#ffd23f':'#fef8ec'}" font-size="26">−</text>
+    <text x="150" y="98" fill="${hi==='B'?'#ffd23f':'#fef8ec'}" font-size="26">+</text>
+    <text x="60" y="145" fill="#fef8ec" text-anchor="middle" font-size="16">A</text>
+    <text x="158" y="145" fill="#fef8ec" text-anchor="middle" font-size="16">B</text>
+  </svg>`, hint:'En una pila AA, el botón metálico saliente identifica el terminal positivo (+).'},
+  {name:'Capacitor electrolítico', correct:'A', svg:(hi)=>`<svg viewBox="0 0 200 180">
+    <line x1="80" y1="45" x2="80" y2="125" stroke="#4dd8ff" stroke-width="5"/>
+    <path d="M120 45 Q90 85 120 125" fill="none" stroke="#4dd8ff" stroke-width="5"/>
+    <line x1="80" y1="125" x2="80" y2="155" stroke="${hi==='A'?'#ffd23f':'#7a7a7a'}" stroke-width="5"/>
+    <line x1="120" y1="125" x2="120" y2="155" stroke="${hi==='B'?'#ffd23f':'#7a7a7a'}" stroke-width="5"/>
+    <text x="67" y="35" fill="#fef8ec" font-size="14">+</text>
+    <text x="133" y="35" fill="#fef8ec" font-size="14">−</text>
+    <text x="80" y="175" fill="#fef8ec" text-anchor="middle" font-size="16">A</text>
+    <text x="120" y="175" fill="#fef8ec" text-anchor="middle" font-size="16">B</text>
+  </svg>`, hint:'En este capacitor electrolítico, A está marcado como positivo (+) y B como negativo (−).'}
+];
+let polState = {order:[], idx:0, score:0, answered:false};
+function initPolarity(){
+  polState.order = [...POL_ITEMS.keys()].sort(()=>Math.random()-0.5);
+  polState.idx = 0; polState.score = 0; polState.answered=false;
+  document.getElementById('polScore').textContent = 0;
+  renderPolarity();
+}
+function renderPolarity(){
+  const item = POL_ITEMS[polState.order[polState.idx]];
+  document.getElementById('polItem').innerHTML = `<h3 style="text-align:center;margin-bottom:6px;">${item.name}</h3>${item.svg('')}`;
+  document.getElementById('polFeedback').textContent='';
+  document.getElementById('polFeedback').className='feedback';
+  polState.answered=false;
+}
+function answerPolarity(choice){
+  if(polState.answered) return;
+  polState.answered = true;
+  const item = POL_ITEMS[polState.order[polState.idx]];
+  const fb = document.getElementById('polFeedback');
+  document.getElementById('polItem').innerHTML = `<h3 style="text-align:center;margin-bottom:6px;">${item.name}</h3>${item.svg(choice)}`;
+  if(choice === item.correct){
+    polState.score++;
+    document.getElementById('polScore').textContent = polState.score;
+    fb.textContent = '✅ ¡Correcto! ' + item.hint;
+    fb.className = 'feedback ok';
+  } else {
+    fb.textContent = '❌ Casi. ' + item.hint;
+    fb.className = 'feedback bad';
+  }
+  setTimeout(()=>{
+    polState.idx++;
+    if(polState.idx >= polState.order.length){
+      document.getElementById('polItem').innerHTML = `<h3 style="text-align:center;">🏁 Terminaste: ${polState.score}/${POL_ITEMS.length}</h3>`;
+      document.getElementById('polFeedback').innerHTML = '<button class="btn" onclick="initPolarity()">Jugar de nuevo</button>';
+      document.getElementById('polFeedback').className='feedback';
+    } else {
+      renderPolarity();
+    }
+  }, 1900);
+}
+initPolarity();
+
+/* ============================================================
+   JUEGO 4: SERIE VS PARALELO
+   ============================================================ */
+function switchSP(view){
+  document.querySelectorAll('.sp-tab').forEach(t=>t.classList.toggle('active', t.dataset.view===view));
+  document.getElementById('view-serie').classList.toggle('active', view==='serie');
+  document.getElementById('view-paralelo').classList.toggle('active', view==='paralelo');
+}
+function ledSVG(on){
+  return `<svg class="led-visual" viewBox="0 0 80 80">
+    <path d="M25 55 V32 A15 15 0 0 1 55 32 V55 Z" fill="${on?'#ff4d5e':'none'}" stroke="${on?'#ffb454':'#555'}" stroke-width="3" style="filter:${on?'drop-shadow(0 0 12px #ff4d5e)':'none'}"/>
+    <line x1="25" y1="55" x2="25" y2="70" stroke="${on?'#ffd23f':'#555'}" stroke-width="3"/>
+    <line x1="55" y1="55" x2="55" y2="70" stroke="${on?'#ffd23f':'#555'}" stroke-width="3"/>
+  </svg>`;
+}
+function switchSVG(on){
+  return `<svg viewBox="0 0 60 40" style="width:50px;height:34px;">
+    <circle cx="8" cy="30" r="4" fill="#ffd23f"/><circle cx="52" cy="30" r="4" fill="#ffd23f"/>
+    <line x1="8" y1="30" x2="${on?'50':'34'}" y2="${on?'30':'14'}" stroke="${on?'#4ade80':'#ff5c5c'}" stroke-width="4"/>
+  </svg>`;
+}
+// SERIE: 1 chain, 3 switches, all leds share same "on" state = AND of switches
+let serieSwitches = [true,true,true];
+function renderSerie(){
+  const allOn = serieSwitches.every(s=>s);
+  const wrap = document.getElementById('serieCircuit');
+  let html = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;">`;
+  html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">PILA</div>${ICONS.bateria}</div>`;
+  serieSwitches.forEach((s,i)=>{
+    html += `<div class="cb-wire"></div>`;
+    html += `<div style="text-align:center;cursor:pointer;" onclick="toggleSerie(${i})">
+      <div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">SW${i+1}</div>${switchSVG(s)}</div>`;
+    html += `<div class="cb-wire"></div>`;
+    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">R${i+1} · 330 Ω</div>${ICONS.resistencia}</div>`;
+    html += `<div class="cb-wire"></div>`;
+    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">LED${i+1}</div>${ledSVG(allOn)}</div>`;
+  });
+  html += `</div>`;
+  wrap.innerHTML = html;
+}
+function toggleSerie(i){ serieSwitches[i] = !serieSwitches[i]; renderSerie(); }
+renderSerie();
+
+// PARALELO: 3 independent branches, each with its own switch + led
+let paraSwitches = [true,true,true];
+function renderParalelo(){
+  const wrap = document.getElementById('paraleloCircuit');
+  let html = `<div style="display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;">`;
+  html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">PILA</div>${ICONS.bateria}</div>`;
+  paraSwitches.forEach((s,i)=>{
+    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div style="font-size:0.65rem;opacity:0.6;">RAMA ${i+1}</div>
+      <div style="cursor:pointer;" onclick="toggleParalelo(${i})">${switchSVG(s)}</div>
+      <div style="font-size:0.65rem;opacity:0.6;">R${i+1} · 330 Ω</div>
+      ${ICONS.resistencia}
+      ${ledSVG(s)}
+    </div>`;
+  });
+  html += `</div>`;
+  wrap.innerHTML = html;
+}
+function toggleParalelo(i){ paraSwitches[i] = !paraSwitches[i]; renderParalelo(); }
+renderParalelo();
+
+/* ============================================================
+   JUEGO: QUIZ — un set de preguntas por nivel
+   ============================================================ */
+const QUIZ_PRIMARIA = [
+  {q:'¿Qué función cumple una resistencia en un circuito con LED?', opts:['Aumenta la corriente','Limita la corriente y protege al LED','Produce luz','Almacena energía'], correct:1, diagram:ICONS.resistencia},
+  {q:'¿Cuál es el terminal positivo de un LED en el símbolo?', opts:['El cátodo, marcado por la barra','El ánodo, en el lado de entrada del diodo','Cualquiera, porque no tiene polaridad','La resistencia'], correct:1, diagram:ICONS.led},
+  {q:'¿Qué puede pasar si conectamos un LED sin resistencia a una pila?', opts:['Puede recibir demasiada corriente y dañarse','La pila deja de funcionar','El LED se convierte en interruptor','No ocurre nada'], correct:0},
+  {q:'¿Cuál de estos componentes NO tiene polaridad?', opts:['LED','Pila','Resistencia','Capacitor electrolítico'], correct:2, diagram:ICONS.resistencia},
+  {q:'¿Qué hace un interruptor?', opts:['Almacena energía','Abre o cierra el paso de corriente','Cambia la resistencia con la luz','Produce sonido'], correct:1, diagram:ICONS.interruptor},
+  {q:'En un circuito en paralelo con LEDs, ¿qué necesita cada rama?', opts:['Una resistencia propia','Dos pilas obligatoriamente','Ningún cable','Un capacitor obligatoriamente'], correct:0}
+];
+let quizState = {idx:0, score:0, answered:false};
+function initQuiz(){
+  quizState = {idx:0, score:0, answered:false};
+  renderQuiz();
+}
+function renderQuiz(){
+  const QUIZ = QUIZ_PRIMARIA;
+  const panel = document.getElementById('quizPanel');
+  if(quizState.idx >= QUIZ.length){
+    panel.innerHTML = `<div class="quiz-final">
+      <div style="font-size:0.8rem;opacity:0.7;font-family:'Space Mono',monospace;">RESULTADO FINAL</div>
+      <div class="score">${quizState.score}/${QUIZ.length}</div>
+      <p style="opacity:0.8;">${quizState.score===QUIZ.length ? '¡Perfecto! Eres un experto en electrónica ⚡' : quizState.score>=Math.ceil(QUIZ.length*0.6) ? '¡Muy bien! Ya dominas los conceptos clave.' : 'Sigue explorando los juegos de arriba para reforzar 💪'}</p>
+      <button class="btn" onclick="initQuiz()">Intentar de nuevo</button>
+    </div>`;
+    return;
+  }
+  const q = QUIZ[quizState.idx];
+  quizState.answered = false;
+  let progress = '';
+  for(let i=0;i<QUIZ.length;i++) progress += `<div class="${i<quizState.idx?'done':''}"></div>`;
+  panel.innerHTML = `
+    <div class="quiz-progress">${progress}</div>
+    <div class="quiz-q">${quizState.idx+1}. ${q.q}</div>
+    ${q.diagram ? `<div class="quiz-diagram">${q.diagram}</div>` : ''}
+    <div class="quiz-opts" id="quizOpts"></div>`;
+  const optsWrap = document.getElementById('quizOpts');
+  q.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className='quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = ()=>answerQuiz(i);
+    optsWrap.appendChild(btn);
+  });
+}
+function answerQuiz(i){
+  if(quizState.answered) return;
+  quizState.answered = true;
+  const QUIZ = QUIZ_PRIMARIA;
+  const q = QUIZ[quizState.idx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,idx)=>{
+    if(idx===q.correct) o.classList.add('correct');
+    else if(idx===i) o.classList.add('wrong');
+  });
+  if(i===q.correct) quizState.score++;
+  setTimeout(()=>{
+    quizState.idx++;
+    renderQuiz();
+  }, 1100);
+}
+
+/* ============================================================
+   LABORATORIO DE CIRCUITOS — simulador libre, sin login
+   Motor: Union-Find. Un LED enciende si su terminal 'a' (ánodo)
+   queda en el mismo grupo que el (+) de la pila, y su terminal
+   'b' (cátodo) queda en el mismo grupo que el (−) de la pila,
+   siguiendo cables + resistencias (siempre conducen) + interruptores
+   cerrados. Se itera para permitir LEDs en serie.
+   ============================================================ */
+let lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+const LAB_LIMITS = {bateria:1, resistencia:4, led:4, interruptor:2, motor:2, buzzer:2};
+const LAB_LABELS = {bateria:'PILA', resistencia:'RESISTENCIA', led:'LED', interruptor:'INTERRUPTOR', motor:'MOTOR', buzzer:'BUZZER'};
+
+/* valores reales editables: click (sin arrastrar) en la pila o la resistencia
+   para ciclar entre valores comunes, como un multímetro/selector real */
+const RESISTOR_VALUES = [100,220,330,470,680,1000,2200,4700,10000];
+const BATTERY_VOLTAGES = [1.5,3,4.5,6,9,12];
+const LED_COLORS = {
+  red:   {hex:'#c0505a', lit:'#ff5c5c', vf:2.0},
+  yellow:{hex:'#b3922b', lit:'#ffd23f', vf:2.1},
+  green: {hex:'#3d7a52', lit:'#4ade80', vf:2.2},
+  blue:  {hex:'#3a5f8a', lit:'#4dd8ff', vf:3.2},
+  white: {hex:'#8a8a80', lit:'#ffffff', vf:3.2}
+};
+const LED_COLOR_KEYS = Object.keys(LED_COLORS);
+const RESISTOR_BAND_COLORS = {
+  100:['brown','black','brown'], 220:['red','red','brown'], 330:['orange','orange','brown'],
+  470:['yellow','violet','brown'], 680:['blue','gray','brown'], 1000:['brown','black','red'],
+  2200:['red','red','red'], 4700:['yellow','violet','red'], 10000:['brown','black','orange']
+};
+const COLOR_HEX = {black:'#1a1a1a',brown:'#6b4423',red:'#d61f1f',orange:'#ff8a3d',yellow:'#e8c700',green:'#2e8b57',blue:'#3a6ea5',violet:'#8a3fd6',gray:'#8a8a8a',white:'#f0f0f0'};
+function labResLabel(v){ return v>=1000 ? (v/1000)+'kΩ' : v+'Ω'; }
+function labVLabel(v){ return v+'V'; }
+const LAB_GRID = 20;
+
+function labAddComponent(type){
+  const count = lab.instances.filter(i=>i.type===type).length;
+  if(count >= (LAB_LIMITS[type]||4)) return;
+  const id = type+'_'+(lab.nextId++);
+  const idx = lab.instances.length;
+  const col = idx % 4, row = Math.floor(idx/4);
+  const inst = {id, type, x: 20+col*165, y: 55+row*100, closed:true};
+  if(type==='resistencia') inst.value = 220;
+  if(type==='bateria') inst.voltage = 9;
+  if(type==='led') inst.color = 'red';
+  lab.instances.push(inst);
+  lab.lastResult = null;
+  renderLab();
+}
+function labRemoveInstance(id){
+  lab.instances = lab.instances.filter(i=>i.id!==id);
+  lab.wires = lab.wires.filter(([a,b])=>!a.startsWith(id+'_') && !b.startsWith(id+'_'));
+  lab.lastResult = null;
+  renderLab();
+}
+function labTermPos(id, suffix){
+  const inst = lab.instances.find(i=>i.id===id);
+  if(!inst) return null;
+  return {x: inst.x + (suffix==='a'?0:100), y: inst.y+28};
+}
+function labParseKey(key){
+  const idx = key.lastIndexOf('_');
+  return {id:key.slice(0,idx), suffix:key.slice(idx+1)};
+}
+
+let labDragMode = null;
+let labDragData = null;
+
+/* ---- dibujo de una pieza según su tipo, con estética "protoboard" ---- */
+function labDrawComponentArt(inst, diag){
+  const x=inst.x, y=inst.y, cx=x+50, cy=y+28;
+  const active = diag && diag.active;
+  const ledDef = LED_COLORS[inst.color||'red'];
+  const glowColor = inst.type==='led' ? (diag.status==='danger' ? '#ffffff' : ledDef.lit) : '#ffd23f';
+  const glowRadius = active ? (inst.type==='led' ? 4 + 14*(diag.brightness||0) : 8) : 0;
+  const glow = active ? `style="filter:drop-shadow(0 0 ${glowRadius}px ${glowColor})"` : '';
+  if(inst.type==='resistencia'){
+    const bands = RESISTOR_BAND_COLORS[inst.value] || RESISTOR_BAND_COLORS[220];
+    return `<rect x="${x+18}" y="${y+14}" width="64" height="28" rx="6" fill="#d9c8a0" stroke="#8a7a55" stroke-width="1.5"/>
+      <rect x="${x+30}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[0]]}"/>
+      <rect x="${x+40}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[1]]}"/>
+      <rect x="${x+50}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[2]]}"/>
+      <rect x="${x+66}" y="${y+14}" width="6" height="28" fill="#d4af37"/>`;
+  }
+  if(inst.type==='led'){
+    let domeColor = ledDef.hex, op = 0.5;
+    if(active){
+      if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
+      else { domeColor = ledDef.lit; op = Math.max(0.35, diag.brightness||0.5); }
+    }
+    return `<g ${glow}>
+      <path d="M${x+32} ${y+42} V${y+22} A18 18 0 0 1 ${x+68} ${y+22} V${y+42} Z" fill="${domeColor}" stroke="#8a2e2e" stroke-width="1.5" opacity="${op}"/>
+      <rect x="${x+32}" y="${y+38}" width="36" height="6" fill="#8a2e2e" opacity="0.5"/>
+      </g>`;
+  }
+  if(inst.type==='bateria'){
+    return `<rect x="${x+14}" y="${y+10}" width="72" height="36" rx="4" fill="#f4a13c" stroke="#a5651a" stroke-width="1.5"/>
+      <rect x="${x+40}" y="${y+2}" width="20" height="10" rx="2" fill="#6b6b6b"/>
+      <text x="${x+50}" y="${y+33}" text-anchor="middle" fill="#3d2405" style="font-size:11px;font-weight:700;pointer-events:none;">${labVLabel(inst.voltage||9)}</text>`;
+  }
+  if(inst.type==='interruptor'){
+    const on = inst.closed;
+    return `<rect x="${x+26}" y="${y+18}" width="48" height="20" rx="10" fill="${on?'#2f6b45':'#6b2f2f'}" stroke="${on?'#4ade80':'#ff5c5c'}" stroke-width="1.5"/>
+      <circle cx="${on? x+64 : x+36}" cy="${y+28}" r="8" fill="#fef8ec"/>`;
+  }
+  if(inst.type==='motor'){
+    const spin = active ? `<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="0.8s" repeatCount="indefinite"/>` : '';
+    return `<circle cx="${cx}" cy="${cy}" r="20" fill="#3b3b3b" stroke="#8a8a8a" stroke-width="2"/>
+      <g>${spin}
+        <line x1="${cx-14}" y1="${cy}" x2="${cx+14}" y2="${cy}" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+        <line x1="${cx}" y1="${cy-14}" x2="${cx}" y2="${cy+14}" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <circle cx="${cx}" cy="${cy}" r="4" fill="#fef8ec"/>`;
+  }
+  if(inst.type==='buzzer'){
+    const rings = active ? `
+      <circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="#4dd8ff" stroke-width="2" opacity="0.8">
+        <animate attributeName="r" values="10;22;10" dur="1s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;0;0.8" dur="1s" repeatCount="indefinite"/>
+      </circle>` : '';
+    return `<circle cx="${cx}" cy="${cy}" r="18" fill="#e8e2d0" stroke="#8a7a55" stroke-width="2"/>
+      ${[0,1,2].map(i=>`<circle cx="${cx-8+i*8}" cy="${cy}" r="1.6" fill="#6b6b6b"/>`).join('')}
+      ${rings}`;
+  }
+  return '';
+}
+
+function renderLab(){
+  const svg = document.getElementById('labSvg');
+  if(!svg) return;
+  let html = `<defs>
+    <pattern id="breadboardHoles" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1.4" fill="rgba(255,248,236,0.28)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="700" height="380" rx="10" fill="#c9bfa0"/>
+  <rect x="10" y="10" width="680" height="30" rx="4" fill="rgba(255,80,80,0.18)"/>
+  <rect x="10" y="340" width="680" height="30" rx="4" fill="rgba(80,140,255,0.18)"/>
+  <rect x="10" y="46" width="680" height="288" fill="url(#breadboardHoles)"/>
+  <text x="16" y="30" fill="#a53d3d" style="font-size:11px;font-family:monospace;">+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +</text>
+  <text x="16" y="362" fill="#2f5aa5" style="font-size:11px;font-family:monospace;">− − − − − − − − − − − − − − − − − − − − − − − − − − − − − − −</text>`;
+
+  const liveWires = (lab.lastResult && lab.lastResult.liveWires) || new Set();
+  lab.wires.forEach(([a,b],idx)=>{
+    const pa = labParseKey(a), pb = labParseKey(b);
+    const p1 = labTermPos(pa.id,pa.suffix), p2 = labTermPos(pb.id,pb.suffix);
+    if(!p1||!p2) return;
+    const d = `M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}`;
+    const isLive = liveWires.has(idx);
+    html += `<path class="wire-line done" d="${d}"/>`;
+    if(isLive){
+      html += `<circle r="4.5" fill="#fff59d"><animateMotion dur="1.1s" repeatCount="indefinite" path="${d}"/></circle>`;
+    }
+  });
+
+  lab.instances.forEach(inst=>{
+    const diag = (lab.lastResult && lab.lastResult.details[inst.id]) || {active:false};
+    const active = diag.active;
+    const isSwitch = inst.type==='interruptor';
+    const boxClass = 'lab-comp-box' + (active?' lit':'') + (isSwitch ? (inst.closed?' switch-closed':' switch-open') : '') + (diag.status==='danger'?' danger':'');
+    let labelText = LAB_LABELS[inst.type];
+    if(inst.type==='resistencia') labelText = labResLabel(inst.value||220);
+    if(inst.type==='bateria') labelText = 'PILA ' + labVLabel(inst.voltage||9);
+    html += `<g data-role="body" data-inst="${inst.id}">
+      <rect class="${boxClass}" x="${inst.x}" y="${inst.y}" width="100" height="56" rx="10" fill-opacity="0.03"/>
+      ${labDrawComponentArt(inst, diag)}
+      <text class="wire-comp-label" x="${inst.x+50}" y="${inst.y+52}" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">${labelText}${active?' ✓':''}</text>`;
+    if(isSwitch){
+      html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="${inst.closed?'#2f6b45':'#8a2e2e'}" style="font-size:9px;font-family:monospace;pointer-events:none;">${inst.closed?'CERRADO (toca)':'ABIERTO (toca)'}</text>`;
+    } else if(inst.type==='bateria'){
+      html += `<text x="${inst.x+20}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">+</text><text x="${inst.x+78}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">−</text>
+      <text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar V</text>`;
+    } else if(inst.type==='led'){
+      html += `<text x="${inst.x+12}" y="${inst.y+52}" fill="#fef8ec" style="font-size:8px;pointer-events:none;">A</text><text x="${inst.x+84}" y="${inst.y+52}" fill="#fef8ec" style="font-size:8px;pointer-events:none;">K</text>`;
+      if(diag.status){
+        const tag = diag.status==='danger' ? '🔥 ¡mucha corriente!' : diag.status==='dim' ? `🔅 tenue ${diag.mA}mA` : `✓ ${diag.mA}mA`;
+        const col = diag.status==='danger' ? '#ff5c5c' : diag.status==='dim' ? '#e8c700' : '#4ade80';
+        html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="${col}" style="font-size:9px;font-family:monospace;pointer-events:none;">${tag}</text>`;
+      } else {
+        html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar color</text>`;
+      }
+    } else if(inst.type==='resistencia'){
+      html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar Ω</text>`;
+    }
+    html += `<circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_a" cx="${inst.x}" cy="${inst.y+28}" r="8"></circle>
+      <circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_b" cx="${inst.x+100}" cy="${inst.y+28}" r="8"></circle>
+      <circle data-role="delete" data-inst="${inst.id}" cx="${inst.x+92}" cy="${inst.y+8}" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"/>
+      <text data-role="delete" data-inst="${inst.id}" x="${inst.x+92}" y="${inst.y+11}" text-anchor="middle" fill="#7a1414" style="font-size:10px;cursor:pointer;pointer-events:none;">×</text>
+    </g>`;
+  });
+  svg.innerHTML = html;
+
+  svg.querySelectorAll('[data-role="terminal"]').forEach(el=>el.addEventListener('pointerdown', labTerminalDown));
+  svg.querySelectorAll('[data-role="body"]').forEach(el=>el.addEventListener('pointerdown', labBodyDown));
+  svg.querySelectorAll('[data-role="delete"]').forEach(el=>{
+    el.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); labRemoveInstance(e.currentTarget.dataset.inst); });
+  });
+  svg.onpointermove = labPointerMove;
+  svg.onpointerup = labPointerUp;
+  svg.onpointerleave = ()=>{ labDragMode=null; labDragData=null; renderLab(); };
+}
+
+function labTerminalDown(e){
+  e.preventDefault(); e.stopPropagation();
+  const key = e.target.dataset.key;
+  const p = labParseKey(key);
+  const pos = labTermPos(p.id,p.suffix);
+  labDragMode='wire';
+  labDragData = {fromKey:key, x:pos.x, y:pos.y};
+  drawLabTemp(pos.x,pos.y);
+}
+function labBodyDown(e){
+  e.preventDefault(); e.stopPropagation();
+  const id = e.currentTarget.dataset.inst;
+  const inst = lab.instances.find(i=>i.id===id);
+  if(!inst) return;
+  const svg = document.getElementById('labSvg');
+  const p = svgPoint(svg, e.clientX, e.clientY);
+  labDragMode='move';
+  labDragData = {id, startX:p.x, startY:p.y, origX:inst.x, origY:inst.y, moved:false};
+}
+function labPointerMove(e){
+  if(!labDragMode) return;
+  const svg = document.getElementById('labSvg');
+  const p = svgPoint(svg, e.clientX, e.clientY);
+  if(labDragMode==='wire'){
+    drawLabTemp(p.x,p.y);
+  } else if(labDragMode==='move'){
+    const dx = p.x-labDragData.startX, dy = p.y-labDragData.startY;
+    if(Math.abs(dx)>4||Math.abs(dy)>4) labDragData.moved=true;
+    const inst = lab.instances.find(i=>i.id===labDragData.id);
+    if(inst){
+      const rawX = Math.max(6, Math.min(590, labDragData.origX+dx));
+      const rawY = Math.max(46, Math.min(272, labDragData.origY+dy));
+      inst.x = Math.round(rawX/LAB_GRID)*LAB_GRID;
+      inst.y = Math.round(rawY/LAB_GRID)*LAB_GRID;
+      renderLab();
+    }
+  }
+}
+function drawLabTemp(x2,y2){
+  const svg = document.getElementById('labSvg');
+  let temp = svg.querySelector('.wire-line.temp');
+  if(!temp){
+    temp = document.createElementNS('http://www.w3.org/2000/svg','path');
+    temp.setAttribute('class','wire-line temp');
+    svg.appendChild(temp);
+  }
+  temp.setAttribute('d', `M${labDragData.x},${labDragData.y} L${x2},${y2}`);
+}
+function labPointerUp(e){
+  if(!labDragMode) return;
+  const svg = document.getElementById('labSvg');
+  if(labDragMode==='wire'){
+    const p = svgPoint(svg, e.clientX, e.clientY);
+    let best=null, bestDist=22;
+    lab.instances.forEach(inst=>{
+      ['a','b'].forEach(suffix=>{
+        const key = inst.id+'_'+suffix;
+        if(key===labDragData.fromKey) return;
+        const pos = labTermPos(inst.id,suffix);
+        const d = Math.hypot(pos.x-p.x,pos.y-p.y);
+        if(d<bestDist){bestDist=d;best=key;}
+      });
+    });
+    if(best){
+      const exists = lab.wires.some(([a,b])=>(a===labDragData.fromKey&&b===best)||(a===best&&b===labDragData.fromKey));
+      if(!exists) lab.wires.push([labDragData.fromKey, best]);
+    }
+    lab.lastResult = null;
+  } else if(labDragMode==='move'){
+    if(!labDragData.moved){
+      const inst = lab.instances.find(i=>i.id===labDragData.id);
+      if(inst){
+        if(inst.type==='interruptor'){ inst.closed = !inst.closed; lab.lastResult=null; }
+        else if(inst.type==='resistencia'){
+          const idx = RESISTOR_VALUES.indexOf(inst.value||220);
+          inst.value = RESISTOR_VALUES[(idx+1)%RESISTOR_VALUES.length];
+          lab.lastResult=null;
+        } else if(inst.type==='bateria'){
+          const idx = BATTERY_VOLTAGES.indexOf(inst.voltage||9);
+          inst.voltage = BATTERY_VOLTAGES[(idx+1)%BATTERY_VOLTAGES.length];
+          lab.lastResult=null;
+        } else if(inst.type==='led'){
+          const idx = LED_COLOR_KEYS.indexOf(inst.color||'red');
+          inst.color = LED_COLOR_KEYS[(idx+1)%LED_COLOR_KEYS.length];
+          lab.lastResult=null;
+        }
+      }
+    }
+  }
+  labDragMode=null; labDragData=null;
+  renderLab();
+}
+
+function clearLab(){
+  lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+  const r = document.getElementById('labResult');
+  r.textContent=''; r.className='cb-result';
+  document.getElementById('labMaterials').innerHTML='';
+  renderLab();
+}
+
+function simulateLab(){
+  const battery = lab.instances.find(i=>i.type==='bateria');
+  const result = document.getElementById('labResult');
+  if(!battery){
+    result.textContent = '⚠️ Agrega una pila para poder simular el circuito.';
+    result.className='cb-result bad';
+    return;
+  }
+  const V = battery.voltage || 9;
+
+  /* --- conexiones automáticas tipo protoboard real: dos terminales que caen
+     en la misma "columna" (mismo x, redondeado a la cuadrícula) quedan unidas
+     sin necesidad de cable, tal como conectar dos patitas en la misma fila
+     de agujeros de una protoboard física --- */
+  const columnPairs = [];
+  const colGroups = {};
+  lab.instances.forEach(inst=>{
+    ['a','b'].forEach(suf=>{
+      const pos = labTermPos(inst.id, suf);
+      const col = Math.round(pos.x/LAB_GRID);
+      (colGroups[col] = colGroups[col] || []).push(inst.id+'_'+suf);
+    });
+  });
+  Object.values(colGroups).forEach(group=>{
+    for(let i=1;i<group.length;i++) columnPairs.push([group[0], group[i]]);
+  });
+
+  // --- grafo base: cables + columnas compartidas + resistencias + interruptores cerrados ---
+  const parent = {};
+  function makeSet(k){ if(!(k in parent)) parent[k]=k; }
+  function find(k){ makeSet(k); return parent[k]===k ? k : (parent[k]=find(parent[k])); }
+  function union(a,b){ makeSet(a); makeSet(b); const ra=find(a), rb=find(b); if(ra!==rb) parent[ra]=rb; }
+
+  lab.instances.forEach(inst=>{
+    makeSet(inst.id+'_a'); makeSet(inst.id+'_b');
+    if(inst.type==='resistencia') union(inst.id+'_a', inst.id+'_b');
+    if(inst.type==='interruptor' && inst.closed) union(inst.id+'_a', inst.id+'_b');
+  });
+  lab.wires.forEach(([a,b])=>union(a,b));
+  columnPairs.forEach(([a,b])=>union(a,b));
+
+  const actives = lab.instances.filter(i=>['led','motor','buzzer'].includes(i.type));
+
+  // --- fase 1: activación directa/en cadena (mismo tipo en serie, ej. 2 LEDs) ---
+  const litSet = new Set();
+  let changed = true, iterations = 0;
+  while(changed && iterations < 10){
+    changed = false; iterations++;
+    actives.forEach(dev=>{
+      if(litSet.has(dev.id)) return;
+      const a = dev.id+'_a', b = dev.id+'_b';
+      if(find(a)===find(battery.id+'_a') && find(b)===find(battery.id+'_b')){
+        litSet.add(dev.id);
+        union(a,b);
+        changed = true;
+      }
+    });
+  }
+
+  // --- fase 2: grafo "máximo" (asumiendo que TODOS los componentes activos conducen)
+  // para detectar cadenas mixtas (ej. motor + buzzer en serie) que la fase 1 no resuelve sola ---
+  const parent2 = {...parent};
+  function find2(k){ if(!(k in parent2)) parent2[k]=k; return parent2[k]===k ? k : (parent2[k]=find2(parent2[k])); }
+  function union2(a,b){ find2(a); find2(b); const ra=find2(a), rb=find2(b); if(ra!==rb) parent2[ra]=rb; }
+  actives.forEach(dev=>union2(dev.id+'_a', dev.id+'_b'));
+  const battSetMax = find2(battery.id+'_a');
+  const loopPossible = find2(battery.id+'_b') === battSetMax;
+
+  if(loopPossible){
+    actives.forEach(dev=>{
+      if(litSet.has(dev.id)) return;
+      if(find2(dev.id+'_a')===battSetMax && find2(dev.id+'_b')===battSetMax){
+        litSet.add(dev.id);
+      }
+    });
+  }
+
+  const liveWires = new Set();
+  if(litSet.size>0){
+    lab.wires.forEach(([a,b],idx)=>{
+      if(find2(a)===battSetMax && find2(b)===battSetMax) liveWires.add(idx);
+    });
+  }
+
+  // --- fase 3: Ley de Ohm real. Dijkstra desde (+) y desde (−) de la pila,
+  // sumando los ohmios de las resistencias que hay en el camino de cada LED
+  // (las columnas compartidas cuentan como cable, resistencia 0) ---
+  const adj = {};
+  function addEdge(a,b,w){ (adj[a]=adj[a]||[]).push([b,w]); (adj[b]=adj[b]||[]).push([a,w]); }
+  lab.wires.forEach(([a,b])=>addEdge(a,b,0));
+  columnPairs.forEach(([a,b])=>addEdge(a,b,0));
+  lab.instances.forEach(inst=>{
+    if(inst.type==='resistencia') addEdge(inst.id+'_a', inst.id+'_b', inst.value||220);
+    if(inst.type==='interruptor' && inst.closed) addEdge(inst.id+'_a', inst.id+'_b', 0);
+    if(['led','motor','buzzer'].includes(inst.type) && litSet.has(inst.id)) addEdge(inst.id+'_a', inst.id+'_b', 0);
+  });
+  function dijkstra(start){
+    const dist = {}; dist[start]=0; const done = new Set();
+    while(true){
+      let u=null, best=Infinity;
+      for(const k in dist){ if(!done.has(k) && dist[k]<best){ best=dist[k]; u=k; } }
+      if(u===null) break;
+      done.add(u);
+      (adj[u]||[]).forEach(([v,w])=>{
+        const nd = dist[u]+w;
+        if(dist[v]===undefined || nd<dist[v]) dist[v]=nd;
+      });
+    }
+    return dist;
+  }
+  const distPos = dijkstra(battery.id+'_a');
+  const distNeg = dijkstra(battery.id+'_b');
+
+  const details = {};
+  let anyDanger = false, anyDim = false, missingResistor = false;
+  lab.instances.forEach(inst=>{
+    if(inst.type==='resistencia' || inst.type==='bateria' || inst.type==='interruptor'){
+      details[inst.id] = {active:false};
+      return;
+    }
+    const active = litSet.has(inst.id);
+    if(!active){ details[inst.id] = {active:false}; return; }
+    if(inst.type!=='led'){ details[inst.id] = {active:true}; return; }
+    const rUp = distPos[inst.id+'_a'], rDown = distNeg[inst.id+'_b'];
+    const rTotal = (rUp!==undefined && rDown!==undefined) ? rUp+rDown : 0;
+    const vf = (LED_COLORS[inst.color||'red']||LED_COLORS.red).vf;
+    const effV = Math.max(0, V - vf);
+    let mA, status, brightness;
+    if(rTotal<=0){
+      mA = Infinity; status = 'danger'; anyDanger = true; missingResistor = true; brightness = 1;
+    } else {
+      mA = Math.round((effV/rTotal)*1000);
+      brightness = Math.max(0.12, Math.min(1, mA/20));
+      if(mA > 40){ status = 'danger'; anyDanger = true; }
+      else if(mA < 4){ status = 'dim'; anyDim = true; }
+      else status = 'ok';
+    }
+    details[inst.id] = {active:true, status, mA: mA===Infinity?'∞':mA, rTotal, brightness};
+  });
+
+  lab.lastResult = {lit: litSet, liveWires, details};
+  renderLab();
+
+  const leds = actives.filter(i=>i.type==='led');
+  const motors = actives.filter(i=>i.type==='motor');
+  const buzzers = actives.filter(i=>i.type==='buzzer');
+
+  if(actives.length===0){
+    result.textContent = 'Agrega al menos un LED, motor o buzzer para ver si tu circuito funciona.';
+    result.className='cb-result';
+  } else if(litSet.size===0){
+    result.innerHTML = '❌ Nada se activa todavía. Revisa que el circuito esté cerrado (pila → ... → componente → ... → pila) y que los interruptores estén cerrados.';
+    result.className='cb-result bad';
+  } else {
+    const parts = [];
+    if(leds.length) parts.push(`💡 ${[...litSet].filter(id=>leds.some(l=>l.id===id)).length}/${leds.length} LED(s)`);
+    if(motors.length) parts.push(`⚙️ ${[...litSet].filter(id=>motors.some(m=>m.id===id)).length}/${motors.length} motor(es) girando`);
+    if(buzzers.length) parts.push(`🔊 ${[...litSet].filter(id=>buzzers.some(bz=>bz.id===id)).length}/${buzzers.length} buzzer(s) sonando`);
+    let msg = `✅ ${parts.join(' · ')}. Pila a ${V}V.`;
+    if(anyDanger) msg += missingResistor ? ' 🔥 ¡Corto circuito! Falta resistencia en el camino de un LED, se puede quemar.' : ' 🔥 Corriente demasiado alta en algún LED: sube el valor de la resistencia o baja el voltaje.';
+    else if(anyDim) msg += ' 🔅 Algún LED recibe muy poca corriente y se verá tenue: baja el valor de la resistencia.';
+    result.innerHTML = msg;
+    result.className = anyDanger ? 'cb-result bad' : (anyDim ? 'cb-result' : 'cb-result ok');
+  }
+}
+
+const LAB_PRESETS = {
+  simple: {
+    label:'LED simple',
+    materials:['1 pila de 9V (o portapilas con pilas AA)','1 resistencia de 220Ω a 330Ω','1 LED','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:20, y:150, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:230, y:150, closed:true, value:220},
+      {id:'led_1', type:'led', x:440, y:150, closed:true}
+    ],
+    wires:[['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b']]
+  },
+  interruptor: {
+    label:'LED con interruptor',
+    materials:['1 pila de 9V','1 interruptor o pulsador','1 resistencia de 220Ω a 330Ω','1 LED','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:150, closed:true, voltage:9},
+      {id:'interruptor_1', type:'interruptor', x:170, y:150, closed:true},
+      {id:'resistencia_1', type:'resistencia', x:340, y:150, closed:true, value:220},
+      {id:'led_1', type:'led', x:510, y:150, closed:true}
+    ],
+    wires:[['bateria_1_a','interruptor_1_a'],['interruptor_1_b','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b']]
+  },
+  paralelo: {
+    label:'2 LEDs en paralelo',
+    materials:['1 pila de 9V','2 resistencias de 220Ω a 330Ω','2 LEDs','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:100, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:230, y:30, closed:true, value:220},
+      {id:'led_1', type:'led', x:450, y:30, closed:true},
+      {id:'resistencia_2', type:'resistencia', x:230, y:190, closed:true, value:220},
+      {id:'led_2', type:'led', x:450, y:190, closed:true}
+    ],
+    wires:[
+      ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
+      ['bateria_1_a','resistencia_2_a'],['resistencia_2_b','led_2_a'],['led_2_b','bateria_1_b']
+    ]
+  }
+};
+function loadPreset(key){
+  const p = LAB_PRESETS[key];
+  lab.instances = p.instances.map(i=>({...i}));
+  lab.wires = p.wires.map(w=>[...w]);
+  lab.nextId = 10;
+  lab.lastResult = null;
+  const r = document.getElementById('labResult');
+  r.textContent = `Receta "${p.label}" cargada. Pulsa "Simular" para probarla, o cópiala con tus componentes reales en casa.`;
+  r.className='cb-result';
+  document.getElementById('labMaterials').innerHTML = `<div class="lab-materials"><b>🧰 Materiales:</b><ul>${p.materials.map(m=>`<li>${m}</li>`).join('')}</ul></div>`;
+  renderLab();
+}
+
+/* ============================================================
+   INICIALIZACIÓN GENERAL
+   ============================================================ */
+renderTheory();
+initQuiz();
+renderLab();
+</script>
+</body>
+</html>
