@@ -566,6 +566,57 @@
   .diff-tab.active{background:var(--copper); color:var(--ink); border-color:var(--copper);}
   .lang-toggle{font-size:.7rem; opacity:.7; margin-left:8px; cursor:pointer; text-decoration:underline;}
 
+
+  /* Ley de Ohm game */
+  .ohm-playground{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:22px;}
+  @media(max-width:720px){.ohm-playground{grid-template-columns:1fr;}}
+  .ohm-sliders label{display:block; margin-bottom:16px; font-size:.9rem;}
+  .ohm-sliders input[type=range]{width:100%; accent-color:var(--copper); margin:8px 0;}
+  .ohm-val{font-family:'Space Mono',monospace; color:var(--wire-yellow); font-weight:700;}
+  .ohm-live-box{
+    background:rgba(0,0,0,.28); border-radius:16px; padding:20px; text-align:center;
+    border:1px solid rgba(255,180,84,.25);
+  }
+  .ohm-formula-big{font-size:1.4rem; font-weight:800; color:var(--wire-yellow); margin-bottom:8px;}
+  .ohm-calc{font-family:'Space Mono',monospace; font-size:1rem; margin-bottom:16px;}
+  .ohm-led-preview{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .ohm-led{
+    width:48px; height:48px; border-radius:50%; background:#ff4d5e;
+    box-shadow:0 0 20px #ff4d5e; transition:opacity .2s, box-shadow .2s, transform .2s;
+  }
+  .ohm-challenge{
+    background:rgba(0,0,0,.22); border-radius:16px; padding:20px;
+    border:1px solid rgba(255,180,84,.2);
+  }
+  .ohm-q{font-size:1.1rem; font-weight:700; margin-bottom:14px; line-height:1.4;}
+  .ohm-opts{display:grid; gap:10px;}
+  .ohm-opt{
+    text-align:left; background:rgba(0,0,0,.22); border:2px solid rgba(255,248,236,.15);
+    color:var(--cream); padding:12px 16px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2',sans-serif; font-size:.95rem;
+  }
+  .ohm-opt:hover{border-color:var(--copper);}
+  .ohm-opt.correct{border-color:var(--ok-green); background:rgba(74,222,128,.15);}
+  .ohm-opt.wrong{border-color:var(--bad-red); background:rgba(255,92,92,.12);}
+
+
+  .comp-photo-wrap{
+    width:100%; height:125px; background:#fff; border-radius:12px; margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;
+  }
+  .comp-photo-wrap .component-photo{
+    width:100%; height:125px; object-fit:contain; padding:8px; margin:0; background:transparent;
+  }
+  .comp-photo-fallback{
+    position:absolute; inset:0; align-items:center; justify-content:center; background:#f7f7f7;
+  }
+  .comp-photo-fallback svg{width:70px; height:70px;}
+  .comp-symbol{margin:4px 0;}
+  .comp-symbol svg{width:56px; height:56px;}
+  .comp-meta{display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:6px;}
+  .pol-tag.mix{background:rgba(255,180,84,0.2); color:#ffb454;}
+  .comp-card h3{font-size:1rem; line-height:1.25;}
+
 </style>
 </head>
 <body>
@@ -645,7 +696,8 @@ const PG = {
       {id:'polar', label:'Polaridad', emoji:'🔋'},
       {id:'cables', label:'Cables', emoji:'🔗'},
       {id:'quiz', label:'Quiz', emoji:'🏆'},
-      {id:'lab', label:'Laboratorio', emoji:'⚡'}
+      {id:'lab', label:'Laboratorio', emoji:'⚡'},
+      {id:'ohm', label:'Ohm', emoji:'📐'}
     ];
     bar.innerHTML = defs.map(d => 
       `<div class="medal ${this.medals[d.id]?'earned':''}" title="${d.label}"><span>${d.emoji}</span>${d.label}</div>`
@@ -737,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
       <button class="game-tab" data-game="serieparalelo" onclick="switchGame('serieparalelo')">💡 Serie / Paralelo</button>
       <button class="game-tab" data-game="cables" onclick="switchGame('cables')">🔗 Conecta los cables</button>
       <button class="game-tab" data-game="quiz" onclick="switchGame('quiz')">🏆 Quiz final</button>
+      <button class="game-tab" data-game="ohm" onclick="switchGame('ohm')">📐 Ley de Ohm</button>
     </div>
 
     <!-- JUEGO 1: MEMORAMA -->
@@ -846,6 +899,40 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
         <p>6 preguntas sobre componentes y circuitos de primaria.</p>
       </div>
       <div id="quizPanel"></div>
+    </div>
+
+    <div class="game-view" id="game-ohm">
+      <div class="game-view-head">
+        <h3>📐 Ley de Ohm</h3>
+        <p>La corriente I depende del voltaje V y de la resistencia R: <b>I = V ÷ R</b></p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Aciertos: <b id="ohmScore">0</b>/<span id="ohmTotal">5</span></div>
+        <button class="btn ghost" onclick="initOhmGame()">🔄 Reiniciar</button>
+      </div>
+      <div class="ohm-playground">
+        <div class="ohm-sliders">
+          <label>Voltaje de la pila (V)
+            <input type="range" id="ohmV" min="1.5" max="12" step="1.5" value="9" oninput="updateOhmLive()">
+            <span class="ohm-val" id="ohmVLabel">9 V</span>
+          </label>
+          <label>Resistencia (R)
+            <input type="range" id="ohmR" min="100" max="2000" step="50" value="300" oninput="updateOhmLive()">
+            <span class="ohm-val" id="ohmRLabel">300 Ω</span>
+          </label>
+        </div>
+        <div class="ohm-live-box">
+          <div class="ohm-formula-big">I = V ÷ R</div>
+          <div class="ohm-calc" id="ohmCalc">I = 9 ÷ 300 = <b>30 mA</b></div>
+          <div class="ohm-led-preview">
+            <div class="ohm-led" id="ohmLed"></div>
+            <span id="ohmLedText">LED con brillo normal</span>
+          </div>
+        </div>
+      </div>
+      <div class="ohm-challenge" id="ohmChallenge">
+        <!-- filled by JS -->
+      </div>
     </div>
   </div>
 </section>
@@ -1014,23 +1101,74 @@ const ICONS = {
 };
 
 const COMPONENTS = [
-{id:'resistencia',name:'Resistencia (Resistor)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20resistors.jpg',figure:'Figura 1. Resistencia',desc:'Componente pasivo que presenta oposición al paso de la corriente eléctrica, medida en ohms (Ω). Se emplea para proteger otros elementos (como los LEDs) de corrientes excesivas.'},
-{id:'led',name:'Diodo Emisor de Luz (LED)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Red-LED.jpg',figure:'Figura 2. LED',desc:'Componente semiconductor que emite luz cuando la corriente eléctrica lo atraviesa en el sentido directo de polarización.'},
-{id:'capacitor',name:'Capacitor (Condensador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20capacitors.jpg',figure:'Figura 3. Capacitor',desc:'Componente pasivo capaz de almacenar energía eléctrica en un campo electrostático generado entre dos placas conductoras separadas por un material dieléctrico (incluye tipos cerámicos, de poliéster y electrolíticos).'},
-{id:'transistor',name:'Transistor (Transistor bipolar)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Through-Hole-Transistor.jpg',figure:'Figura 4. Transistor',desc:'Dispositivo semiconductor de tres terminales (emisor, base y colector) que actúa como amplificador de señales o como interruptor controlado por corriente.'},
-{id:'ldr',name:'Fotoresistencia (LDR / Sensor óptico pasivo)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Photoresistors.jpg',figure:'Figura 5. Fotoresistencia LDR',desc:'Componente pasivo cuya resistencia eléctrica varía de forma inversa en función de la intensidad luminosa incidente sobre su superficie.'},
-{id:'jumper',name:'Jumpers (Cables de conexión)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Jumper_wires.jpg',figure:'Figura 6. Jumpers',desc:'Cables conductores de corta longitud utilizados para establecer conexiones temporales y rápidas entre componentes montados en una protoboard sin necesidad de soldadura.'},
-{id:'pulsador',name:'Pulsador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Tactile_switch.jpg',figure:'Figura 7. Pulsador',desc:'Dispositivo electromecánico de accionamiento temporal que establece o interrumpe una conexión eléctrica únicamente mientras se mantiene presionado, retornando a su posición original al ser liberado.'},
-{id:'interruptor',name:'Interruptor',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Eight-Switch.jpg',figure:'Figura 8. Interruptor',desc:'Dispositivo electromecánico que permite abrir o cerrar un circuito eléctrico de manera intencionada y sostenida, manteniendo el estado seleccionado hasta una nueva manipulación.'},
-{id:'buzzer',name:'Buzzer (Zumbador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20piezo.jpg',figure:'Figura 9. Buzzer',desc:'Dispositivo electroacústico que convierte señales eléctricas en sonido audible, funcionando como indicador sonoro (activo o pasivo).'},
-{id:'motor',name:'Motor de Corriente Continua (Motor DC)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Screw-DC-Motor.jpg',figure:'Figura 10. Motor DC',desc:'Dispositivo electromecánico que transforma la energía eléctrica en movimiento rotacional mediante la interacción entre campos magnéticos.'},
-{id:'bateria',name:'Batería (Fuente de alimentación)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/BateriaAA.jpg',figure:'Figura 11. Batería',desc:'Dispositivo electroquímico que almacena energía química y la convierte en energía eléctrica continua mediante reacciones de oxidación-reducción (como pilas alcalinas de 1.5 V o baterías cuadradas de 9 V).'},
-{id:'potenciometro',name:'Potenciómetro',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Potentiometer.jpg',figure:'Figura 12. Potenciómetro',desc:'Resistencia variable que permite ajustar la oposición al flujo de corriente mediante un cursor mecánico.'},
-{id:'fusible',name:'Fusible',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Glass_fuse.jpg',figure:'Figura 13. Fusible',desc:'Componente de protección diseñado para interrumpir la corriente del circuito en caso de sobrecargas.'},
-{id:'rele',name:'Relé',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Relay.jpg',figure:'Figura 14. Relé',desc:'Interruptor electromagnético controlado por un circuito de menor potencia.'},
-{id:'diodo',name:'Diodo rectificador',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/1N4007_diodes.jpg',figure:'Figura 15. Diodo rectificador',desc:'Diodo semiconductor utilizado principalmente para permitir el flujo de corriente en una sola dirección.'},
-{id:'transformador',name:'Transformador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Transformer.jpg',figure:'Figura 16. Transformador',desc:'Dispositivo eléctrico que permite aumentar o disminuir la tensión en un circuito de corriente alterna.'},
-{id:'microcontrolador',name:'Microcontrolador básico',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Arduino_Uno_-_R3.jpg',figure:'Figura 17. Microcontrolador',desc:'Circuito integrado programable que concentra las unidades principales de un computador para el control de sistemas electrónicos.'}
+{id:'resistencia', name:'Resistencia', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Resistors.jpg/240px-Resistors.jpg',
+ figure:'Figura 1. Resistencia',
+ desc:'Se opone al paso de la corriente eléctrica (se mide en ohms Ω). Se usa para proteger componentes como el LED de corrientes muy altas.'},
+{id:'led', name:'LED', pol:true,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Red_LED.jpg/240px-Red_LED.jpg',
+ figure:'Figura 2. LED',
+ desc:'Diodo que emite luz cuando la corriente pasa en el sentido correcto. Tiene pata larga (+) y pata corta (−). ¡No lo conectes al revés!'},
+{id:'capacitor', name:'Capacitor', pol:'mixed',
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Electrolytic_capacitors.jpg/240px-Electrolytic_capacitors.jpg',
+ figure:'Figura 3. Capacitor',
+ desc:'Almacena energía eléctrica un rato. Los electrolíticos SÍ son polarizados (tienen + y −). Los cerámicos y de poliéster NO son polarizados.'},
+{id:'transistor', name:'Transistor', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/BJT_TO-92.jpg/240px-BJT_TO-92.jpg',
+ figure:'Figura 4. Transistor',
+ desc:'Tiene 3 patas (emisor, base y colector). Sirve como interruptor o amplificador controlado por una pequeña corriente.'},
+{id:'ldr', name:'LDR (Fotoresistencia)', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Photoresistor.jpg/240px-Photoresistor.jpg',
+ figure:'Figura 5. LDR',
+ desc:'Su resistencia cambia según la luz: con mucha luz baja la resistencia; en la oscuridad sube. Ideal para sensores de día/noche.'},
+{id:'jumper', name:'Jumpers', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD0rFENPIwa0Er1HpJJlQzdbNreRVhpdB65AEdEKxyjA&s=10',
+ figure:'Figura 6. Jumpers',
+ desc:'Cables cortos para conectar componentes en la protoboard sin soldar. Permiten armar y desarmar circuitos rápido.'},
+{id:'pulsador', name:'Pulsador', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvxjcXa_OdcZ6295-1Bt1FaQMk7SSf69D9mT5tK9mK6A&s=10',
+ figure:'Figura 7. Pulsador',
+ desc:'Cierra el circuito solo mientras lo mantienes presionado. Al soltar, se abre otra vez.'},
+{id:'interruptor', name:'Interruptor', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Toggle_switch.jpg/240px-Toggle_switch.jpg',
+ figure:'Figura 8. Interruptor',
+ desc:'Abre o cierra el circuito y se queda en esa posición hasta que lo cambies. Como el switch de la luz de tu casa.'},
+{id:'buzzer', name:'Buzzer (Zumbador)', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRPRt1f02brwlBtcjQXF1sfMzPRo30tVRAIqeQl8hF1g&s=10',
+ figure:'Figura 9. Buzzer',
+ desc:'Emite un sonido cuando recibe corriente. Muchos buzzers activos tienen polaridad (+ y −).'},
+{id:'motor', name:'Motor DC', pol:true,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Electric_motor.jpg/240px-Electric_motor.jpg',
+ figure:'Figura 10. Motor DC',
+ desc:'Convierte electricidad en movimiento (gira). Si inviertes los cables, gira al revés.'},
+{id:'bateria', name:'Batería / Pila', pol:true,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/AA_battery_size_comparison.jpg/240px-AA_battery_size_comparison.jpg',
+ figure:'Figura 11. Batería',
+ desc:'Fuente de energía del circuito. Tiene polo positivo (+) y negativo (−). Nunca la cortocircuites.'},
+{id:'potenciometro', name:'Potenciómetro', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Potentiometer.jpg/240px-Potentiometer.jpg',
+ figure:'Figura 12. Potenciómetro',
+ desc:'Resistencia variable: al girar el eje cambias cuánta corriente deja pasar. Sirve para volumen o brillo.'},
+{id:'fusible', name:'Fusible', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvHrHl8lN8STBizvdOf_fGRTIXDXXKBsXzV6ZcXsTf4g&s=10',
+ figure:'Figura 13. Fusible',
+ desc:'Protección: si pasa demasiada corriente, se funde y abre el circuito para evitar daños o incendios.'},
+{id:'rele', name:'Relé', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Relay.jpg/240px-Relay.jpg',
+ figure:'Figura 14. Relé',
+ desc:'Interruptor electromagnético: una corriente pequeña controla otra más grande (por ejemplo, un motor).'},
+{id:'diodo', name:'Diodo rectificador', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5gIXYddxsXJXBd9Iq14l0dvKXo-DWYe9bs1R3eR1oFg&s=10',
+ figure:'Figura 15. Diodo',
+ desc:'Deja pasar la corriente solo en un sentido (del ánodo al cátodo). El LED es un tipo especial de diodo.'},
+{id:'transformador', name:'Transformador', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Transformer.jpg/240px-Transformer.jpg',
+ figure:'Figura 16. Transformador',
+ desc:'Sube o baja el voltaje en corriente alterna (AC). Se usa en cargadores y fuentes de alimentación.'},
+{id:'microcontrolador', name:'Microcontrolador', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Arduino_Uno_-_R3.jpg/240px-Arduino_Uno_-_R3.jpg',
+ figure:'Figura 17. Microcontrolador',
+ desc:'Cerebro programable del circuito (como Arduino). Ejecuta instrucciones y controla LEDs, motores y sensores.'}
 ];
 
 const SYMBOL_LABELS = {
@@ -1284,6 +1422,7 @@ function switchGame(name){
   document.querySelectorAll('.game-tab').forEach(t=>t.classList.toggle('active', t.dataset.game===name));
   document.querySelectorAll('.game-view').forEach(v=>v.classList.toggle('active', v.id === 'game-'+name));
   if(name==='cables' && !wireInitDone){ initWireGame(); wireInitDone = true; }
+  if(name==='ohm' && typeof updateOhmLive==='function') updateOhmLive();
 }
 
 /* ============================================================
@@ -1466,16 +1605,29 @@ const compGrid = document.getElementById('compGrid');
 COMPONENTS.forEach(c=>{
   const card = document.createElement('div');
   card.className='comp-card';
+  card.setAttribute('role','button');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('aria-label', c.name);
+  let polClass = 'no', polText = '○ NO POLARIZADO';
+  if(c.pol === true){ polClass = 'si'; polText = '⚡ POLARIZADO'; }
+  else if(c.pol === 'mixed'){ polClass = 'mix'; polText = '⚡ / ○ SEGÚN TIPO'; }
+  const icon = ICONS[c.id] || '';
   card.innerHTML = `
-    <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
-         onerror="this.style.opacity='0.3'; this.alt='Imagen no disponible offline';">
-    ${ICONS[c.id]}
+    <div class="comp-photo-wrap">
+      <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="comp-photo-fallback" style="display:none">${icon}</div>
+    </div>
+    <div class="comp-symbol">${icon}</div>
     <span class="figure">${c.figure}</span>
     <h3>${c.name}</h3>
-    <span class="pol-tag ${c.pol?'si':'no'}">${c.pol?'⚡ POLARIZADO':'○ NO POLARIZADO'}</span>
-    <span class="symbol-label">Símbolo: ${SYMBOL_LABELS[c.id] || c.id.toUpperCase()}</span>
+    <div class="comp-meta">
+      <span class="pol-tag ${polClass}">${polText}</span>
+      <span class="symbol-label">Símbolo: ${SYMBOL_LABELS[c.id] || c.id.toUpperCase()}</span>
+    </div>
     <p>${c.desc}</p>`;
   card.onclick=()=>card.classList.toggle('open');
+  card.onkeydown=(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); card.classList.toggle('open'); } };
   compGrid.appendChild(card);
 });
 
@@ -2473,6 +2625,125 @@ function loadPreset(key){
 }
 
 
+
+/* ============================================================
+   JUEGO: LEY DE OHM
+   ============================================================ */
+const OHM_QUESTIONS = [
+  {q:'Si la pila es de 9 V y la resistencia es de 300 Ω, ¿cuánta corriente circula?', opts:['30 mA','3 mA','300 mA','90 mA'], correct:0, hint:'I = V ÷ R = 9 ÷ 300 = 0,03 A = 30 mA'},
+  {q:'¿Qué pasa si aumentas la resistencia y dejas el mismo voltaje?', opts:['La corriente baja','La corriente sube','El voltaje cambia','Nada'], correct:0, hint:'Más R → menos I (I = V/R)'},
+  {q:'Un LED se ve muy brillante y se puede quemar. ¿Qué puedes hacer?', opts:['Poner una resistencia más grande','Quitar la resistencia','Subir el voltaje','Cortar un cable'], correct:0, hint:'Más resistencia limita la corriente'},
+  {q:'Pila de 6 V y resistencia de 200 Ω. ¿Cuántos mA hay?', opts:['30 mA','12 mA','3 mA','1200 mA'], correct:0, hint:'I = 6 ÷ 200 = 0,03 A = 30 mA'},
+  {q:'La fórmula de la Ley de Ohm es:', opts:['I = V ÷ R','V = I ÷ R','R = V × I','I = V × R'], correct:0, hint:'Corriente = Voltaje dividido entre Resistencia'},
+  {q:'Si V = 12 V y quieres unos 20 mA, ¿qué resistencia usas aproximadamente?', opts:['600 Ω','12 Ω','20 Ω','2400 Ω'], correct:0, hint:'R = V ÷ I = 12 ÷ 0,02 = 600 Ω'},
+  {q:'¿Qué unidad usamos para la corriente en circuitos de LED?', opts:['mA (miliamperios)','Voltios','Ohmios','Watts'], correct:0, hint:'Los LEDs suelen usar 10–20 mA'},
+];
+
+let ohmState = {idx:0, score:0, answered:false, order:[]};
+
+function updateOhmLive(){
+  const V = parseFloat(document.getElementById('ohmV')?.value || 9);
+  const R = parseFloat(document.getElementById('ohmR')?.value || 300);
+  const I_mA = Math.round((V / R) * 1000);
+  const vLab = document.getElementById('ohmVLabel');
+  const rLab = document.getElementById('ohmRLabel');
+  const calc = document.getElementById('ohmCalc');
+  const led = document.getElementById('ohmLed');
+  const ledText = document.getElementById('ohmLedText');
+  if(vLab) vLab.textContent = V + ' V';
+  if(rLab) rLab.textContent = R + ' Ω';
+  if(calc) calc.innerHTML = `I = ${V} ÷ ${R} = <b>${I_mA} mA</b>`;
+  if(led){
+    // brightness based on current (typical LED ~15-20mA full)
+    let bright = Math.min(1, Math.max(0.08, I_mA / 25));
+    let danger = I_mA > 40;
+    let dim = I_mA < 5;
+    led.style.opacity = bright;
+    led.style.transform = `scale(${0.7 + bright*0.4})`;
+    led.style.boxShadow = danger
+      ? `0 0 ${20+I_mA}px #fff, 0 0 40px #ff4d5e`
+      : `0 0 ${12*bright}px #ff4d5e`;
+    if(ledText){
+      if(danger) ledText.textContent = '🔥 ¡Mucha corriente! El LED se puede quemar';
+      else if(dim) ledText.textContent = '🔅 Muy poca corriente — LED tenue';
+      else ledText.textContent = '💡 LED con buen brillo (~' + I_mA + ' mA)';
+    }
+  }
+}
+
+function initOhmGame(){
+  ohmState = {
+    idx: 0,
+    score: 0,
+    answered: false,
+    order: [...OHM_QUESTIONS.keys()].sort(()=>Math.random()-0.5).slice(0,5)
+  };
+  const sc = document.getElementById('ohmScore');
+  const tot = document.getElementById('ohmTotal');
+  if(sc) sc.textContent = '0';
+  if(tot) tot.textContent = '5';
+  updateOhmLive();
+  renderOhmChallenge();
+}
+
+function renderOhmChallenge(){
+  const host = document.getElementById('ohmChallenge');
+  if(!host) return;
+  if(ohmState.idx >= ohmState.order.length){
+    if(window.PG){
+      if(ohmState.score >= 4){ PG.award('ohm','Maestro de Ohm'); PG.confetti(50); PG.sfxWin(); }
+      else if(ohmState.score >= 3){ PG.toast('📐 ¡Buen trabajo con Ohm!'); PG.sfxOk(); }
+      if(typeof saveScore==='function') saveScore('ohm_score', ohmState.score);
+    }
+    host.innerHTML = `<div style="text-align:center;">
+      <div style="font-size:2rem;font-weight:800;color:var(--wire-yellow);">${ohmState.score}/5</div>
+      <p>${ohmState.score===5?'¡Perfecto! Dominas la Ley de Ohm ⚡': ohmState.score>=3?'¡Muy bien! Sigue practicando con los deslizadores.':'Prueba mover V y R arriba y vuelve a intentar.'}</p>
+      <button class="btn" onclick="initOhmGame()">Jugar de nuevo</button>
+    </div>`;
+    return;
+  }
+  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
+  ohmState.answered = false;
+  host.innerHTML = `
+    <div class="ohm-q">${ohmState.idx+1}. ${q.q}</div>
+    <div class="ohm-opts" id="ohmOpts"></div>
+    <div class="feedback" id="ohmFeedback" style="margin-top:12px;"></div>`;
+  const wrap = document.getElementById('ohmOpts');
+  q.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'ohm-opt';
+    btn.textContent = opt;
+    btn.onclick = ()=>answerOhm(i);
+    wrap.appendChild(btn);
+  });
+}
+
+function answerOhm(i){
+  if(ohmState.answered) return;
+  ohmState.answered = true;
+  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
+  const opts = document.querySelectorAll('#ohmOpts .ohm-opt');
+  const fb = document.getElementById('ohmFeedback');
+  opts.forEach((o,idx)=>{
+    if(idx===q.correct) o.classList.add('correct');
+    else if(idx===i) o.classList.add('wrong');
+  });
+  if(i===q.correct){
+    ohmState.score++;
+    document.getElementById('ohmScore').textContent = ohmState.score;
+    if(fb){ fb.textContent = '✅ ¡Correcto! ' + q.hint; fb.className='feedback ok'; }
+    if(window.PG) PG.sfxOk();
+  } else {
+    if(fb){ fb.textContent = '❌ ' + q.hint; fb.className='feedback bad'; }
+    if(window.PG) PG.sfxBad();
+  }
+  setTimeout(()=>{
+    ohmState.idx++;
+    renderOhmChallenge();
+  }, 1600);
+}
+
+
 /* ============================================================
    FEATURE PACK: guardar, pasos, borrar cables, medallas,
    diploma, código de colores, ranking, idiomas
@@ -2512,7 +2783,7 @@ function resetMedals(){
 }
 function checkAllMedals(){
   if(!window.PG) return;
-  const need = ['memo','circuito','polar','cables','quiz','lab'];
+  const need = ['memo','circuito','polar','cables','quiz','lab','ohm'];
   if(need.every(k => PG.medals[k])){
     setTimeout(()=>{
       document.getElementById('diplomaOverlay')?.classList.add('show');
@@ -2651,6 +2922,7 @@ function toggleLang(){
 renderTheory();
 initQuiz();
 renderLab();
+if(typeof initOhmGame==='function') initOhmGame();
 if(typeof renderColorCode==='function') renderColorCode();
 if(typeof renderLeaderboard==='function') renderLeaderboard();
 if(window.PG) PG.renderMedals();
