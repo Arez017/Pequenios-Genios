@@ -385,7 +385,7 @@
     max-height:0; overflow:hidden; transition:max-height .35s ease;
     padding:0 22px;
   }
-  .theory-item.open .theory-body{max-height:400px; padding:0 22px 20px;}
+  .theory-item.open .theory-body{max-height:1400px; padding:0 22px 20px;}
   .theory-body p{margin:0 0 10px; opacity:0.85; line-height:1.6; font-size:0.94rem;}
   .theory-body p:last-child{margin-bottom:0;}
   .theory-mini-diagram{margin:6px 0 14px; display:flex; justify-content:center;}
@@ -1388,6 +1388,62 @@ const THEORY_PRIMARIA = [
       </g>
       <line x1="145" y1="45" x2="160" y2="45" stroke="#ffd23f" stroke-width="3"/>
       <line x1="190" y1="25" x2="190" y2="65" stroke="#4dd8ff" stroke-width="4"/><path d="M205 25 Q198 45 205 65" fill="none" stroke="#4dd8ff" stroke-width="4"/></svg>`
+  },
+  {
+    title:'Ley de Ohm: la fórmula mágica',
+    body:`<p>La <b>Ley de Ohm</b> nos dice cómo se relacionan tres cosas importantes en un circuito:</p>
+      <p style="text-align:center; font-size:1.4rem; font-weight:800; color:#ffd23f; margin:16px 0;">
+        I = V ÷ R
+      </p>
+      <ul style="margin:12px 0 12px 20px; line-height:1.7;">
+        <li><b>V</b> = Voltaje (la “fuerza” de la pila, se mide en <b>voltios</b>)</li>
+        <li><b>R</b> = Resistencia (lo que frena la corriente, se mide en <b>ohms Ω</b>)</li>
+        <li><b>I</b> = Corriente (cuánta electricidad pasa, se mide en <b>amperios</b> o milamperios mA)</li>
+      </ul>
+      <p>Imagina que el voltaje es como la presión del agua, la resistencia es como un grifo semienterrado y la corriente es la cantidad de agua que sale. Si aumentas la resistencia (cierras más el grifo), sale menos corriente. Si aumentas el voltaje (más presión), sale más corriente.</p>
+
+      <p style="margin-top:18px;"><b>¡Vamos a practicar con cálculos fáciles!</b></p>
+
+      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
+        <p style="margin:0 0 6px;"><b>Ejemplo 1:</b> Pila de <b>9 V</b> + resistencia de <b>300 Ω</b></p>
+        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 300 = 0,03 A = <b style="color:#4ade80;">30 mA</b></p>
+        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ Perfecto para un LED. Brilla bien y no se quema.</p>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
+        <p style="margin:0 0 6px;"><b>Ejemplo 2:</b> Pila de <b>9 V</b> + resistencia de <b>1000 Ω</b> (1 kΩ)</p>
+        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 1000 = 0,009 A = <b style="color:#4ade80;">9 mA</b></p>
+        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ El LED brilla un poco menos (más suave).</p>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
+        <p style="margin:0 0 6px;"><b>Ejemplo 3:</b> Pila de <b>3 V</b> + resistencia de <b>150 Ω</b></p>
+        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 3 ÷ 150 = 0,02 A = <b style="color:#4ade80;">20 mA</b></p>
+        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ También está bien para un LED.</p>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
+        <p style="margin:0 0 6px;"><b>Ejemplo 4 (¡cuidado!):</b> Pila de <b>9 V</b> + resistencia de <b>100 Ω</b></p>
+        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 100 = 0,09 A = <b style="color:#ff5c5c;">90 mA</b></p>
+        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ ¡Demasiada corriente! El LED se puede quemar. Por eso usamos valores más altos.</p>
+      </div>
+
+      <p style="margin-top:14px;"><b>Regla fácil de recordar:</b></p>
+      <ul style="margin:8px 0 8px 20px; line-height:1.6;">
+        <li>Más resistencia → menos corriente → LED más apagado</li>
+        <li>Menos resistencia → más corriente → LED más brillante (¡o se quema!)</li>
+        <li>Más voltaje → más corriente</li>
+      </ul>
+      <p>¡Ahora ya puedes calcular la corriente de cualquier circuito simple!</p>`,
+    diagram:`<svg viewBox="0 0 280 140">
+      <!-- Formula triangle style -->
+      <polygon points="140,20 40,120 240,120" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+      <text x="140" y="55" text-anchor="middle" fill="#ffd23f" font-size="22" font-weight="700">V</text>
+      <text x="80" y="110" text-anchor="middle" fill="#4dd8ff" font-size="20" font-weight="700">I</text>
+      <text x="200" y="110" text-anchor="middle" fill="#ff8a3d" font-size="20" font-weight="700">R</text>
+      <!-- Labels -->
+      <text x="140" y="135" text-anchor="middle" fill="#fef8ec" font-size="12">Voltaje = Corriente × Resistencia</text>
+    </svg>`
   }
 ];
 const theoryList = document.getElementById('theoryList');
