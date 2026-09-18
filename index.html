@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pequeños Genios</title>
+<meta name="description" content="Pequeños Genios: página web interactiva para aprender electrónica básica jugando. Componentes, polaridad, circuitos y laboratorio virtual para primaria.">
+<meta name="theme-color" content="#0b3d2e">
+<meta property="og:title" content="Pequeños Genios — electrónica básica jugando">
+<meta property="og:description" content="Juegos interactivos y laboratorio de circuitos para niños de primaria. Proyecto de innovación · U.E. La Primera">
+<meta property="og:type" content="website">
+<title>Pequeños Genios · Electrónica básica jugando</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b3d2e' stroke='%23ffd23f' stroke-width='8'/><text y='.9em' x='50%' text-anchor='middle' font-size='55'>⚡</text></svg>">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -244,7 +250,7 @@
     background:var(--cream); color:var(--ink); transform:rotateY(180deg);
     font-size:0.68rem; font-weight:700; text-align:center; line-height:1.2; gap:4px;
   }
-  .memo-back svg{width:34px;height:34px;}
+  .memo-back svg{width:98px;height:98px;}
   .memo-card.matched .memo-back{background:var(--ok-green); color:#04310f;}
 
   /* GAME 2 circuit builder */
@@ -421,6 +427,16 @@
   .wire-terminal{fill:var(--panel); stroke:var(--copper-2); stroke-width:3; cursor:pointer; transition:fill .15s;}
   .wire-terminal:hover{stroke:var(--wire-yellow);}
   .wire-terminal.connected{fill:var(--ok-green); stroke:var(--ok-green);}
+  .wire-terminal.pending{
+    fill:var(--wire-yellow); stroke:#fff; stroke-width:4;
+    filter:drop-shadow(0 0 8px var(--wire-yellow));
+    animation: termPulse 0.9s ease-in-out infinite;
+  }
+  @keyframes termPulse{0%,100%{r:8;} 50%{r:11;}}
+  .lab-hint-bar{
+    text-align:center; font-family:'Space Mono',monospace; font-size:0.78rem;
+    color:var(--wire-yellow); min-height:22px; margin-top:8px; letter-spacing:0.5px;
+  }
   .wire-line{stroke:var(--wire-yellow); stroke-width:4; stroke-linecap:round; fill:none;}
   .wire-line.done{stroke:var(--ok-green);}
   .wire-line.temp{stroke:var(--wire-yellow); stroke-dasharray:6 6; opacity:0.85;}
@@ -458,9 +474,240 @@
     section{padding:56px 16px;}
     .panel{padding:20px;}
   }
+
+  /* === Mejoras Pequeños Genios === */
+  .toast{
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(120px);
+    background:var(--wire-yellow); color:var(--ink); font-weight:800; font-size:1.05rem;
+    padding:14px 28px; border-radius:16px; z-index:200; box-shadow:0 10px 30px rgba(0,0,0,.4);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1); pointer-events:none; text-align:center; max-width:90vw;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .confetti-piece{position:fixed; width:10px; height:10px; top:-20px; z-index:150; pointer-events:none; border-radius:2px;}
+  .medal-bar{
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:18px 0 8px;
+  }
+  .medal{
+    background:rgba(0,0,0,.28); border:1px solid rgba(255,180,84,.3); border-radius:12px;
+    padding:8px 14px; font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.5px;
+    opacity:.45; transition:opacity .3s, transform .2s;
+  }
+  .medal.earned{opacity:1; transform:scale(1.05); border-color:var(--wire-yellow); box-shadow:0 0 12px rgba(255,210,63,.35);}
+  .medal span{display:block; font-size:1.2rem; margin-bottom:2px;}
+  nav a:focus-visible, .btn:focus-visible, .pol-btn:focus-visible, .quiz-opt:focus-visible, .game-tab:focus-visible{
+    outline:3px solid var(--wire-yellow); outline-offset:3px;
+  }
+  .comp-card:focus-visible{outline:3px solid var(--copper); outline-offset:3px;}
+  @media (max-width:640px){
+    .memo-grid{grid-template-columns:repeat(3,1fr); gap:8px;}
+    .panel{padding:20px 14px;}
+    .cb-slots{padding:12px;}
+    .cb-slot{width:70px; height:70px;}
+  }
+
+
+  /* === Features pack === */
+  .wire-line.clickable{cursor:pointer; pointer-events:stroke;}
+  .wire-line.clickable:hover{stroke:#ff5c5c; stroke-width:6;}
+  .lab-toolbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0;}
+  .lab-step-box{
+    background:rgba(0,0,0,.28); border:1px solid rgba(255,180,84,.3); border-radius:14px;
+    padding:12px 16px; margin:12px 0; font-size:.9rem; line-height:1.45;
+  }
+  .lab-step-box b{color:var(--wire-yellow);}
+  .lab-step-box .step-num{display:inline-block; width:22px; height:22px; border-radius:50%;
+    background:var(--copper); color:var(--ink); text-align:center; font-weight:800; font-size:.75rem; line-height:22px; margin-right:6px;}
+  .ohm-box{
+    margin-top:10px; padding:10px 14px; border-radius:12px; background:rgba(255,210,63,.12);
+    border:1px dashed rgba(255,210,63,.4); font-family:'Space Mono',monospace; font-size:.82rem;
+    text-align:center; color:var(--cream);
+  }
+  .ohm-box .formula{color:var(--wire-yellow); font-weight:700;}
+  .leaderboard{
+    background:rgba(0,0,0,.25); border-radius:14px; padding:14px; margin:16px 0;
+    font-family:'Space Mono',monospace; font-size:.8rem;
+  }
+  .leaderboard h4{margin:0 0 8px; color:var(--copper-2); letter-spacing:1px;}
+  .leaderboard li{list-style:none; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.06);}
+  .color-code-game{
+    display:grid; gap:14px; margin-top:12px;
+  }
+  .band-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center;}
+  .band-btn{
+    width:42px; height:56px; border-radius:8px; border:2px solid rgba(255,255,255,.25);
+    cursor:pointer; font-size:.65rem; font-weight:700; color:#fff; text-shadow:0 1px 2px #000;
+  }
+  .band-btn.selected{border-color:var(--wire-yellow); box-shadow:0 0 0 3px rgba(255,210,63,.4);}
+  .resistor-visual{
+    display:flex; align-items:center; justify-content:center; gap:0; margin:12px auto;
+    height:36px;
+  }
+  .resistor-body{width:120px; height:28px; background:#d4a574; border-radius:6px; position:relative;
+    display:flex; align-items:stretch; overflow:hidden;}
+  .resistor-band{flex:1; min-width:12px;}
+  .resistor-lead{width:40px; height:4px; background:#aaa;}
+  .diploma-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:300;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .diploma-overlay.show{display:flex;}
+  .diploma-card{
+    background:linear-gradient(160deg,#fef8ec,#f5e6c8); color:#0b1f18;
+    border-radius:20px; padding:32px 28px; max-width:420px; width:100%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); border:4px solid #ffd23f;
+  }
+  .diploma-card h2{margin:0 0 8px; font-size:1.6rem;}
+  .diploma-card .name{font-size:1.3rem; font-weight:800; color:#0b3d2e; margin:12px 0;}
+  .diff-tabs{display:flex; gap:8px; justify-content:center; margin-bottom:14px; flex-wrap:wrap;}
+  .diff-tab{
+    font-family:'Space Mono',monospace; font-size:.72rem; padding:6px 12px; border-radius:8px;
+    border:2px solid rgba(255,248,236,.3); background:transparent; color:var(--cream); cursor:pointer;
+  }
+  .diff-tab.active{background:var(--copper); color:var(--ink); border-color:var(--copper);}
+  .lang-toggle{font-size:.7rem; opacity:.7; margin-left:8px; cursor:pointer; text-decoration:underline;}
+
+
+  /* Ley de Ohm game */
+  .ohm-playground{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:22px;}
+  @media(max-width:720px){.ohm-playground{grid-template-columns:1fr;}}
+  .ohm-sliders label{display:block; margin-bottom:16px; font-size:.9rem;}
+  .ohm-sliders input[type=range]{width:100%; accent-color:var(--copper); margin:8px 0;}
+  .ohm-val{font-family:'Space Mono',monospace; color:var(--wire-yellow); font-weight:700;}
+  .ohm-live-box{
+    background:rgba(0,0,0,.28); border-radius:16px; padding:20px; text-align:center;
+    border:1px solid rgba(255,180,84,.25);
+  }
+  .ohm-formula-big{font-size:1.4rem; font-weight:800; color:var(--wire-yellow); margin-bottom:8px;}
+  .ohm-calc{font-family:'Space Mono',monospace; font-size:1rem; margin-bottom:16px;}
+  .ohm-led-preview{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .ohm-led{
+    width:48px; height:48px; border-radius:50%; background:#ff4d5e;
+    box-shadow:0 0 20px #ff4d5e; transition:opacity .2s, box-shadow .2s, transform .2s;
+  }
+  .ohm-challenge{
+    background:rgba(0,0,0,.22); border-radius:16px; padding:20px;
+    border:1px solid rgba(255,180,84,.2);
+  }
+  .ohm-q{font-size:1.1rem; font-weight:700; margin-bottom:14px; line-height:1.4;}
+  .ohm-opts{display:grid; gap:10px;}
+  .ohm-opt{
+    text-align:left; background:rgba(0,0,0,.22); border:2px solid rgba(255,248,236,.15);
+    color:var(--cream); padding:12px 16px; border-radius:12px; cursor:pointer;
+    font-family:'Baloo 2',sans-serif; font-size:.95rem;
+  }
+  .ohm-opt:hover{border-color:var(--copper);}
+  .ohm-opt.correct{border-color:var(--ok-green); background:rgba(74,222,128,.15);}
+  .ohm-opt.wrong{border-color:var(--bad-red); background:rgba(255,92,92,.12);}
+
+
+  .comp-photo-wrap{
+    width:100%; height:125px; background:#fff; border-radius:12px; margin-bottom:8px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;
+  }
+  .comp-photo-wrap .component-photo{
+    width:100%; height:125px; object-fit:contain; padding:8px; margin:0; background:transparent;
+  }
+  .comp-photo-fallback{
+    position:absolute; inset:0; align-items:center; justify-content:center; background:#f7f7f7;
+  }
+  .comp-photo-fallback svg{width:70px; height:70px;}
+  .comp-symbol{margin:4px 0;}
+  .comp-symbol svg{width:56px; height:56px;}
+  .comp-meta{display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:6px;}
+  .pol-tag.mix{background:rgba(255,180,84,0.2); color:#ffb454;}
+  .comp-card h3{font-size:1rem; line-height:1.25;}
+
 </style>
 </head>
 <body>
+
+<!-- Mejoras UX: toast, confetti, sonidos, progreso -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ===== Utilidades Pequeños Genios (mejoras) ===== */
+const PG = {
+  scores: JSON.parse(localStorage.getItem('pg_scores') || '{}'),
+  medals: JSON.parse(localStorage.getItem('pg_medals') || '{}'),
+  save() {
+    localStorage.setItem('pg_scores', JSON.stringify(this.scores));
+    localStorage.setItem('pg_medals', JSON.stringify(this.medals));
+    this.renderMedals();
+  },
+  toast(msg, ms=2600) {
+    const t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(this._tt);
+    this._tt = setTimeout(() => t.classList.remove('show'), ms);
+  },
+  confetti(n=40) {
+    const colors = ['#ffd23f','#ff8a3d','#4dd8ff','#ff4d5e','#4ade80','#fef8ec'];
+    for(let i=0;i<n;i++){
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = colors[i%colors.length];
+      p.style.width = (6+Math.random()*8)+'px';
+      p.style.height = (6+Math.random()*8)+'px';
+      p.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      const dx = (Math.random()-0.5)*200;
+      const dy = 400 + Math.random()*500;
+      const rot = Math.random()*720;
+      p.animate([
+        { transform:'translate(0,0) rotate(0)', opacity:1 },
+        { transform:`translate(${dx}px,${dy}px) rotate(${rot}deg)`, opacity:0 }
+      ], { duration: 1200+Math.random()*900, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => p.remove();
+    }
+  },
+  // Web Audio beeps (no external files)
+  _ac: null,
+  tone(freq=880, dur=0.12, type='sine', vol=0.08) {
+    try {
+      if(!this._ac) this._ac = new (window.AudioContext||window.webkitAudioContext)();
+      const o = this._ac.createOscillator();
+      const g = this._ac.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(this._ac.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.001, this._ac.currentTime + dur);
+      o.stop(this._ac.currentTime + dur + 0.02);
+    } catch(e){}
+  },
+  sfxOk(){ this.tone(880,0.1); setTimeout(()=>this.tone(1175,0.12),90); },
+  sfxBad(){ this.tone(220,0.18,'square',0.06); },
+  sfxWin(){ this.tone(523,0.1); setTimeout(()=>this.tone(659,0.1),100); setTimeout(()=>this.tone(784,0.18),200); },
+  award(medalId, label) {
+    if(this.medals[medalId]) return;
+    this.medals[medalId] = true;
+    this.save();
+    this.toast('🏅 ¡Medalla desbloqueada! ' + label);
+    this.confetti(55);
+    this.sfxWin();
+  },
+  renderMedals() {
+    const bar = document.getElementById('medalBar');
+    if(!bar) return;
+    const defs = [
+      {id:'memo', label:'Memoria', emoji:'🧠'},
+      {id:'circuito', label:'Circuito', emoji:'🔌'},
+      {id:'polar', label:'Polaridad', emoji:'🔋'},
+      {id:'cables', label:'Cables', emoji:'🔗'},
+      {id:'quiz', label:'Quiz', emoji:'🏆'},
+      {id:'lab', label:'Laboratorio', emoji:'⚡'},
+      {id:'ohm', label:'Ohm', emoji:'📐'}
+    ];
+    bar.innerHTML = defs.map(d => 
+      `<div class="medal ${this.medals[d.id]?'earned':''}" title="${d.label}"><span>${d.emoji}</span>${d.label}</div>`
+    ).join('');
+  }
+};
+window.PG = PG;
+document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
+</script>
+
 <div class="glow-spin"></div>
 <div class="traces"></div>
 <div class="drift-layer" id="driftLayer"></div>
@@ -471,6 +718,7 @@
   <a href="#componentes">Componentes</a>
   <a href="#teoria">Centro de teoría</a>
   <a href="#juegos">Zona de juegos</a>
+  <a href="#codigo-colores">Código colores</a>
   <a href="#laboratorio">Laboratorio</a>
 </nav>
 
@@ -497,7 +745,7 @@
   </div>
   <div class="comp-grid" id="compGrid"></div>
   <p style="text-align:center;opacity:.55;font-size:.75rem;margin-top:18px;">
-    Imágenes de referencia: Wikimedia Commons. Las figuras se numeran para facilitar su identificación en el proyecto.
+    Imágenes de componentes reales. Las figuras se numeran para facilitar su identificación en el proyecto.
   </p>
 </section>
 
@@ -512,12 +760,26 @@
 </section>
 
 <!-- ===================== ZONA DE JUEGOS (un solo apartado con pestañas) ===================== -->
+
+<section id="codigo-colores">
+  <div class="section-head">
+    <div class="eyebrow">Aprende el código</div>
+    <h2>Código de colores de resistencias</h2>
+    <p>Elige las bandas y descubre el valor en ohms. Así se leen las resistencias reales.</p>
+  </div>
+  <div class="panel">
+    <div id="colorCodeHost"></div>
+  </div>
+  <div id="leaderboardHost"></div>
+</section>
+
 <section id="juegos">
   <div class="section-head">
     <div class="eyebrow">Pon a prueba lo aprendido</div>
     <h2>Zona de juegos</h2>
     <p>Actividades interactivas diseñadas exclusivamente para primaria.</p>
   </div>
+  <div class="medal-bar" id="medalBar" aria-label="Medallas obtenidas"></div>
 
   <div class="panel">
     <div class="game-tabs" id="gameTabs">
@@ -527,6 +789,7 @@
       <button class="game-tab" data-game="serieparalelo" onclick="switchGame('serieparalelo')">💡 Serie / Paralelo</button>
       <button class="game-tab" data-game="cables" onclick="switchGame('cables')">🔗 Conecta los cables</button>
       <button class="game-tab" data-game="quiz" onclick="switchGame('quiz')">🏆 Quiz final</button>
+      <button class="game-tab" data-game="ohm" onclick="switchGame('ohm')">📐 Ley de Ohm</button>
     </div>
 
     <!-- JUEGO 1: MEMORAMA -->
@@ -637,6 +900,40 @@
       </div>
       <div id="quizPanel"></div>
     </div>
+
+    <div class="game-view" id="game-ohm">
+      <div class="game-view-head">
+        <h3>📐 Ley de Ohm</h3>
+        <p>La corriente I depende del voltaje V y de la resistencia R: <b>I = V ÷ R</b></p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Aciertos: <b id="ohmScore">0</b>/<span id="ohmTotal">5</span></div>
+        <button class="btn ghost" onclick="initOhmGame()">🔄 Reiniciar</button>
+      </div>
+      <div class="ohm-playground">
+        <div class="ohm-sliders">
+          <label>Voltaje de la pila (V)
+            <input type="range" id="ohmV" min="1.5" max="12" step="1.5" value="9" oninput="updateOhmLive()">
+            <span class="ohm-val" id="ohmVLabel">9 V</span>
+          </label>
+          <label>Resistencia (R)
+            <input type="range" id="ohmR" min="100" max="2000" step="50" value="300" oninput="updateOhmLive()">
+            <span class="ohm-val" id="ohmRLabel">300 Ω</span>
+          </label>
+        </div>
+        <div class="ohm-live-box">
+          <div class="ohm-formula-big">I = V ÷ R</div>
+          <div class="ohm-calc" id="ohmCalc">I = 9 ÷ 300 = <b>30 mA</b></div>
+          <div class="ohm-led-preview">
+            <div class="ohm-led" id="ohmLed"></div>
+            <span id="ohmLedText">LED con brillo normal</span>
+          </div>
+        </div>
+      </div>
+      <div class="ohm-challenge" id="ohmChallenge">
+        <!-- filled by JS -->
+      </div>
+    </div>
   </div>
 </section>
 
@@ -657,6 +954,16 @@
       <button class="btn ghost" onclick="labAddComponent('buzzer')">🔊 + Buzzer</button>
       <button class="btn" onclick="simulateLab()">⚡ Simular</button>
       <button class="btn ghost" onclick="clearLab()">🗑️ Borrar todo</button>
+      <button class="btn ghost" onclick="saveLabCircuit()">💾 Guardar</button>
+      <button class="btn ghost" onclick="loadLabCircuit()">📂 Cargar</button>
+      <button class="btn ghost" onclick="toggleLabSteps()">📋 Paso a paso</button>
+    </div>
+    <div class="lab-step-box" id="labSteps" style="display:none;">
+      <div><span class="step-num">1</span> Agrega una <b>Pila</b> (botón 🔋)</div>
+      <div><span class="step-num">2</span> Agrega una <b>Resistencia</b> (protege el LED)</div>
+      <div><span class="step-num">3</span> Agrega un <b>LED</b></div>
+      <div><span class="step-num">4</span> Conecta: <b>Pila(+)</b> → Resistencia → LED(+) → LED(−) → <b>Pila(−)</b></div>
+      <div><span class="step-num">5</span> Pulsa <b>Simular</b> y mira los mA</div>
     </div>
     <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
       Toca y arrastra una pieza para moverla · Dos patitas alineadas en la misma columna quedan conectadas automáticamente, como en una protoboard real · Arrastra desde un círculo (terminal) a otro para cablear entre columnas distintas · Un toque corto cambia el valor de resistencia/voltaje/color o abre/cierra el interruptor · Toca la × para borrar una pieza
@@ -664,6 +971,7 @@
     <div class="wire-board" style="margin-top:14px;">
       <svg id="labSvg" viewBox="0 0 700 380"></svg>
     </div>
+    <div class="lab-hint-bar" id="labHintBar">Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar</div>
     <div class="cb-result" id="labResult"></div>
 
     <div class="lab-presets">
@@ -672,15 +980,36 @@
         <button class="btn ghost" onclick="loadPreset('simple')">LED simple</button>
         <button class="btn ghost" onclick="loadPreset('interruptor')">LED con interruptor</button>
         <button class="btn ghost" onclick="loadPreset('paralelo')">2 LEDs en paralelo</button>
+        <button class="btn ghost" onclick="loadPreset('serie')">2 LEDs en serie</button>
+        <button class="btn ghost" onclick="loadPreset('motor')">Motor + interruptor</button>
+        <button class="btn ghost" onclick="loadPreset('buzzer')">Buzzer + LED</button>
       </div>
       <div id="labMaterials"></div>
     </div>
   </div>
 </section>
 
-<footer class="mono">
-  ⚡ CIRCUITECA — Proyecto de innovación "Página web para facilitar la comprensión de la electrónica básica en niños de primaria" — U.E. La Primera, Fe y Alegría, El Alto - Bolivia
+<footer class="mono" style="text-align:center; padding:30px 16px; opacity:.75; font-size:.75rem;">
+  ⚡ Pequeños Genios — Proyecto de innovación · U.E. La Primera, Fe y Alegría, El Alto - Bolivia<br>
+  <button class="btn ghost" style="margin-top:12px; font-size:.75rem; padding:8px 14px;" onclick="resetMedals()">🔄 Reiniciar medallas</button>
+  <span class="lang-toggle" onclick="toggleLang()" id="langToggle">Aymara / Qhichwa</span>
 </footer>
+
+<!-- Diploma overlay -->
+<div class="diploma-overlay" id="diplomaOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="diploma-card" id="diplomaCard">
+    <div style="font-size:2.5rem;">🏅</div>
+    <h2>¡Certificado Pequeños Genios!</h2>
+    <p>Se otorga el presente reconocimiento a</p>
+    <div class="name" id="diplomaName">Un(a) pequeño(a) genio(a)</div>
+    <p>por dominar los fundamentos de electrónica básica:<br>componentes, polaridad, circuitos y laboratorio virtual.</p>
+    <p style="margin-top:16px; font-size:.85rem; opacity:.7;">U.E. La Primera · Fe y Alegría · El Alto, Bolivia</p>
+    <div class="cta-row" style="margin-top:18px;">
+      <button class="btn" onclick="downloadDiploma()">📥 Descargar</button>
+      <button class="btn ghost" style="color:#0b1f18;border-color:#0b1f18;" onclick="document.getElementById('diplomaOverlay').classList.remove('show')">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -772,23 +1101,74 @@ const ICONS = {
 };
 
 const COMPONENTS = [
-{id:'resistencia',name:'Resistencia (Resistor)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20resistors.jpg',figure:'Figura 1. Resistencia',desc:'Componente pasivo que presenta oposición al paso de la corriente eléctrica, medida en ohms (Ω). Se emplea para proteger otros elementos (como los LEDs) de corrientes excesivas.'},
-{id:'led',name:'Diodo Emisor de Luz (LED)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Red-LED.jpg',figure:'Figura 2. LED',desc:'Componente semiconductor que emite luz cuando la corriente eléctrica lo atraviesa en el sentido directo de polarización.'},
-{id:'capacitor',name:'Capacitor (Condensador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20capacitors.jpg',figure:'Figura 3. Capacitor',desc:'Componente pasivo capaz de almacenar energía eléctrica en un campo electrostático generado entre dos placas conductoras separadas por un material dieléctrico (incluye tipos cerámicos, de poliéster y electrolíticos).'},
-{id:'transistor',name:'Transistor (Transistor bipolar)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Through-Hole-Transistor.jpg',figure:'Figura 4. Transistor',desc:'Dispositivo semiconductor de tres terminales (emisor, base y colector) que actúa como amplificador de señales o como interruptor controlado por corriente.'},
-{id:'ldr',name:'Fotoresistencia (LDR / Sensor óptico pasivo)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Photoresistors.jpg',figure:'Figura 5. Fotoresistencia LDR',desc:'Componente pasivo cuya resistencia eléctrica varía de forma inversa en función de la intensidad luminosa incidente sobre su superficie.'},
-{id:'jumper',name:'Jumpers (Cables de conexión)',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Jumper_wires.jpg',figure:'Figura 6. Jumpers',desc:'Cables conductores de corta longitud utilizados para establecer conexiones temporales y rápidas entre componentes montados en una protoboard sin necesidad de soldadura.'},
-{id:'pulsador',name:'Pulsador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Tactile_switch.jpg',figure:'Figura 7. Pulsador',desc:'Dispositivo electromecánico de accionamiento temporal que establece o interrumpe una conexión eléctrica únicamente mientras se mantiene presionado, retornando a su posición original al ser liberado.'},
-{id:'interruptor',name:'Interruptor',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Eight-Switch.jpg',figure:'Figura 8. Interruptor',desc:'Dispositivo electromecánico que permite abrir o cerrar un circuito eléctrico de manera intencionada y sostenida, manteniendo el estado seleccionado hasta una nueva manipulación.'},
-{id:'buzzer',name:'Buzzer (Zumbador)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic%20component%20piezo.jpg',figure:'Figura 9. Buzzer',desc:'Dispositivo electroacústico que convierte señales eléctricas en sonido audible, funcionando como indicador sonoro (activo o pasivo).'},
-{id:'motor',name:'Motor de Corriente Continua (Motor DC)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Screw-DC-Motor.jpg',figure:'Figura 10. Motor DC',desc:'Dispositivo electromecánico que transforma la energía eléctrica en movimiento rotacional mediante la interacción entre campos magnéticos.'},
-{id:'bateria',name:'Batería (Fuente de alimentación)',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/BateriaAA.jpg',figure:'Figura 11. Batería',desc:'Dispositivo electroquímico que almacena energía química y la convierte en energía eléctrica continua mediante reacciones de oxidación-reducción (como pilas alcalinas de 1.5 V o baterías cuadradas de 9 V).'},
-{id:'potenciometro',name:'Potenciómetro',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Electronic-Component-Potentiometer.jpg',figure:'Figura 12. Potenciómetro',desc:'Resistencia variable que permite ajustar la oposición al flujo de corriente mediante un cursor mecánico.'},
-{id:'fusible',name:'Fusible',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Glass_fuse.jpg',figure:'Figura 13. Fusible',desc:'Componente de protección diseñado para interrumpir la corriente del circuito en caso de sobrecargas.'},
-{id:'rele',name:'Relé',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Relay.jpg',figure:'Figura 14. Relé',desc:'Interruptor electromagnético controlado por un circuito de menor potencia.'},
-{id:'diodo',name:'Diodo rectificador',pol:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/1N4007_diodes.jpg',figure:'Figura 15. Diodo rectificador',desc:'Diodo semiconductor utilizado principalmente para permitir el flujo de corriente en una sola dirección.'},
-{id:'transformador',name:'Transformador',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Transformer.jpg',figure:'Figura 16. Transformador',desc:'Dispositivo eléctrico que permite aumentar o disminuir la tensión en un circuito de corriente alterna.'},
-{id:'microcontrolador',name:'Microcontrolador básico',pol:false,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Arduino_Uno_-_R3.jpg',figure:'Figura 17. Microcontrolador',desc:'Circuito integrado programable que concentra las unidades principales de un computador para el control de sistemas electrónicos.'}
+{id:'resistencia', name:'Resistencia', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9ECckDic6UWG2czLkKyiLmX_h4uKFjBoNUm0YxA5ALQ&s=10',
+ figure:'Figura 1. Resistencia',
+ desc:'Se opone al paso de la corriente eléctrica (se mide en ohms Ω). Se usa para proteger componentes como el LED de corrientes muy altas.'},
+{id:'led', name:'LED', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkjgqrqza2pYjGnt6KtZBfbhZVT0R63av6oJd71OHfKw&s=10',
+ figure:'Figura 2. LED',
+ desc:'Diodo que emite luz cuando la corriente pasa en el sentido correcto. Tiene pata larga (+) y pata corta (−). ¡No lo conectes al revés!'},
+{id:'capacitor', name:'Capacitor', pol:'mixed',
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVpaKlvEMAbaPfWEVHcWDcVv69sBeuMMwiKm1BJ66hkg&s=10',
+ figure:'Figura 3. Capacitor',
+ desc:'Almacena energía eléctrica un rato. Los electrolíticos SÍ son polarizados (tienen + y −). Los cerámicos y de poliéster NO son polarizados.'},
+{id:'transistor', name:'Transistor', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFuFLW-9ZPDbd3I4iDvjUnEydc9NgA8S7tkzGDdgNRtw&s=10',
+ figure:'Figura 4. Transistor',
+ desc:'Tiene 3 patas (emisor, base y colector). Sirve como interruptor o amplificador controlado por una pequeña corriente.'},
+{id:'ldr', name:'LDR (Fotoresistencia)', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSnxR62BeaY4Re-NIdcLIkybvi6wpcEWV9LzIB8UIn6g&s=10',
+ figure:'Figura 5. LDR',
+ desc:'Su resistencia cambia según la luz: con mucha luz baja la resistencia; en la oscuridad sube. Ideal para sensores de día/noche.'},
+{id:'jumper', name:'Jumpers', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSD0rFENPIwa0Er1HpJJlQzdbNreRVhpdB65AEdEKxyjA&s=10',
+ figure:'Figura 6. Jumpers',
+ desc:'Cables cortos para conectar componentes en la protoboard sin soldar. Permiten armar y desarmar circuitos rápido.'},
+{id:'pulsador', name:'Pulsador', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvxjcXa_OdcZ6295-1Bt1FaQMk7SSf69D9mT5tK9mK6A&s=10',
+ figure:'Figura 7. Pulsador',
+ desc:'Cierra el circuito solo mientras lo mantienes presionado. Al soltar, se abre otra vez.'},
+{id:'interruptor', name:'Interruptor', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFrH-czBDOFBEc0i9ZfuUZa_UzHfGqKcvqhHxNM7-9pw&s=10',
+ figure:'Figura 8. Interruptor',
+ desc:'Abre o cierra el circuito y se queda en esa posición hasta que lo cambies. Como el switch de la luz de tu casa.'},
+{id:'buzzer', name:'Buzzer (Zumbador)', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRPRt1f02brwlBtcjQXF1sfMzPRo30tVRAIqeQl8hF1g&s=10',
+ figure:'Figura 9. Buzzer',
+ desc:'Emite un sonido cuando recibe corriente. Muchos buzzers activos tienen polaridad (+ y −).'},
+{id:'motor', name:'Motor DC', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLeFKBM-hdyypYqZQf5jlKzrf3usja74FB6joBtGOd9g&s=10',
+ figure:'Figura 10. Motor DC',
+ desc:'Convierte electricidad en movimiento (gira). Si inviertes los cables, gira al revés.'},
+{id:'bateria', name:'Batería / Pila', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqcgXX2MPCBllLmBkXtM632h--FZcqjsIhgHjtxcxZ7w&s=10',
+ figure:'Figura 11. Batería',
+ desc:'Fuente de energía del circuito. Tiene polo positivo (+) y negativo (−). Nunca la cortocircuites.'},
+{id:'potenciometro', name:'Potenciómetro', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9t-CxqhqwMEKRX1JpTNem2CWs6pqRXUmvt1RQsFx6cw&s=10',
+ figure:'Figura 12. Potenciómetro',
+ desc:'Resistencia variable: al girar el eje cambias cuánta corriente deja pasar. Sirve para volumen o brillo.'},
+{id:'fusible', name:'Fusible', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvHrHl8lN8STBizvdOf_fGRTIXDXXKBsXzV6ZcXsTf4g&s=10',
+ figure:'Figura 13. Fusible',
+ desc:'Protección: si pasa demasiada corriente, se funde y abre el circuito para evitar daños o incendios.'},
+{id:'rele', name:'Relé', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT62XvFFdHFPjT9t4FUuxGuffEauBB4WoR0y3MCk_E3yQ&s=10',
+ figure:'Figura 14. Relé',
+ desc:'Interruptor electromagnético: una corriente pequeña controla otra más grande (por ejemplo, un motor).'},
+{id:'diodo', name:'Diodo rectificador', pol:true,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5gIXYddxsXJXBd9Iq14l0dvKXo-DWYe9bs1R3eR1oFg&s=10',
+ figure:'Figura 15. Diodo',
+ desc:'Deja pasar la corriente solo en un sentido (del ánodo al cátodo). El LED es un tipo especial de diodo.'},
+{id:'transformador', name:'Transformador', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk2THA4dzoV-_aTMc6FIt2Ke_1qF2MiZjKvrMlOPlVfA&s=10',
+ figure:'Figura 16. Transformador',
+ desc:'Sube o baja el voltaje en corriente alterna (AC). Se usa en cargadores y fuentes de alimentación.'},
+{id:'microcontrolador', name:'Microcontrolador', pol:false,
+ image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbCbuTRrFEy_UGEunifS3cmv1eBAQU0YM3JrD0LaDw5w&s=10',
+ figure:'Figura 17. Microcontrolador',
+ desc:'Cerebro programable del circuito (como Arduino). Ejecuta instrucciones y controla LEDs, motores y sensores.'}
 ];
 
 const SYMBOL_LABELS = {
@@ -1042,6 +1422,7 @@ function switchGame(name){
   document.querySelectorAll('.game-tab').forEach(t=>t.classList.toggle('active', t.dataset.game===name));
   document.querySelectorAll('.game-view').forEach(v=>v.classList.toggle('active', v.id === 'game-'+name));
   if(name==='cables' && !wireInitDone){ initWireGame(); wireInitDone = true; }
+  if(name==='ohm' && typeof updateOhmLive==='function') updateOhmLive();
 }
 
 /* ============================================================
@@ -1191,6 +1572,7 @@ function onWirePointerUp(e){
       result.textContent = '';
       if(wireConnected.length === WIRE_PAIRS.length){
         result.innerHTML = '✅ ¡Circuito cerrado! La corriente ya puede fluir y el LED enciende.';
+        if(window.PG){ PG.sfxWin(); PG.confetti(40); PG.toast('🔗 ¡Cables perfectos!'); PG.award('cables','Experto en Cables'); }
         result.className = 'cb-result ok';
       }
     } else {
@@ -1223,16 +1605,29 @@ const compGrid = document.getElementById('compGrid');
 COMPONENTS.forEach(c=>{
   const card = document.createElement('div');
   card.className='comp-card';
+  card.setAttribute('role','button');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('aria-label', c.name);
+  let polClass = 'no', polText = '○ NO POLARIZADO';
+  if(c.pol === true){ polClass = 'si'; polText = '⚡ POLARIZADO'; }
+  else if(c.pol === 'mixed'){ polClass = 'mix'; polText = '⚡ / ○ SEGÚN TIPO'; }
+  const icon = ICONS[c.id] || '';
   card.innerHTML = `
-    <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
-         onerror="this.style.display='none'">
-    ${ICONS[c.id]}
+    <div class="comp-photo-wrap">
+      <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="comp-photo-fallback" style="display:none">${icon}</div>
+    </div>
+    <div class="comp-symbol">${icon}</div>
     <span class="figure">${c.figure}</span>
     <h3>${c.name}</h3>
-    <span class="pol-tag ${c.pol?'si':'no'}">${c.pol?'⚡ POLARIZADO':'○ NO POLARIZADO'}</span>
-    <span class="symbol-label">Símbolo: ${SYMBOL_LABELS[c.id] || c.id.toUpperCase()}</span>
+    <div class="comp-meta">
+      <span class="pol-tag ${polClass}">${polText}</span>
+      <span class="symbol-label">Símbolo: ${SYMBOL_LABELS[c.id] || c.id.toUpperCase()}</span>
+    </div>
     <p>${c.desc}</p>`;
   card.onclick=()=>card.classList.toggle('open');
+  card.onkeydown=(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); card.classList.toggle('open'); } };
   compGrid.appendChild(card);
 });
 
@@ -1280,6 +1675,13 @@ function flipMemo(el){
         a.classList.add('matched'); b.classList.add('matched');
         memoState.matched++;
         document.getElementById('memoPairs').textContent = memoState.matched;
+        if(window.PG){ PG.sfxOk(); }
+        if(memoState.matched >= 6 && window.PG){
+          PG.toast('🎉 ¡Memorama completo!');
+          PG.confetti(50);
+          PG.award('memo', 'Maestro de la Memoria');
+          if(typeof saveScore==='function') saveScore('memo_moves', memoState.moves);
+        }
         memoState.flipped=[]; memoState.lock=false;
       },400);
     } else {
@@ -1363,6 +1765,7 @@ function testCircuit(){
   const correct = JSON.stringify(order) === JSON.stringify(CORRECT_ORDER);
   if(correct){
     result.innerHTML = '✅ ¡Circuito correcto! La corriente fluye y el LED enciende sin quemarse.';
+    if(window.PG){ PG.sfxWin(); PG.confetti(45); PG.toast('🔌 ¡Circuito armado!'); PG.award('circuito','Constructor de Circuitos'); }
     result.className = 'cb-result ok';
     slots.forEach(s=>s.style.borderColor='#4ade80');
   } else {
@@ -1436,9 +1839,12 @@ function answerPolarity(choice){
     polState.score++;
     document.getElementById('polScore').textContent = polState.score;
     fb.textContent = '✅ ¡Correcto! ' + item.hint;
+    if(window.PG){ PG.sfxOk(); }
+    if(polState.score >= 3 && window.PG){ PG.award('polar','Maestro de la Polaridad'); PG.confetti(40); PG.toast('🔋 ¡Polaridad dominada!'); if(typeof saveScore==='function') saveScore('polar_score', polState.score); }
     fb.className = 'feedback ok';
   } else {
     fb.textContent = '❌ Casi. ' + item.hint;
+    if(window.PG){ PG.sfxBad(); }
     fb.className = 'feedback bad';
   }
   setTimeout(()=>{
@@ -1538,6 +1944,11 @@ function renderQuiz(){
   const QUIZ = QUIZ_PRIMARIA;
   const panel = document.getElementById('quizPanel');
   if(quizState.idx >= QUIZ.length){
+    if(window.PG){
+      if(typeof saveScore==='function') saveScore('quiz_score', quizState.score);
+      if(quizState.score === QUIZ.length){ PG.award('quiz','Genio del Quiz'); PG.confetti(60); PG.sfxWin(); }
+      else if(quizState.score >= Math.ceil(QUIZ.length*0.6)){ PG.toast('🏆 ¡Buen resultado en el Quiz!'); PG.sfxOk(); }
+    }
     panel.innerHTML = `<div class="quiz-final">
       <div style="font-size:0.8rem;opacity:0.7;font-family:'Space Mono',monospace;">RESULTADO FINAL</div>
       <div class="score">${quizState.score}/${QUIZ.length}</div>
@@ -1647,6 +2058,7 @@ function labParseKey(key){
 
 let labDragMode = null;
 let labDragData = null;
+let labPendingTerminal = null; // click-to-connect: first terminal selected
 
 /* ---- dibujo de una pieza según su tipo, con estética "protoboard" ---- */
 function labDrawComponentArt(inst, diag){
@@ -1729,9 +2141,9 @@ function renderLab(){
     if(!p1||!p2) return;
     const d = `M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}`;
     const isLive = liveWires.has(idx);
-    html += `<path class="wire-line done" d="${d}"/>`;
+    html += `<path class="wire-line done clickable" data-role="wire" data-idx="${idx}" d="${d}"/>`;
     if(isLive){
-      html += `<circle r="4.5" fill="#fff59d"><animateMotion dur="1.1s" repeatCount="indefinite" path="${d}"/></circle>`;
+      html += `<circle r="4.5" fill="#fff59d" style="pointer-events:none"><animateMotion dur="1.1s" repeatCount="indefinite" path="${d}"/></circle>`;
     }
   });
 
@@ -1764,8 +2176,10 @@ function renderLab(){
     } else if(inst.type==='resistencia'){
       html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar Ω</text>`;
     }
-    html += `<circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_a" cx="${inst.x}" cy="${inst.y+28}" r="8"></circle>
-      <circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_b" cx="${inst.x+100}" cy="${inst.y+28}" r="8"></circle>
+    const clsA = 'wire-terminal' + (labPendingTerminal===inst.id+'_a'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_a'||b===inst.id+'_a')?' connected':'');
+    const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
+    html += `<circle class="${clsA}" data-role="terminal" data-key="${inst.id}_a" cx="${inst.x}" cy="${inst.y+28}" r="8"></circle>
+      <circle class="${clsB}" data-role="terminal" data-key="${inst.id}_b" cx="${inst.x+100}" cy="${inst.y+28}" r="8"></circle>
       <circle data-role="delete" data-inst="${inst.id}" cx="${inst.x+92}" cy="${inst.y+8}" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"/>
       <text data-role="delete" data-inst="${inst.id}" x="${inst.x+92}" y="${inst.y+11}" text-anchor="middle" fill="#7a1414" style="font-size:10px;cursor:pointer;pointer-events:none;">×</text>
     </g>`;
@@ -1777,19 +2191,64 @@ function renderLab(){
   svg.querySelectorAll('[data-role="delete"]').forEach(el=>{
     el.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); labRemoveInstance(e.currentTarget.dataset.inst); });
   });
+  svg.querySelectorAll('[data-role="wire"]').forEach(el=>{
+    el.addEventListener('pointerdown', (e)=>{
+      e.stopPropagation(); e.preventDefault();
+      const idx = parseInt(e.currentTarget.dataset.idx, 10);
+      if(!isNaN(idx)) labWireClick(idx);
+    });
+  });
   svg.onpointermove = labPointerMove;
   svg.onpointerup = labPointerUp;
   svg.onpointerleave = ()=>{ labDragMode=null; labDragData=null; renderLab(); };
 }
 
+function labSetHint(msg){
+  const el = document.getElementById('labHintBar');
+  if(el) el.textContent = msg || 'Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar';
+}
+function labConnectWire(fromKey, toKey){
+  if(!fromKey || !toKey || fromKey===toKey) return false;
+  const exists = lab.wires.some(([a,b])=>(a===fromKey&&b===toKey)||(a===toKey&&b===fromKey));
+  if(exists){
+    if(window.PG) PG.toast('Ese cable ya está conectado');
+    return false;
+  }
+  lab.wires.push([fromKey, toKey]);
+  lab.lastResult = null;
+  if(window.PG){ PG.sfxOk(); PG.toast('⚡ Cable conectado'); }
+  return true;
+}
 function labTerminalDown(e){
   e.preventDefault(); e.stopPropagation();
   const key = e.target.dataset.key;
+  if(!key) return;
+
+  // Click-to-connect mode (primary for kids)
+  if(labPendingTerminal){
+    if(labPendingTerminal === key){
+      // same terminal → cancel
+      labPendingTerminal = null;
+      labSetHint();
+      renderLab();
+      return;
+    }
+    labConnectWire(labPendingTerminal, key);
+    labPendingTerminal = null;
+    labSetHint();
+    renderLab();
+    return;
+  }
+
+  // First click: select terminal (pending) + also allow drag
+  labPendingTerminal = key;
   const p = labParseKey(key);
-  const pos = labTermPos(p.id,p.suffix);
-  labDragMode='wire';
-  labDragData = {fromKey:key, x:pos.x, y:pos.y};
-  drawLabTemp(pos.x,pos.y);
+  const pos = labTermPos(p.id, p.suffix);
+  labDragMode = 'wire';
+  labDragData = {fromKey:key, x:pos.x, y:pos.y, startedAt: Date.now()};
+  labSetHint('👆 Ahora toca el OTRO conector para completar el cable (o arrastra)');
+  renderLab();
+  drawLabTemp(pos.x, pos.y);
 }
 function labBodyDown(e){
   e.preventDefault(); e.stopPropagation();
@@ -1845,9 +2304,18 @@ function labPointerUp(e){
         if(d<bestDist){bestDist=d;best=key;}
       });
     });
+    const elapsed = Date.now() - (labDragData.startedAt||0);
+    // If user dragged far enough to another terminal → connect and clear pending
     if(best){
-      const exists = lab.wires.some(([a,b])=>(a===labDragData.fromKey&&b===best)||(a===best&&b===labDragData.fromKey));
-      if(!exists) lab.wires.push([labDragData.fromKey, best]);
+      labConnectWire(labDragData.fromKey, best);
+      labPendingTerminal = null;
+      labSetHint();
+    } else if(elapsed < 280){
+      // short tap without moving: keep pending for click-to-connect (already set)
+    } else {
+      // long drag that didn't land → cancel pending
+      labPendingTerminal = null;
+      labSetHint();
     }
     lab.lastResult = null;
   } else if(labDragMode==='move'){
@@ -1877,6 +2345,8 @@ function labPointerUp(e){
 
 function clearLab(){
   lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+  labPendingTerminal = null;
+  labSetHint();
   const r = document.getElementById('labResult');
   r.textContent=''; r.className='cb-result';
   document.getElementById('labMaterials').innerHTML='';
@@ -2044,8 +2514,27 @@ function simulateLab(){
     let msg = `✅ ${parts.join(' · ')}. Pila a ${V}V.`;
     if(anyDanger) msg += missingResistor ? ' 🔥 ¡Corto circuito! Falta resistencia en el camino de un LED, se puede quemar.' : ' 🔥 Corriente demasiado alta en algún LED: sube el valor de la resistencia o baja el voltaje.';
     else if(anyDim) msg += ' 🔅 Algún LED recibe muy poca corriente y se verá tenue: baja el valor de la resistencia.';
-    result.innerHTML = msg;
+    // Ohm live formula for first lit LED
+    let ohmHtml = '';
+    const firstLed = leds.find(l => litSet.has(l.id));
+    if(firstLed && details[firstLed.id] && details[firstLed.id].rTotal !== undefined){
+      const d = details[firstLed.id];
+      const vf = (LED_COLORS[firstLed.color||'red']||LED_COLORS.red).vf;
+      if(d.rTotal > 0 && d.mA !== '∞'){
+        ohmHtml = `<div class="ohm-box"><span class="formula">Ley de Ohm:</span> I = (V − Vf) / R = (${V} − ${vf}) / ${d.rTotal} ≈ <b>${d.mA} mA</b></div>`;
+      }
+    }
+    result.innerHTML = msg + ohmHtml;
     result.className = anyDanger ? 'cb-result bad' : (anyDim ? 'cb-result' : 'cb-result ok');
+    if(window.PG && litSet.size > 0 && !anyDanger){
+      PG.sfxOk();
+      if(!PG.medals.lab){ PG.award('lab','Ingeniero de Laboratorio'); PG.confetti(35); }
+      // Buzzer sound if any buzzer is lit
+      if(buzzers.some(bz => litSet.has(bz.id))){
+        PG.tone(880, 0.35, 'square', 0.05);
+        setTimeout(()=>PG.tone(880, 0.2, 'square', 0.04), 400);
+      }
+    } else if(window.PG && anyDanger){ PG.sfxBad(); }
   }
 }
 
@@ -2085,6 +2574,41 @@ const LAB_PRESETS = {
       ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
       ['bateria_1_a','resistencia_2_a'],['resistencia_2_b','led_2_a'],['led_2_b','bateria_1_b']
     ]
+  },
+  serie: {
+    label:'2 LEDs en serie',
+    materials:['1 pila de 9V','1 resistencia de 220Ω a 470Ω','2 LEDs','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:150, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:160, y:150, closed:true, value:330},
+      {id:'led_1', type:'led', x:320, y:150, closed:true, color:'red'},
+      {id:'led_2', type:'led', x:480, y:150, closed:true, color:'green'}
+    ],
+    wires:[['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','led_2_a'],['led_2_b','bateria_1_b']]
+  },
+  motor: {
+    label:'Motor + interruptor',
+    materials:['1 pila de 9V','1 interruptor','1 motor DC','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:40, y:150, closed:true, voltage:9},
+      {id:'interruptor_1', type:'interruptor', x:240, y:150, closed:true},
+      {id:'motor_1', type:'motor', x:440, y:150, closed:true}
+    ],
+    wires:[['bateria_1_a','interruptor_1_a'],['interruptor_1_b','motor_1_a'],['motor_1_b','bateria_1_b']]
+  },
+  buzzer: {
+    label:'Buzzer + LED',
+    materials:['1 pila de 9V','1 resistencia 220Ω','1 LED','1 buzzer','cables'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:100, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:200, y:40, closed:true, value:220},
+      {id:'led_1', type:'led', x:400, y:40, closed:true},
+      {id:'buzzer_1', type:'buzzer', x:300, y:200, closed:true}
+    ],
+    wires:[
+      ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
+      ['bateria_1_a','buzzer_1_a'],['buzzer_1_b','bateria_1_b']
+    ]
   }
 };
 function loadPreset(key){
@@ -2100,12 +2624,308 @@ function loadPreset(key){
   renderLab();
 }
 
+
+
+/* ============================================================
+   JUEGO: LEY DE OHM
+   ============================================================ */
+const OHM_QUESTIONS = [
+  {q:'Si la pila es de 9 V y la resistencia es de 300 Ω, ¿cuánta corriente circula?', opts:['30 mA','3 mA','300 mA','90 mA'], correct:0, hint:'I = V ÷ R = 9 ÷ 300 = 0,03 A = 30 mA'},
+  {q:'¿Qué pasa si aumentas la resistencia y dejas el mismo voltaje?', opts:['La corriente baja','La corriente sube','El voltaje cambia','Nada'], correct:0, hint:'Más R → menos I (I = V/R)'},
+  {q:'Un LED se ve muy brillante y se puede quemar. ¿Qué puedes hacer?', opts:['Poner una resistencia más grande','Quitar la resistencia','Subir el voltaje','Cortar un cable'], correct:0, hint:'Más resistencia limita la corriente'},
+  {q:'Pila de 6 V y resistencia de 200 Ω. ¿Cuántos mA hay?', opts:['30 mA','12 mA','3 mA','1200 mA'], correct:0, hint:'I = 6 ÷ 200 = 0,03 A = 30 mA'},
+  {q:'La fórmula de la Ley de Ohm es:', opts:['I = V ÷ R','V = I ÷ R','R = V × I','I = V × R'], correct:0, hint:'Corriente = Voltaje dividido entre Resistencia'},
+  {q:'Si V = 12 V y quieres unos 20 mA, ¿qué resistencia usas aproximadamente?', opts:['600 Ω','12 Ω','20 Ω','2400 Ω'], correct:0, hint:'R = V ÷ I = 12 ÷ 0,02 = 600 Ω'},
+  {q:'¿Qué unidad usamos para la corriente en circuitos de LED?', opts:['mA (miliamperios)','Voltios','Ohmios','Watts'], correct:0, hint:'Los LEDs suelen usar 10–20 mA'},
+];
+
+let ohmState = {idx:0, score:0, answered:false, order:[]};
+
+function updateOhmLive(){
+  const V = parseFloat(document.getElementById('ohmV')?.value || 9);
+  const R = parseFloat(document.getElementById('ohmR')?.value || 300);
+  const I_mA = Math.round((V / R) * 1000);
+  const vLab = document.getElementById('ohmVLabel');
+  const rLab = document.getElementById('ohmRLabel');
+  const calc = document.getElementById('ohmCalc');
+  const led = document.getElementById('ohmLed');
+  const ledText = document.getElementById('ohmLedText');
+  if(vLab) vLab.textContent = V + ' V';
+  if(rLab) rLab.textContent = R + ' Ω';
+  if(calc) calc.innerHTML = `I = ${V} ÷ ${R} = <b>${I_mA} mA</b>`;
+  if(led){
+    // brightness based on current (typical LED ~15-20mA full)
+    let bright = Math.min(1, Math.max(0.08, I_mA / 25));
+    let danger = I_mA > 40;
+    let dim = I_mA < 5;
+    led.style.opacity = bright;
+    led.style.transform = `scale(${0.7 + bright*0.4})`;
+    led.style.boxShadow = danger
+      ? `0 0 ${20+I_mA}px #fff, 0 0 40px #ff4d5e`
+      : `0 0 ${12*bright}px #ff4d5e`;
+    if(ledText){
+      if(danger) ledText.textContent = '🔥 ¡Mucha corriente! El LED se puede quemar';
+      else if(dim) ledText.textContent = '🔅 Muy poca corriente — LED tenue';
+      else ledText.textContent = '💡 LED con buen brillo (~' + I_mA + ' mA)';
+    }
+  }
+}
+
+function initOhmGame(){
+  ohmState = {
+    idx: 0,
+    score: 0,
+    answered: false,
+    order: [...OHM_QUESTIONS.keys()].sort(()=>Math.random()-0.5).slice(0,5)
+  };
+  const sc = document.getElementById('ohmScore');
+  const tot = document.getElementById('ohmTotal');
+  if(sc) sc.textContent = '0';
+  if(tot) tot.textContent = '5';
+  updateOhmLive();
+  renderOhmChallenge();
+}
+
+function renderOhmChallenge(){
+  const host = document.getElementById('ohmChallenge');
+  if(!host) return;
+  if(ohmState.idx >= ohmState.order.length){
+    if(window.PG){
+      if(ohmState.score >= 4){ PG.award('ohm','Maestro de Ohm'); PG.confetti(50); PG.sfxWin(); }
+      else if(ohmState.score >= 3){ PG.toast('📐 ¡Buen trabajo con Ohm!'); PG.sfxOk(); }
+      if(typeof saveScore==='function') saveScore('ohm_score', ohmState.score);
+    }
+    host.innerHTML = `<div style="text-align:center;">
+      <div style="font-size:2rem;font-weight:800;color:var(--wire-yellow);">${ohmState.score}/5</div>
+      <p>${ohmState.score===5?'¡Perfecto! Dominas la Ley de Ohm ⚡': ohmState.score>=3?'¡Muy bien! Sigue practicando con los deslizadores.':'Prueba mover V y R arriba y vuelve a intentar.'}</p>
+      <button class="btn" onclick="initOhmGame()">Jugar de nuevo</button>
+    </div>`;
+    return;
+  }
+  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
+  ohmState.answered = false;
+  host.innerHTML = `
+    <div class="ohm-q">${ohmState.idx+1}. ${q.q}</div>
+    <div class="ohm-opts" id="ohmOpts"></div>
+    <div class="feedback" id="ohmFeedback" style="margin-top:12px;"></div>`;
+  const wrap = document.getElementById('ohmOpts');
+  q.opts.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'ohm-opt';
+    btn.textContent = opt;
+    btn.onclick = ()=>answerOhm(i);
+    wrap.appendChild(btn);
+  });
+}
+
+function answerOhm(i){
+  if(ohmState.answered) return;
+  ohmState.answered = true;
+  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
+  const opts = document.querySelectorAll('#ohmOpts .ohm-opt');
+  const fb = document.getElementById('ohmFeedback');
+  opts.forEach((o,idx)=>{
+    if(idx===q.correct) o.classList.add('correct');
+    else if(idx===i) o.classList.add('wrong');
+  });
+  if(i===q.correct){
+    ohmState.score++;
+    document.getElementById('ohmScore').textContent = ohmState.score;
+    if(fb){ fb.textContent = '✅ ¡Correcto! ' + q.hint; fb.className='feedback ok'; }
+    if(window.PG) PG.sfxOk();
+  } else {
+    if(fb){ fb.textContent = '❌ ' + q.hint; fb.className='feedback bad'; }
+    if(window.PG) PG.sfxBad();
+  }
+  setTimeout(()=>{
+    ohmState.idx++;
+    renderOhmChallenge();
+  }, 1600);
+}
+
+
+/* ============================================================
+   FEATURE PACK: guardar, pasos, borrar cables, medallas,
+   diploma, código de colores, ranking, idiomas
+   ============================================================ */
+function toggleLabSteps(){
+  const el = document.getElementById('labSteps');
+  if(!el) return;
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+function saveLabCircuit(){
+  const data = { instances: lab.instances, wires: lab.wires, nextId: lab.nextId };
+  localStorage.setItem('pg_lab_circuit', JSON.stringify(data));
+  if(window.PG) PG.toast('💾 Circuito guardado en este navegador');
+}
+function loadLabCircuit(){
+  const raw = localStorage.getItem('pg_lab_circuit');
+  if(!raw){ if(window.PG) PG.toast('No hay circuito guardado'); return; }
+  try{
+    const data = JSON.parse(raw);
+    lab.instances = data.instances||[];
+    lab.wires = data.wires||[];
+    lab.nextId = data.nextId||10;
+    lab.lastResult = null;
+    labPendingTerminal = null;
+    renderLab();
+    if(window.PG) PG.toast('📂 Circuito cargado');
+  }catch(e){ if(window.PG) PG.toast('Error al cargar'); }
+}
+function resetMedals(){
+  if(!confirm('¿Reiniciar todas las medallas y puntajes?')) return;
+  if(window.PG){
+    PG.medals = {};
+    PG.scores = {};
+    PG.save();
+    PG.toast('Medallas reiniciadas');
+  }
+}
+function checkAllMedals(){
+  if(!window.PG) return;
+  const need = ['memo','circuito','polar','cables','quiz','lab','ohm'];
+  if(need.every(k => PG.medals[k])){
+    setTimeout(()=>{
+      document.getElementById('diplomaOverlay')?.classList.add('show');
+      PG.confetti(80);
+      PG.sfxWin();
+    }, 600);
+  }
+}
+// Hook into award
+if(window.PG){
+  const _award = PG.award.bind(PG);
+  PG.award = function(id, label){
+    _award(id, label);
+    checkAllMedals();
+  };
+}
+function downloadDiploma(){
+  const card = document.getElementById('diplomaCard');
+  // Simple: open print dialog for the diploma
+  const w = window.open('','_blank');
+  w.document.write('<html><head><title>Certificado Pequeños Genios</title></head><body style="font-family:sans-serif;text-align:center;padding:40px;">');
+  w.document.write(card.innerHTML);
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+
+/* --- Borrar cable al hacer click --- */
+function labWireClick(idx){
+  if(idx<0 || idx>=lab.wires.length) return;
+  lab.wires.splice(idx, 1);
+  lab.lastResult = null;
+  if(window.PG){ PG.sfxBad(); PG.toast('Cable eliminado'); }
+  renderLab();
+}
+
+/* Patch: make wires clickable in renderLab — we intercept after wires are drawn */
+const _origRenderLab = typeof renderLab === 'function' ? renderLab : null;
+
+/* Color code game state */
+const COLOR_CODE = [
+  {name:'Negro', val:0, mult:1, color:'#1a1a1a'},
+  {name:'Marrón', val:1, mult:10, color:'#6b3a1f'},
+  {name:'Rojo', val:2, mult:100, color:'#c0392b'},
+  {name:'Naranja', val:3, mult:1000, color:'#e67e22'},
+  {name:'Amarillo', val:4, mult:10000, color:'#f1c40f'},
+  {name:'Verde', val:5, mult:100000, color:'#27ae60'},
+  {name:'Azul', val:6, mult:1000000, color:'#2980b9'},
+  {name:'Violeta', val:7, mult:10000000, color:'#8e44ad'},
+  {name:'Gris', val:8, mult:100000000, color:'#7f8c8d'},
+  {name:'Blanco', val:9, mult:1000000000, color:'#ecf0f1'}
+];
+let ccBands = [1, 0, 2]; // brown black red = 1000Ω
+function renderColorCode(){
+  const host = document.getElementById('colorCodeHost');
+  if(!host) return;
+  const b0 = COLOR_CODE[ccBands[0]], b1 = COLOR_CODE[ccBands[1]], b2 = COLOR_CODE[ccBands[2]];
+  const ohms = (b0.val*10 + b1.val) * b2.mult;
+  let label = ohms >= 1e6 ? (ohms/1e6)+' MΩ' : ohms >= 1000 ? (ohms/1000)+' kΩ' : ohms+' Ω';
+  host.innerHTML = `
+    <div class="resistor-visual">
+      <div class="resistor-lead"></div>
+      <div class="resistor-body">
+        <div class="resistor-band" style="background:${b0.color}"></div>
+        <div class="resistor-band" style="background:${b1.color}"></div>
+        <div class="resistor-band" style="background:${b2.color}"></div>
+        <div class="resistor-band" style="background:#d4a574"></div>
+        <div class="resistor-band" style="background:#c9a227"></div>
+      </div>
+      <div class="resistor-lead"></div>
+    </div>
+    <p style="text-align:center;font-size:1.2rem;font-weight:800;">Valor: <span style="color:var(--wire-yellow)">${label}</span> ±5%</p>
+    <p style="text-align:center;opacity:.7;font-size:.85rem;">Toca una banda y elige el color</p>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">1ª</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[0]===i?'selected':''}" style="background:${c.color}" onclick="setBand(0,${i})" title="${c.name}">${c.val}</button>`).join('')}
+    </div>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">2ª</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[1]===i?'selected':''}" style="background:${c.color}" onclick="setBand(1,${i})" title="${c.name}">${c.val}</button>`).join('')}
+    </div>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">×</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[2]===i?'selected':''}" style="background:${c.color}" onclick="setBand(2,${i})" title="${c.name} ×">${c.name[0]}</button>`).join('')}
+    </div>`;
+}
+function setBand(pos, idx){
+  ccBands[pos] = idx;
+  renderColorCode();
+  if(window.PG) PG.sfxOk();
+}
+
+/* Leaderboard */
+function saveScore(game, value){
+  if(!window.PG) return;
+  const key = game;
+  const prev = PG.scores[key];
+  // lower is better for moves, higher for quiz
+  if(game==='memo_moves'){
+    if(prev===undefined || value < prev) PG.scores[key]=value;
+  } else {
+    if(prev===undefined || value > prev) PG.scores[key]=value;
+  }
+  PG.save();
+  renderLeaderboard();
+}
+function renderLeaderboard(){
+  const el = document.getElementById('leaderboardHost');
+  if(!el || !window.PG) return;
+  const s = PG.scores;
+  el.innerHTML = `<div class="leaderboard"><h4>🏆 RÉCORDS LOCALES</h4>
+    <li>Memorama (menos movimientos): <b>${s.memo_moves??'—'}</b></li>
+    <li>Quiz (aciertos): <b>${s.quiz_score??'—'}</b></li>
+    <li>Polaridad: <b>${s.polar_score??'—'}</b></li>
+  </div>`;
+}
+
+/* Lang (simple Aymara/Quechua labels) */
+let langMode = 'es';
+const LANG = {
+  es: {},
+  ay: { 'Zona de juegos':'Anataña uraqi', 'Componentes electrónicos':'Electrónica componentes', 'Laboratorio de circuitos':'Circuito laboratorio' },
+  qu: { 'Zona de juegos':'Pukllay zona', 'Componentes electrónicos':'Electrónica componentes', 'Laboratorio de circuitos':'Circuito laboratorio' }
+};
+function toggleLang(){
+  langMode = langMode==='es' ? 'ay' : langMode==='ay' ? 'qu' : 'es';
+  const t = document.getElementById('langToggle');
+  if(t) t.textContent = langMode==='es' ? 'Aymara / Qhichwa' : langMode==='ay' ? 'Aymara (activo)' : 'Qhichwa (activo)';
+  if(window.PG) PG.toast(langMode==='es'?'Español': langMode==='ay'?'Aymara':'Qhichwa');
+}
+
+
 /* ============================================================
    INICIALIZACIÓN GENERAL
    ============================================================ */
 renderTheory();
 initQuiz();
 renderLab();
+if(typeof initOhmGame==='function') initOhmGame();
+if(typeof renderColorCode==='function') renderColorCode();
+if(typeof renderLeaderboard==='function') renderLeaderboard();
+if(window.PG) PG.renderMedals();
 </script>
 </body>
 </html>
