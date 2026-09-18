@@ -1102,6 +1102,7 @@ const ICONS = {
 
 const COMPONENTS = [
 {id:'resistencia', name:'Resistencia', pol:false,
+<<<<<<< HEAD
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9ECckDic6UWG2czLkKyiLmX_h4uKFjBoNUm0YxA5ALQ&s=10',
  figure:'Figura 1. Resistencia',
  desc:'Se opone al paso de la corriente eléctrica (se mide en ohms Ω). Se usa para proteger componentes como el LED de corrientes muy altas.'},
@@ -1119,6 +1120,25 @@ const COMPONENTS = [
  desc:'Tiene 3 patas (emisor, base y colector). Sirve como interruptor o amplificador controlado por una pequeña corriente.'},
 {id:'ldr', name:'LDR (Fotoresistencia)', pol:false,
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSnxR62BeaY4Re-NIdcLIkybvi6wpcEWV9LzIB8UIn6g&s=10',
+=======
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Resistors.jpg/240px-Resistors.jpg',
+ figure:'Figura 1. Resistencia',
+ desc:'Se opone al paso de la corriente eléctrica (se mide en ohms Ω). Se usa para proteger componentes como el LED de corrientes muy altas.'},
+{id:'led', name:'LED', pol:true,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Red_LED.jpg/240px-Red_LED.jpg',
+ figure:'Figura 2. LED',
+ desc:'Diodo que emite luz cuando la corriente pasa en el sentido correcto. Tiene pata larga (+) y pata corta (−). ¡No lo conectes al revés!'},
+{id:'capacitor', name:'Capacitor', pol:'mixed',
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Electrolytic_capacitors.jpg/240px-Electrolytic_capacitors.jpg',
+ figure:'Figura 3. Capacitor',
+ desc:'Almacena energía eléctrica un rato. Los electrolíticos SÍ son polarizados (tienen + y −). Los cerámicos y de poliéster NO son polarizados.'},
+{id:'transistor', name:'Transistor', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/BJT_TO-92.jpg/240px-BJT_TO-92.jpg',
+ figure:'Figura 4. Transistor',
+ desc:'Tiene 3 patas (emisor, base y colector). Sirve como interruptor o amplificador controlado por una pequeña corriente.'},
+{id:'ldr', name:'LDR (Fotoresistencia)', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Photoresistor.jpg/240px-Photoresistor.jpg',
+>>>>>>> 5434d81869e5c66c9a2e1fe641d1e24bb3b38eec
  figure:'Figura 5. LDR',
  desc:'Su resistencia cambia según la luz: con mucha luz baja la resistencia; en la oscuridad sube. Ideal para sensores de día/noche.'},
 {id:'jumper', name:'Jumpers', pol:false,
@@ -1130,7 +1150,11 @@ const COMPONENTS = [
  figure:'Figura 7. Pulsador',
  desc:'Cierra el circuito solo mientras lo mantienes presionado. Al soltar, se abre otra vez.'},
 {id:'interruptor', name:'Interruptor', pol:false,
+<<<<<<< HEAD
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFrH-czBDOFBEc0i9ZfuUZa_UzHfGqKcvqhHxNM7-9pw&s=10',
+=======
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Toggle_switch.jpg/240px-Toggle_switch.jpg',
+>>>>>>> 5434d81869e5c66c9a2e1fe641d1e24bb3b38eec
  figure:'Figura 8. Interruptor',
  desc:'Abre o cierra el circuito y se queda en esa posición hasta que lo cambies. Como el switch de la luz de tu casa.'},
 {id:'buzzer', name:'Buzzer (Zumbador)', pol:true,
@@ -1138,6 +1162,7 @@ const COMPONENTS = [
  figure:'Figura 9. Buzzer',
  desc:'Emite un sonido cuando recibe corriente. Muchos buzzers activos tienen polaridad (+ y −).'},
 {id:'motor', name:'Motor DC', pol:true,
+<<<<<<< HEAD
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLeFKBM-hdyypYqZQf5jlKzrf3usja74FB6joBtGOd9g&s=10',
  figure:'Figura 10. Motor DC',
  desc:'Convierte electricidad en movimiento (gira). Si inviertes los cables, gira al revés.'},
@@ -1147,6 +1172,17 @@ const COMPONENTS = [
  desc:'Fuente de energía del circuito. Tiene polo positivo (+) y negativo (−). Nunca la cortocircuites.'},
 {id:'potenciometro', name:'Potenciómetro', pol:false,
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9t-CxqhqwMEKRX1JpTNem2CWs6pqRXUmvt1RQsFx6cw&s=10',
+=======
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Electric_motor.jpg/240px-Electric_motor.jpg',
+ figure:'Figura 10. Motor DC',
+ desc:'Convierte electricidad en movimiento (gira). Si inviertes los cables, gira al revés.'},
+{id:'bateria', name:'Batería / Pila', pol:true,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/AA_battery_size_comparison.jpg/240px-AA_battery_size_comparison.jpg',
+ figure:'Figura 11. Batería',
+ desc:'Fuente de energía del circuito. Tiene polo positivo (+) y negativo (−). Nunca la cortocircuites.'},
+{id:'potenciometro', name:'Potenciómetro', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Potentiometer.jpg/240px-Potentiometer.jpg',
+>>>>>>> 5434d81869e5c66c9a2e1fe641d1e24bb3b38eec
  figure:'Figura 12. Potenciómetro',
  desc:'Resistencia variable: al girar el eje cambias cuánta corriente deja pasar. Sirve para volumen o brillo.'},
 {id:'fusible', name:'Fusible', pol:false,
@@ -1154,7 +1190,11 @@ const COMPONENTS = [
  figure:'Figura 13. Fusible',
  desc:'Protección: si pasa demasiada corriente, se funde y abre el circuito para evitar daños o incendios.'},
 {id:'rele', name:'Relé', pol:false,
+<<<<<<< HEAD
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT62XvFFdHFPjT9t4FUuxGuffEauBB4WoR0y3MCk_E3yQ&s=10',
+=======
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Relay.jpg/240px-Relay.jpg',
+>>>>>>> 5434d81869e5c66c9a2e1fe641d1e24bb3b38eec
  figure:'Figura 14. Relé',
  desc:'Interruptor electromagnético: una corriente pequeña controla otra más grande (por ejemplo, un motor).'},
 {id:'diodo', name:'Diodo rectificador', pol:true,
@@ -1162,11 +1202,19 @@ const COMPONENTS = [
  figure:'Figura 15. Diodo',
  desc:'Deja pasar la corriente solo en un sentido (del ánodo al cátodo). El LED es un tipo especial de diodo.'},
 {id:'transformador', name:'Transformador', pol:false,
+<<<<<<< HEAD
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk2THA4dzoV-_aTMc6FIt2Ke_1qF2MiZjKvrMlOPlVfA&s=10',
  figure:'Figura 16. Transformador',
  desc:'Sube o baja el voltaje en corriente alterna (AC). Se usa en cargadores y fuentes de alimentación.'},
 {id:'microcontrolador', name:'Microcontrolador', pol:false,
  image:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbCbuTRrFEy_UGEunifS3cmv1eBAQU0YM3JrD0LaDw5w&s=10',
+=======
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Transformer.jpg/240px-Transformer.jpg',
+ figure:'Figura 16. Transformador',
+ desc:'Sube o baja el voltaje en corriente alterna (AC). Se usa en cargadores y fuentes de alimentación.'},
+{id:'microcontrolador', name:'Microcontrolador', pol:false,
+ image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Arduino_Uno_-_R3.jpg/240px-Arduino_Uno_-_R3.jpg',
+>>>>>>> 5434d81869e5c66c9a2e1fe641d1e24bb3b38eec
  figure:'Figura 17. Microcontrolador',
  desc:'Cerebro programable del circuito (como Arduino). Ejecuta instrucciones y controla LEDs, motores y sensores.'}
 ];
