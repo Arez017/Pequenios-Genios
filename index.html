@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pequeños Genios</title>
+<meta name="description" content="Pequeños Genios: página web interactiva para aprender electrónica básica jugando. Componentes, polaridad, circuitos y laboratorio virtual para primaria.">
+<meta name="theme-color" content="#0b3d2e">
+<meta property="og:title" content="Pequeños Genios — electrónica básica jugando">
+<meta property="og:description" content="Juegos interactivos y laboratorio de circuitos para niños de primaria. Proyecto de innovación · U.E. La Primera">
+<meta property="og:type" content="website">
+<title>Pequeños Genios · Electrónica básica jugando</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b3d2e' stroke='%23ffd23f' stroke-width='8'/><text y='.9em' x='50%' text-anchor='middle' font-size='55'>⚡</text></svg>">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -421,6 +427,16 @@
   .wire-terminal{fill:var(--panel); stroke:var(--copper-2); stroke-width:3; cursor:pointer; transition:fill .15s;}
   .wire-terminal:hover{stroke:var(--wire-yellow);}
   .wire-terminal.connected{fill:var(--ok-green); stroke:var(--ok-green);}
+  .wire-terminal.pending{
+    fill:var(--wire-yellow); stroke:#fff; stroke-width:4;
+    filter:drop-shadow(0 0 8px var(--wire-yellow));
+    animation: termPulse 0.9s ease-in-out infinite;
+  }
+  @keyframes termPulse{0%,100%{r:8;} 50%{r:11;}}
+  .lab-hint-bar{
+    text-align:center; font-family:'Space Mono',monospace; font-size:0.78rem;
+    color:var(--wire-yellow); min-height:22px; margin-top:8px; letter-spacing:0.5px;
+  }
   .wire-line{stroke:var(--wire-yellow); stroke-width:4; stroke-linecap:round; fill:none;}
   .wire-line.done{stroke:var(--ok-green);}
   .wire-line.temp{stroke:var(--wire-yellow); stroke-dasharray:6 6; opacity:0.85;}
@@ -458,9 +474,188 @@
     section{padding:56px 16px;}
     .panel{padding:20px;}
   }
+
+  /* === Mejoras Pequeños Genios === */
+  .toast{
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(120px);
+    background:var(--wire-yellow); color:var(--ink); font-weight:800; font-size:1.05rem;
+    padding:14px 28px; border-radius:16px; z-index:200; box-shadow:0 10px 30px rgba(0,0,0,.4);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1); pointer-events:none; text-align:center; max-width:90vw;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .confetti-piece{position:fixed; width:10px; height:10px; top:-20px; z-index:150; pointer-events:none; border-radius:2px;}
+  .medal-bar{
+    display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:18px 0 8px;
+  }
+  .medal{
+    background:rgba(0,0,0,.28); border:1px solid rgba(255,180,84,.3); border-radius:12px;
+    padding:8px 14px; font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.5px;
+    opacity:.45; transition:opacity .3s, transform .2s;
+  }
+  .medal.earned{opacity:1; transform:scale(1.05); border-color:var(--wire-yellow); box-shadow:0 0 12px rgba(255,210,63,.35);}
+  .medal span{display:block; font-size:1.2rem; margin-bottom:2px;}
+  nav a:focus-visible, .btn:focus-visible, .pol-btn:focus-visible, .quiz-opt:focus-visible, .game-tab:focus-visible{
+    outline:3px solid var(--wire-yellow); outline-offset:3px;
+  }
+  .comp-card:focus-visible{outline:3px solid var(--copper); outline-offset:3px;}
+  @media (max-width:640px){
+    .memo-grid{grid-template-columns:repeat(3,1fr); gap:8px;}
+    .panel{padding:20px 14px;}
+    .cb-slots{padding:12px;}
+    .cb-slot{width:70px; height:70px;}
+  }
+
+
+  /* === Features pack === */
+  .wire-line.clickable{cursor:pointer; pointer-events:stroke;}
+  .wire-line.clickable:hover{stroke:#ff5c5c; stroke-width:6;}
+  .lab-toolbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0;}
+  .lab-step-box{
+    background:rgba(0,0,0,.28); border:1px solid rgba(255,180,84,.3); border-radius:14px;
+    padding:12px 16px; margin:12px 0; font-size:.9rem; line-height:1.45;
+  }
+  .lab-step-box b{color:var(--wire-yellow);}
+  .lab-step-box .step-num{display:inline-block; width:22px; height:22px; border-radius:50%;
+    background:var(--copper); color:var(--ink); text-align:center; font-weight:800; font-size:.75rem; line-height:22px; margin-right:6px;}
+  .ohm-box{
+    margin-top:10px; padding:10px 14px; border-radius:12px; background:rgba(255,210,63,.12);
+    border:1px dashed rgba(255,210,63,.4); font-family:'Space Mono',monospace; font-size:.82rem;
+    text-align:center; color:var(--cream);
+  }
+  .ohm-box .formula{color:var(--wire-yellow); font-weight:700;}
+  .leaderboard{
+    background:rgba(0,0,0,.25); border-radius:14px; padding:14px; margin:16px 0;
+    font-family:'Space Mono',monospace; font-size:.8rem;
+  }
+  .leaderboard h4{margin:0 0 8px; color:var(--copper-2); letter-spacing:1px;}
+  .leaderboard li{list-style:none; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.06);}
+  .color-code-game{
+    display:grid; gap:14px; margin-top:12px;
+  }
+  .band-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center;}
+  .band-btn{
+    width:42px; height:56px; border-radius:8px; border:2px solid rgba(255,255,255,.25);
+    cursor:pointer; font-size:.65rem; font-weight:700; color:#fff; text-shadow:0 1px 2px #000;
+  }
+  .band-btn.selected{border-color:var(--wire-yellow); box-shadow:0 0 0 3px rgba(255,210,63,.4);}
+  .resistor-visual{
+    display:flex; align-items:center; justify-content:center; gap:0; margin:12px auto;
+    height:36px;
+  }
+  .resistor-body{width:120px; height:28px; background:#d4a574; border-radius:6px; position:relative;
+    display:flex; align-items:stretch; overflow:hidden;}
+  .resistor-band{flex:1; min-width:12px;}
+  .resistor-lead{width:40px; height:4px; background:#aaa;}
+  .diploma-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:300;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .diploma-overlay.show{display:flex;}
+  .diploma-card{
+    background:linear-gradient(160deg,#fef8ec,#f5e6c8); color:#0b1f18;
+    border-radius:20px; padding:32px 28px; max-width:420px; width:100%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); border:4px solid #ffd23f;
+  }
+  .diploma-card h2{margin:0 0 8px; font-size:1.6rem;}
+  .diploma-card .name{font-size:1.3rem; font-weight:800; color:#0b3d2e; margin:12px 0;}
+  .diff-tabs{display:flex; gap:8px; justify-content:center; margin-bottom:14px; flex-wrap:wrap;}
+  .diff-tab{
+    font-family:'Space Mono',monospace; font-size:.72rem; padding:6px 12px; border-radius:8px;
+    border:2px solid rgba(255,248,236,.3); background:transparent; color:var(--cream); cursor:pointer;
+  }
+  .diff-tab.active{background:var(--copper); color:var(--ink); border-color:var(--copper);}
+  .lang-toggle{font-size:.7rem; opacity:.7; margin-left:8px; cursor:pointer; text-decoration:underline;}
+
 </style>
 </head>
 <body>
+
+<!-- Mejoras UX: toast, confetti, sonidos, progreso -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ===== Utilidades Pequeños Genios (mejoras) ===== */
+const PG = {
+  scores: JSON.parse(localStorage.getItem('pg_scores') || '{}'),
+  medals: JSON.parse(localStorage.getItem('pg_medals') || '{}'),
+  save() {
+    localStorage.setItem('pg_scores', JSON.stringify(this.scores));
+    localStorage.setItem('pg_medals', JSON.stringify(this.medals));
+    this.renderMedals();
+  },
+  toast(msg, ms=2600) {
+    const t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(this._tt);
+    this._tt = setTimeout(() => t.classList.remove('show'), ms);
+  },
+  confetti(n=40) {
+    const colors = ['#ffd23f','#ff8a3d','#4dd8ff','#ff4d5e','#4ade80','#fef8ec'];
+    for(let i=0;i<n;i++){
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = colors[i%colors.length];
+      p.style.width = (6+Math.random()*8)+'px';
+      p.style.height = (6+Math.random()*8)+'px';
+      p.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+      document.body.appendChild(p);
+      const dx = (Math.random()-0.5)*200;
+      const dy = 400 + Math.random()*500;
+      const rot = Math.random()*720;
+      p.animate([
+        { transform:'translate(0,0) rotate(0)', opacity:1 },
+        { transform:`translate(${dx}px,${dy}px) rotate(${rot}deg)`, opacity:0 }
+      ], { duration: 1200+Math.random()*900, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => p.remove();
+    }
+  },
+  // Web Audio beeps (no external files)
+  _ac: null,
+  tone(freq=880, dur=0.12, type='sine', vol=0.08) {
+    try {
+      if(!this._ac) this._ac = new (window.AudioContext||window.webkitAudioContext)();
+      const o = this._ac.createOscillator();
+      const g = this._ac.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(this._ac.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.001, this._ac.currentTime + dur);
+      o.stop(this._ac.currentTime + dur + 0.02);
+    } catch(e){}
+  },
+  sfxOk(){ this.tone(880,0.1); setTimeout(()=>this.tone(1175,0.12),90); },
+  sfxBad(){ this.tone(220,0.18,'square',0.06); },
+  sfxWin(){ this.tone(523,0.1); setTimeout(()=>this.tone(659,0.1),100); setTimeout(()=>this.tone(784,0.18),200); },
+  award(medalId, label) {
+    if(this.medals[medalId]) return;
+    this.medals[medalId] = true;
+    this.save();
+    this.toast('🏅 ¡Medalla desbloqueada! ' + label);
+    this.confetti(55);
+    this.sfxWin();
+  },
+  renderMedals() {
+    const bar = document.getElementById('medalBar');
+    if(!bar) return;
+    const defs = [
+      {id:'memo', label:'Memoria', emoji:'🧠'},
+      {id:'circuito', label:'Circuito', emoji:'🔌'},
+      {id:'polar', label:'Polaridad', emoji:'🔋'},
+      {id:'cables', label:'Cables', emoji:'🔗'},
+      {id:'quiz', label:'Quiz', emoji:'🏆'},
+      {id:'lab', label:'Laboratorio', emoji:'⚡'}
+    ];
+    bar.innerHTML = defs.map(d => 
+      `<div class="medal ${this.medals[d.id]?'earned':''}" title="${d.label}"><span>${d.emoji}</span>${d.label}</div>`
+    ).join('');
+  }
+};
+window.PG = PG;
+document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
+</script>
+
 <div class="glow-spin"></div>
 <div class="traces"></div>
 <div class="drift-layer" id="driftLayer"></div>
@@ -471,6 +666,7 @@
   <a href="#componentes">Componentes</a>
   <a href="#teoria">Centro de teoría</a>
   <a href="#juegos">Zona de juegos</a>
+  <a href="#codigo-colores">Código colores</a>
   <a href="#laboratorio">Laboratorio</a>
 </nav>
 
@@ -512,12 +708,26 @@
 </section>
 
 <!-- ===================== ZONA DE JUEGOS (un solo apartado con pestañas) ===================== -->
+
+<section id="codigo-colores">
+  <div class="section-head">
+    <div class="eyebrow">Aprende el código</div>
+    <h2>Código de colores de resistencias</h2>
+    <p>Elige las bandas y descubre el valor en ohms. Así se leen las resistencias reales.</p>
+  </div>
+  <div class="panel">
+    <div id="colorCodeHost"></div>
+  </div>
+  <div id="leaderboardHost"></div>
+</section>
+
 <section id="juegos">
   <div class="section-head">
     <div class="eyebrow">Pon a prueba lo aprendido</div>
     <h2>Zona de juegos</h2>
     <p>Actividades interactivas diseñadas exclusivamente para primaria.</p>
   </div>
+  <div class="medal-bar" id="medalBar" aria-label="Medallas obtenidas"></div>
 
   <div class="panel">
     <div class="game-tabs" id="gameTabs">
@@ -657,6 +867,16 @@
       <button class="btn ghost" onclick="labAddComponent('buzzer')">🔊 + Buzzer</button>
       <button class="btn" onclick="simulateLab()">⚡ Simular</button>
       <button class="btn ghost" onclick="clearLab()">🗑️ Borrar todo</button>
+      <button class="btn ghost" onclick="saveLabCircuit()">💾 Guardar</button>
+      <button class="btn ghost" onclick="loadLabCircuit()">📂 Cargar</button>
+      <button class="btn ghost" onclick="toggleLabSteps()">📋 Paso a paso</button>
+    </div>
+    <div class="lab-step-box" id="labSteps" style="display:none;">
+      <div><span class="step-num">1</span> Agrega una <b>Pila</b> (botón 🔋)</div>
+      <div><span class="step-num">2</span> Agrega una <b>Resistencia</b> (protege el LED)</div>
+      <div><span class="step-num">3</span> Agrega un <b>LED</b></div>
+      <div><span class="step-num">4</span> Conecta: <b>Pila(+)</b> → Resistencia → LED(+) → LED(−) → <b>Pila(−)</b></div>
+      <div><span class="step-num">5</span> Pulsa <b>Simular</b> y mira los mA</div>
     </div>
     <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
       Toca y arrastra una pieza para moverla · Dos patitas alineadas en la misma columna quedan conectadas automáticamente, como en una protoboard real · Arrastra desde un círculo (terminal) a otro para cablear entre columnas distintas · Un toque corto cambia el valor de resistencia/voltaje/color o abre/cierra el interruptor · Toca la × para borrar una pieza
@@ -664,6 +884,7 @@
     <div class="wire-board" style="margin-top:14px;">
       <svg id="labSvg" viewBox="0 0 700 380"></svg>
     </div>
+    <div class="lab-hint-bar" id="labHintBar">Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar</div>
     <div class="cb-result" id="labResult"></div>
 
     <div class="lab-presets">
@@ -672,15 +893,36 @@
         <button class="btn ghost" onclick="loadPreset('simple')">LED simple</button>
         <button class="btn ghost" onclick="loadPreset('interruptor')">LED con interruptor</button>
         <button class="btn ghost" onclick="loadPreset('paralelo')">2 LEDs en paralelo</button>
+        <button class="btn ghost" onclick="loadPreset('serie')">2 LEDs en serie</button>
+        <button class="btn ghost" onclick="loadPreset('motor')">Motor + interruptor</button>
+        <button class="btn ghost" onclick="loadPreset('buzzer')">Buzzer + LED</button>
       </div>
       <div id="labMaterials"></div>
     </div>
   </div>
 </section>
 
-<footer class="mono">
-  ⚡ CIRCUITECA — Proyecto de innovación "Página web para facilitar la comprensión de la electrónica básica en niños de primaria" — U.E. La Primera, Fe y Alegría, El Alto - Bolivia
+<footer class="mono" style="text-align:center; padding:30px 16px; opacity:.75; font-size:.75rem;">
+  ⚡ Pequeños Genios — Proyecto de innovación · U.E. La Primera, Fe y Alegría, El Alto - Bolivia<br>
+  <button class="btn ghost" style="margin-top:12px; font-size:.75rem; padding:8px 14px;" onclick="resetMedals()">🔄 Reiniciar medallas</button>
+  <span class="lang-toggle" onclick="toggleLang()" id="langToggle">Aymara / Qhichwa</span>
 </footer>
+
+<!-- Diploma overlay -->
+<div class="diploma-overlay" id="diplomaOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="diploma-card" id="diplomaCard">
+    <div style="font-size:2.5rem;">🏅</div>
+    <h2>¡Certificado Pequeños Genios!</h2>
+    <p>Se otorga el presente reconocimiento a</p>
+    <div class="name" id="diplomaName">Un(a) pequeño(a) genio(a)</div>
+    <p>por dominar los fundamentos de electrónica básica:<br>componentes, polaridad, circuitos y laboratorio virtual.</p>
+    <p style="margin-top:16px; font-size:.85rem; opacity:.7;">U.E. La Primera · Fe y Alegría · El Alto, Bolivia</p>
+    <div class="cta-row" style="margin-top:18px;">
+      <button class="btn" onclick="downloadDiploma()">📥 Descargar</button>
+      <button class="btn ghost" style="color:#0b1f18;border-color:#0b1f18;" onclick="document.getElementById('diplomaOverlay').classList.remove('show')">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -1191,6 +1433,7 @@ function onWirePointerUp(e){
       result.textContent = '';
       if(wireConnected.length === WIRE_PAIRS.length){
         result.innerHTML = '✅ ¡Circuito cerrado! La corriente ya puede fluir y el LED enciende.';
+        if(window.PG){ PG.sfxWin(); PG.confetti(40); PG.toast('🔗 ¡Cables perfectos!'); PG.award('cables','Experto en Cables'); }
         result.className = 'cb-result ok';
       }
     } else {
@@ -1225,7 +1468,7 @@ COMPONENTS.forEach(c=>{
   card.className='comp-card';
   card.innerHTML = `
     <img class="component-photo" src="${c.image}" alt="${c.name}" loading="lazy"
-         onerror="this.style.display='none'">
+         onerror="this.style.opacity='0.3'; this.alt='Imagen no disponible offline';">
     ${ICONS[c.id]}
     <span class="figure">${c.figure}</span>
     <h3>${c.name}</h3>
@@ -1280,6 +1523,13 @@ function flipMemo(el){
         a.classList.add('matched'); b.classList.add('matched');
         memoState.matched++;
         document.getElementById('memoPairs').textContent = memoState.matched;
+        if(window.PG){ PG.sfxOk(); }
+        if(memoState.matched >= 6 && window.PG){
+          PG.toast('🎉 ¡Memorama completo!');
+          PG.confetti(50);
+          PG.award('memo', 'Maestro de la Memoria');
+          if(typeof saveScore==='function') saveScore('memo_moves', memoState.moves);
+        }
         memoState.flipped=[]; memoState.lock=false;
       },400);
     } else {
@@ -1363,6 +1613,7 @@ function testCircuit(){
   const correct = JSON.stringify(order) === JSON.stringify(CORRECT_ORDER);
   if(correct){
     result.innerHTML = '✅ ¡Circuito correcto! La corriente fluye y el LED enciende sin quemarse.';
+    if(window.PG){ PG.sfxWin(); PG.confetti(45); PG.toast('🔌 ¡Circuito armado!'); PG.award('circuito','Constructor de Circuitos'); }
     result.className = 'cb-result ok';
     slots.forEach(s=>s.style.borderColor='#4ade80');
   } else {
@@ -1436,9 +1687,12 @@ function answerPolarity(choice){
     polState.score++;
     document.getElementById('polScore').textContent = polState.score;
     fb.textContent = '✅ ¡Correcto! ' + item.hint;
+    if(window.PG){ PG.sfxOk(); }
+    if(polState.score >= 3 && window.PG){ PG.award('polar','Maestro de la Polaridad'); PG.confetti(40); PG.toast('🔋 ¡Polaridad dominada!'); if(typeof saveScore==='function') saveScore('polar_score', polState.score); }
     fb.className = 'feedback ok';
   } else {
     fb.textContent = '❌ Casi. ' + item.hint;
+    if(window.PG){ PG.sfxBad(); }
     fb.className = 'feedback bad';
   }
   setTimeout(()=>{
@@ -1538,6 +1792,11 @@ function renderQuiz(){
   const QUIZ = QUIZ_PRIMARIA;
   const panel = document.getElementById('quizPanel');
   if(quizState.idx >= QUIZ.length){
+    if(window.PG){
+      if(typeof saveScore==='function') saveScore('quiz_score', quizState.score);
+      if(quizState.score === QUIZ.length){ PG.award('quiz','Genio del Quiz'); PG.confetti(60); PG.sfxWin(); }
+      else if(quizState.score >= Math.ceil(QUIZ.length*0.6)){ PG.toast('🏆 ¡Buen resultado en el Quiz!'); PG.sfxOk(); }
+    }
     panel.innerHTML = `<div class="quiz-final">
       <div style="font-size:0.8rem;opacity:0.7;font-family:'Space Mono',monospace;">RESULTADO FINAL</div>
       <div class="score">${quizState.score}/${QUIZ.length}</div>
@@ -1647,6 +1906,7 @@ function labParseKey(key){
 
 let labDragMode = null;
 let labDragData = null;
+let labPendingTerminal = null; // click-to-connect: first terminal selected
 
 /* ---- dibujo de una pieza según su tipo, con estética "protoboard" ---- */
 function labDrawComponentArt(inst, diag){
@@ -1729,9 +1989,9 @@ function renderLab(){
     if(!p1||!p2) return;
     const d = `M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}`;
     const isLive = liveWires.has(idx);
-    html += `<path class="wire-line done" d="${d}"/>`;
+    html += `<path class="wire-line done clickable" data-role="wire" data-idx="${idx}" d="${d}"/>`;
     if(isLive){
-      html += `<circle r="4.5" fill="#fff59d"><animateMotion dur="1.1s" repeatCount="indefinite" path="${d}"/></circle>`;
+      html += `<circle r="4.5" fill="#fff59d" style="pointer-events:none"><animateMotion dur="1.1s" repeatCount="indefinite" path="${d}"/></circle>`;
     }
   });
 
@@ -1764,8 +2024,10 @@ function renderLab(){
     } else if(inst.type==='resistencia'){
       html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar Ω</text>`;
     }
-    html += `<circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_a" cx="${inst.x}" cy="${inst.y+28}" r="8"></circle>
-      <circle class="wire-terminal" data-role="terminal" data-key="${inst.id}_b" cx="${inst.x+100}" cy="${inst.y+28}" r="8"></circle>
+    const clsA = 'wire-terminal' + (labPendingTerminal===inst.id+'_a'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_a'||b===inst.id+'_a')?' connected':'');
+    const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
+    html += `<circle class="${clsA}" data-role="terminal" data-key="${inst.id}_a" cx="${inst.x}" cy="${inst.y+28}" r="8"></circle>
+      <circle class="${clsB}" data-role="terminal" data-key="${inst.id}_b" cx="${inst.x+100}" cy="${inst.y+28}" r="8"></circle>
       <circle data-role="delete" data-inst="${inst.id}" cx="${inst.x+92}" cy="${inst.y+8}" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"/>
       <text data-role="delete" data-inst="${inst.id}" x="${inst.x+92}" y="${inst.y+11}" text-anchor="middle" fill="#7a1414" style="font-size:10px;cursor:pointer;pointer-events:none;">×</text>
     </g>`;
@@ -1777,19 +2039,64 @@ function renderLab(){
   svg.querySelectorAll('[data-role="delete"]').forEach(el=>{
     el.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); labRemoveInstance(e.currentTarget.dataset.inst); });
   });
+  svg.querySelectorAll('[data-role="wire"]').forEach(el=>{
+    el.addEventListener('pointerdown', (e)=>{
+      e.stopPropagation(); e.preventDefault();
+      const idx = parseInt(e.currentTarget.dataset.idx, 10);
+      if(!isNaN(idx)) labWireClick(idx);
+    });
+  });
   svg.onpointermove = labPointerMove;
   svg.onpointerup = labPointerUp;
   svg.onpointerleave = ()=>{ labDragMode=null; labDragData=null; renderLab(); };
 }
 
+function labSetHint(msg){
+  const el = document.getElementById('labHintBar');
+  if(el) el.textContent = msg || 'Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar';
+}
+function labConnectWire(fromKey, toKey){
+  if(!fromKey || !toKey || fromKey===toKey) return false;
+  const exists = lab.wires.some(([a,b])=>(a===fromKey&&b===toKey)||(a===toKey&&b===fromKey));
+  if(exists){
+    if(window.PG) PG.toast('Ese cable ya está conectado');
+    return false;
+  }
+  lab.wires.push([fromKey, toKey]);
+  lab.lastResult = null;
+  if(window.PG){ PG.sfxOk(); PG.toast('⚡ Cable conectado'); }
+  return true;
+}
 function labTerminalDown(e){
   e.preventDefault(); e.stopPropagation();
   const key = e.target.dataset.key;
+  if(!key) return;
+
+  // Click-to-connect mode (primary for kids)
+  if(labPendingTerminal){
+    if(labPendingTerminal === key){
+      // same terminal → cancel
+      labPendingTerminal = null;
+      labSetHint();
+      renderLab();
+      return;
+    }
+    labConnectWire(labPendingTerminal, key);
+    labPendingTerminal = null;
+    labSetHint();
+    renderLab();
+    return;
+  }
+
+  // First click: select terminal (pending) + also allow drag
+  labPendingTerminal = key;
   const p = labParseKey(key);
-  const pos = labTermPos(p.id,p.suffix);
-  labDragMode='wire';
-  labDragData = {fromKey:key, x:pos.x, y:pos.y};
-  drawLabTemp(pos.x,pos.y);
+  const pos = labTermPos(p.id, p.suffix);
+  labDragMode = 'wire';
+  labDragData = {fromKey:key, x:pos.x, y:pos.y, startedAt: Date.now()};
+  labSetHint('👆 Ahora toca el OTRO conector para completar el cable (o arrastra)');
+  renderLab();
+  drawLabTemp(pos.x, pos.y);
 }
 function labBodyDown(e){
   e.preventDefault(); e.stopPropagation();
@@ -1845,9 +2152,18 @@ function labPointerUp(e){
         if(d<bestDist){bestDist=d;best=key;}
       });
     });
+    const elapsed = Date.now() - (labDragData.startedAt||0);
+    // If user dragged far enough to another terminal → connect and clear pending
     if(best){
-      const exists = lab.wires.some(([a,b])=>(a===labDragData.fromKey&&b===best)||(a===best&&b===labDragData.fromKey));
-      if(!exists) lab.wires.push([labDragData.fromKey, best]);
+      labConnectWire(labDragData.fromKey, best);
+      labPendingTerminal = null;
+      labSetHint();
+    } else if(elapsed < 280){
+      // short tap without moving: keep pending for click-to-connect (already set)
+    } else {
+      // long drag that didn't land → cancel pending
+      labPendingTerminal = null;
+      labSetHint();
     }
     lab.lastResult = null;
   } else if(labDragMode==='move'){
@@ -1877,6 +2193,8 @@ function labPointerUp(e){
 
 function clearLab(){
   lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+  labPendingTerminal = null;
+  labSetHint();
   const r = document.getElementById('labResult');
   r.textContent=''; r.className='cb-result';
   document.getElementById('labMaterials').innerHTML='';
@@ -2044,8 +2362,27 @@ function simulateLab(){
     let msg = `✅ ${parts.join(' · ')}. Pila a ${V}V.`;
     if(anyDanger) msg += missingResistor ? ' 🔥 ¡Corto circuito! Falta resistencia en el camino de un LED, se puede quemar.' : ' 🔥 Corriente demasiado alta en algún LED: sube el valor de la resistencia o baja el voltaje.';
     else if(anyDim) msg += ' 🔅 Algún LED recibe muy poca corriente y se verá tenue: baja el valor de la resistencia.';
-    result.innerHTML = msg;
+    // Ohm live formula for first lit LED
+    let ohmHtml = '';
+    const firstLed = leds.find(l => litSet.has(l.id));
+    if(firstLed && details[firstLed.id] && details[firstLed.id].rTotal !== undefined){
+      const d = details[firstLed.id];
+      const vf = (LED_COLORS[firstLed.color||'red']||LED_COLORS.red).vf;
+      if(d.rTotal > 0 && d.mA !== '∞'){
+        ohmHtml = `<div class="ohm-box"><span class="formula">Ley de Ohm:</span> I = (V − Vf) / R = (${V} − ${vf}) / ${d.rTotal} ≈ <b>${d.mA} mA</b></div>`;
+      }
+    }
+    result.innerHTML = msg + ohmHtml;
     result.className = anyDanger ? 'cb-result bad' : (anyDim ? 'cb-result' : 'cb-result ok');
+    if(window.PG && litSet.size > 0 && !anyDanger){
+      PG.sfxOk();
+      if(!PG.medals.lab){ PG.award('lab','Ingeniero de Laboratorio'); PG.confetti(35); }
+      // Buzzer sound if any buzzer is lit
+      if(buzzers.some(bz => litSet.has(bz.id))){
+        PG.tone(880, 0.35, 'square', 0.05);
+        setTimeout(()=>PG.tone(880, 0.2, 'square', 0.04), 400);
+      }
+    } else if(window.PG && anyDanger){ PG.sfxBad(); }
   }
 }
 
@@ -2085,6 +2422,41 @@ const LAB_PRESETS = {
       ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
       ['bateria_1_a','resistencia_2_a'],['resistencia_2_b','led_2_a'],['led_2_b','bateria_1_b']
     ]
+  },
+  serie: {
+    label:'2 LEDs en serie',
+    materials:['1 pila de 9V','1 resistencia de 220Ω a 470Ω','2 LEDs','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:150, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:160, y:150, closed:true, value:330},
+      {id:'led_1', type:'led', x:320, y:150, closed:true, color:'red'},
+      {id:'led_2', type:'led', x:480, y:150, closed:true, color:'green'}
+    ],
+    wires:[['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','led_2_a'],['led_2_b','bateria_1_b']]
+  },
+  motor: {
+    label:'Motor + interruptor',
+    materials:['1 pila de 9V','1 interruptor','1 motor DC','cables o jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:40, y:150, closed:true, voltage:9},
+      {id:'interruptor_1', type:'interruptor', x:240, y:150, closed:true},
+      {id:'motor_1', type:'motor', x:440, y:150, closed:true}
+    ],
+    wires:[['bateria_1_a','interruptor_1_a'],['interruptor_1_b','motor_1_a'],['motor_1_b','bateria_1_b']]
+  },
+  buzzer: {
+    label:'Buzzer + LED',
+    materials:['1 pila de 9V','1 resistencia 220Ω','1 LED','1 buzzer','cables'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:100, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:200, y:40, closed:true, value:220},
+      {id:'led_1', type:'led', x:400, y:40, closed:true},
+      {id:'buzzer_1', type:'buzzer', x:300, y:200, closed:true}
+    ],
+    wires:[
+      ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
+      ['bateria_1_a','buzzer_1_a'],['buzzer_1_b','bateria_1_b']
+    ]
   }
 };
 function loadPreset(key){
@@ -2100,12 +2472,188 @@ function loadPreset(key){
   renderLab();
 }
 
+
+/* ============================================================
+   FEATURE PACK: guardar, pasos, borrar cables, medallas,
+   diploma, código de colores, ranking, idiomas
+   ============================================================ */
+function toggleLabSteps(){
+  const el = document.getElementById('labSteps');
+  if(!el) return;
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+function saveLabCircuit(){
+  const data = { instances: lab.instances, wires: lab.wires, nextId: lab.nextId };
+  localStorage.setItem('pg_lab_circuit', JSON.stringify(data));
+  if(window.PG) PG.toast('💾 Circuito guardado en este navegador');
+}
+function loadLabCircuit(){
+  const raw = localStorage.getItem('pg_lab_circuit');
+  if(!raw){ if(window.PG) PG.toast('No hay circuito guardado'); return; }
+  try{
+    const data = JSON.parse(raw);
+    lab.instances = data.instances||[];
+    lab.wires = data.wires||[];
+    lab.nextId = data.nextId||10;
+    lab.lastResult = null;
+    labPendingTerminal = null;
+    renderLab();
+    if(window.PG) PG.toast('📂 Circuito cargado');
+  }catch(e){ if(window.PG) PG.toast('Error al cargar'); }
+}
+function resetMedals(){
+  if(!confirm('¿Reiniciar todas las medallas y puntajes?')) return;
+  if(window.PG){
+    PG.medals = {};
+    PG.scores = {};
+    PG.save();
+    PG.toast('Medallas reiniciadas');
+  }
+}
+function checkAllMedals(){
+  if(!window.PG) return;
+  const need = ['memo','circuito','polar','cables','quiz','lab'];
+  if(need.every(k => PG.medals[k])){
+    setTimeout(()=>{
+      document.getElementById('diplomaOverlay')?.classList.add('show');
+      PG.confetti(80);
+      PG.sfxWin();
+    }, 600);
+  }
+}
+// Hook into award
+if(window.PG){
+  const _award = PG.award.bind(PG);
+  PG.award = function(id, label){
+    _award(id, label);
+    checkAllMedals();
+  };
+}
+function downloadDiploma(){
+  const card = document.getElementById('diplomaCard');
+  // Simple: open print dialog for the diploma
+  const w = window.open('','_blank');
+  w.document.write('<html><head><title>Certificado Pequeños Genios</title></head><body style="font-family:sans-serif;text-align:center;padding:40px;">');
+  w.document.write(card.innerHTML);
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+
+/* --- Borrar cable al hacer click --- */
+function labWireClick(idx){
+  if(idx<0 || idx>=lab.wires.length) return;
+  lab.wires.splice(idx, 1);
+  lab.lastResult = null;
+  if(window.PG){ PG.sfxBad(); PG.toast('Cable eliminado'); }
+  renderLab();
+}
+
+/* Patch: make wires clickable in renderLab — we intercept after wires are drawn */
+const _origRenderLab = typeof renderLab === 'function' ? renderLab : null;
+
+/* Color code game state */
+const COLOR_CODE = [
+  {name:'Negro', val:0, mult:1, color:'#1a1a1a'},
+  {name:'Marrón', val:1, mult:10, color:'#6b3a1f'},
+  {name:'Rojo', val:2, mult:100, color:'#c0392b'},
+  {name:'Naranja', val:3, mult:1000, color:'#e67e22'},
+  {name:'Amarillo', val:4, mult:10000, color:'#f1c40f'},
+  {name:'Verde', val:5, mult:100000, color:'#27ae60'},
+  {name:'Azul', val:6, mult:1000000, color:'#2980b9'},
+  {name:'Violeta', val:7, mult:10000000, color:'#8e44ad'},
+  {name:'Gris', val:8, mult:100000000, color:'#7f8c8d'},
+  {name:'Blanco', val:9, mult:1000000000, color:'#ecf0f1'}
+];
+let ccBands = [1, 0, 2]; // brown black red = 1000Ω
+function renderColorCode(){
+  const host = document.getElementById('colorCodeHost');
+  if(!host) return;
+  const b0 = COLOR_CODE[ccBands[0]], b1 = COLOR_CODE[ccBands[1]], b2 = COLOR_CODE[ccBands[2]];
+  const ohms = (b0.val*10 + b1.val) * b2.mult;
+  let label = ohms >= 1e6 ? (ohms/1e6)+' MΩ' : ohms >= 1000 ? (ohms/1000)+' kΩ' : ohms+' Ω';
+  host.innerHTML = `
+    <div class="resistor-visual">
+      <div class="resistor-lead"></div>
+      <div class="resistor-body">
+        <div class="resistor-band" style="background:${b0.color}"></div>
+        <div class="resistor-band" style="background:${b1.color}"></div>
+        <div class="resistor-band" style="background:${b2.color}"></div>
+        <div class="resistor-band" style="background:#d4a574"></div>
+        <div class="resistor-band" style="background:#c9a227"></div>
+      </div>
+      <div class="resistor-lead"></div>
+    </div>
+    <p style="text-align:center;font-size:1.2rem;font-weight:800;">Valor: <span style="color:var(--wire-yellow)">${label}</span> ±5%</p>
+    <p style="text-align:center;opacity:.7;font-size:.85rem;">Toca una banda y elige el color</p>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">1ª</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[0]===i?'selected':''}" style="background:${c.color}" onclick="setBand(0,${i})" title="${c.name}">${c.val}</button>`).join('')}
+    </div>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">2ª</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[1]===i?'selected':''}" style="background:${c.color}" onclick="setBand(1,${i})" title="${c.name}">${c.val}</button>`).join('')}
+    </div>
+    <div class="band-row">
+      <span style="opacity:.6;font-size:.75rem;">×</span>
+      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[2]===i?'selected':''}" style="background:${c.color}" onclick="setBand(2,${i})" title="${c.name} ×">${c.name[0]}</button>`).join('')}
+    </div>`;
+}
+function setBand(pos, idx){
+  ccBands[pos] = idx;
+  renderColorCode();
+  if(window.PG) PG.sfxOk();
+}
+
+/* Leaderboard */
+function saveScore(game, value){
+  if(!window.PG) return;
+  const key = game;
+  const prev = PG.scores[key];
+  // lower is better for moves, higher for quiz
+  if(game==='memo_moves'){
+    if(prev===undefined || value < prev) PG.scores[key]=value;
+  } else {
+    if(prev===undefined || value > prev) PG.scores[key]=value;
+  }
+  PG.save();
+  renderLeaderboard();
+}
+function renderLeaderboard(){
+  const el = document.getElementById('leaderboardHost');
+  if(!el || !window.PG) return;
+  const s = PG.scores;
+  el.innerHTML = `<div class="leaderboard"><h4>🏆 RÉCORDS LOCALES</h4>
+    <li>Memorama (menos movimientos): <b>${s.memo_moves??'—'}</b></li>
+    <li>Quiz (aciertos): <b>${s.quiz_score??'—'}</b></li>
+    <li>Polaridad: <b>${s.polar_score??'—'}</b></li>
+  </div>`;
+}
+
+/* Lang (simple Aymara/Quechua labels) */
+let langMode = 'es';
+const LANG = {
+  es: {},
+  ay: { 'Zona de juegos':'Anataña uraqi', 'Componentes electrónicos':'Electrónica componentes', 'Laboratorio de circuitos':'Circuito laboratorio' },
+  qu: { 'Zona de juegos':'Pukllay zona', 'Componentes electrónicos':'Electrónica componentes', 'Laboratorio de circuitos':'Circuito laboratorio' }
+};
+function toggleLang(){
+  langMode = langMode==='es' ? 'ay' : langMode==='ay' ? 'qu' : 'es';
+  const t = document.getElementById('langToggle');
+  if(t) t.textContent = langMode==='es' ? 'Aymara / Qhichwa' : langMode==='ay' ? 'Aymara (activo)' : 'Qhichwa (activo)';
+  if(window.PG) PG.toast(langMode==='es'?'Español': langMode==='ay'?'Aymara':'Qhichwa');
+}
+
+
 /* ============================================================
    INICIALIZACIÓN GENERAL
    ============================================================ */
 renderTheory();
 initQuiz();
 renderLab();
+if(typeof renderColorCode==='function') renderColorCode();
+if(typeof renderLeaderboard==='function') renderLeaderboard();
+if(window.PG) PG.renderMedals();
 </script>
 </body>
 </html>
