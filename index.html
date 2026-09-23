@@ -439,7 +439,35 @@
     padding:0 22px;
   }
   .theory-item.open .theory-body{max-height:1400px; padding:0 22px 20px;}
-  .memo-level-btn.active{
+  .cb-level-btn.active, .pol-level-btn.active, 
+  .lab-cell{
+    width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:1.2rem; cursor:pointer; border:2px solid rgba(255,255,255,0.12); background:rgba(0,0,0,0.25);
+    transition: transform .15s, border-color .15s, background .15s;
+  }
+  .lab-cell:hover{ transform:scale(1.05); }
+  .lab-cell.path{ background:rgba(74,222,128,0.2); border-color:#4ade80; }
+  .lab-cell.wall{ background:rgba(0,0,0,0.45); cursor:not-allowed; opacity:0.5; }
+  .lab-cell.start{ background:rgba(74,222,128,0.35); border-color:#4ade80; }
+  .lab-cell.end{ background:rgba(248,113,113,0.25); border-color:#f87171; }
+  .lab-cell.player{ background:#4ade80; color:#0b1f18; font-weight:800; box-shadow:0 0 12px #4ade80; }
+  .puz-slot{
+    min-width:120px; min-height:90px; border:2px dashed rgba(255,255,255,0.25); border-radius:12px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding:10px; background:rgba(0,0,0,0.2);
+  }
+  .puz-slot.filled{ border-style:solid; border-color:#4ade80; background:rgba(74,222,128,0.12); }
+  .puz-slot.wrong{ border-color:#f87171; background:rgba(248,113,113,0.12); }
+  .puz-piece{
+    width:72px; height:72px; border-radius:12px; background:rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center; cursor:grab; padding:6px;
+  }
+  .puz-piece svg{ width:48px; height:48px; }
+  .puz-piece.used{ opacity:0.35; pointer-events:none; }
+  .lab-level-btn.active, .puz-level-btn.active{
+    background: var(--copper) !important; color: var(--ink) !important; border-color: var(--copper) !important;
+  }
+.memo-level-btn.active{
     background: var(--copper) !important;
     color: var(--ink) !important;
     border-color: var(--copper) !important;
@@ -927,6 +955,8 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
       <button class="game-tab active" data-game="memorama" onclick="switchGame('memorama')">🧠 Memorama</button>
       <button class="game-tab" data-game="armado" onclick="switchGame('armado')">🔌 Arma el circuito</button>
       <button class="game-tab" data-game="polaridad" onclick="switchGame('polaridad')">🔋 Polaridad</button>
+      <button class="game-tab" data-game="laberinto" onclick="switchGame('laberinto')">🌀 Laberinto</button>
+      <button class="game-tab" data-game="puzzle" onclick="switchGame('puzzle')">🧩 Puzzle</button>
       <button class="game-tab" data-game="serieparalelo" onclick="switchGame('serieparalelo')">💡 Serie / Paralelo</button>
       <button class="game-tab" data-game="cables" onclick="switchGame('cables')">🔗 Conecta los cables</button>
       <button class="game-tab" data-game="quiz" onclick="switchGame('quiz')">🏆 Quiz final</button>
@@ -956,7 +986,12 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
     <div class="game-view" id="game-armado">
       <div class="game-view-head">
         <h3>🔌 Arma el circuito en serie</h3>
-        <p>Arrastra las piezas al riel en el orden correcto: pila → interruptor → resistencia → LED. Sin resistencia, ¡el LED se quema!</p>
+        <p>Arrastra las piezas al riel en el orden correcto. Sin resistencia, ¡el LED se quema!</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost cb-level-btn active" data-level="facil" onclick="setCircuitLevel('facil')">Fácil</button>
+        <button class="btn ghost cb-level-btn" data-level="normal" onclick="setCircuitLevel('normal')">Normal</button>
+        <button class="btn ghost cb-level-btn" data-level="dificil" onclick="setCircuitLevel('dificil')">Difícil</button>
       </div>
       <div class="cb-wrap">
         <div class="cb-tray">
@@ -979,10 +1014,15 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
     <div class="game-view" id="game-polaridad">
       <div class="game-view-head">
         <h3>🔋 ¿Cuál es el terminal positivo?</h3>
-        <p>Algunos componentes deben conectarse en un solo sentido. Adivina el terminal <b>positivo</b> o identifica correctamente la polaridad.</p>
+        <p>Algunos componentes deben conectarse en un solo sentido. Adivina el terminal <b>positivo</b>.</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost pol-level-btn active" data-level="facil" onclick="setPolLevel('facil')">Fácil (3)</button>
+        <button class="btn ghost pol-level-btn" data-level="normal" onclick="setPolLevel('normal')">Normal (5)</button>
+        <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil (7)</button>
       </div>
       <div class="panel-top">
-        <div class="stat">Puntaje: <b id="polScore">0</b>/3</div>
+        <div class="stat">Puntaje: <b id="polScore">0</b>/<span id="polTotal">3</span></div>
         <button class="btn ghost" onclick="initPolarity()">🔄 Reiniciar</button>
       </div>
       <div class="pol-stage">
@@ -993,6 +1033,45 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
         </div>
         <div class="feedback" id="polFeedback"></div>
       </div>
+    </div>
+
+
+    <!-- JUEGO: LABERINTO DE LA CORRIENTE -->
+    <div class="game-view" id="game-laberinto">
+      <div class="game-view-head">
+        <h3>🌀 El Laberinto de la Corriente</h3>
+        <p>Guía la corriente desde la pila (+) hasta el LED. Evita los caminos rotos. ¡Llega al final!</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost lab-level-btn active" data-level="1" onclick="setLabLevel(1)">Nivel 1</button>
+        <button class="btn ghost lab-level-btn" data-level="2" onclick="setLabLevel(2)">Nivel 2</button>
+        <button class="btn ghost lab-level-btn" data-level="3" onclick="setLabLevel(3)">Nivel 3</button>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Pasos: <b id="labSteps">0</b></div>
+        <button class="btn ghost" onclick="initLaberinto()">🔄 Reiniciar</button>
+      </div>
+      <div id="labGrid" style="display:grid; gap:6px; max-width:360px; margin:0 auto; justify-content:center;"></div>
+      <div class="cb-result" id="labResult" style="margin-top:16px; text-align:center;"></div>
+    </div>
+
+    <!-- JUEGO: PUZZLE DE COMPONENTES -->
+    <div class="game-view" id="game-puzzle">
+      <div class="game-view-head">
+        <h3>🧩 Puzzle de Componentes</h3>
+        <p>Arrastra cada componente a su nombre correcto. ¡Aprende a reconocerlos!</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost puz-level-btn active" data-level="facil" onclick="setPuzLevel('facil')">Fácil (4)</button>
+        <button class="btn ghost puz-level-btn" data-level="normal" onclick="setPuzLevel('normal')">Normal (6)</button>
+        <button class="btn ghost puz-level-btn" data-level="dificil" onclick="setPuzLevel('dificil')">Difícil (8)</button>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Correctos: <b id="puzScore">0</b>/<span id="puzTotal">4</span></div>
+        <button class="btn ghost" onclick="initPuzzle()">🔄 Reiniciar</button>
+      </div>
+      <div id="puzBoard" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; align-items:flex-start; margin-top:12px;"></div>
+      <div class="cb-result" id="puzResult" style="margin-top:16px; text-align:center;"></div>
     </div>
 
     <!-- JUEGO 4: SERIE / PARALELO -->
@@ -1621,11 +1700,271 @@ function renderTheory(){
 /* ============================================================
    ZONA DE JUEGOS: cambio de pestaña
    ============================================================ */
+
+/* ============================================================
+   JUEGO: LABERINTO DE LA CORRIENTE
+   ============================================================ */
+const LAB_LEVELS = {
+  1: {
+    rows:5, cols:5,
+    grid:[
+      [0,0,1,0,0],
+      [1,0,1,0,1],
+      [0,0,0,0,1],
+      [0,1,1,0,0],
+      [0,0,0,1,0]
+    ],
+    start:[0,0], end:[4,4]
+  },
+  2: {
+    rows:6, cols:6,
+    grid:[
+      [0,0,1,0,0,0],
+      [1,0,1,0,1,0],
+      [0,0,0,1,0,0],
+      [0,1,0,0,0,1],
+      [0,1,1,1,0,0],
+      [0,0,0,0,0,0]
+    ],
+    start:[0,0], end:[5,5]
+  },
+  3: {
+    rows:7, cols:7,
+    grid:[
+      [0,0,1,0,0,1,0],
+      [1,0,1,0,1,0,0],
+      [0,0,0,0,1,0,1],
+      [0,1,1,0,0,0,0],
+      [0,0,1,1,0,1,0],
+      [1,0,0,0,0,1,0],
+      [0,0,1,0,0,0,0]
+    ],
+    start:[0,0], end:[6,6]
+  }
+};
+let labState = {level:1, pos:[0,0], steps:0, path:new Set()};
+
+function setLabLevel(n){
+  labState.level = n;
+  document.querySelectorAll('.lab-level-btn').forEach(b=>b.classList.toggle('active', +b.dataset.level===n));
+  initLaberinto();
+}
+
+function initLaberinto(){
+  const L = LAB_LEVELS[labState.level];
+  labState.pos = [...L.start];
+  labState.steps = 0;
+  labState.path = new Set([L.start.join(',')]);
+  labWon = false;
+  labHolding = false;
+  const stepsEl = document.getElementById('labSteps');
+  if(stepsEl) stepsEl.textContent = 0;
+  const res = document.getElementById('labResult');
+  if(res){ res.textContent=''; res.className='cb-result'; }
+  renderLaberinto();
+}
+
+function renderLaberinto(){
+  const L = LAB_LEVELS[labState.level];
+  const grid = document.getElementById('labGrid');
+  if(!grid) return;
+  grid.style.gridTemplateColumns = 'repeat(' + L.cols + ', 48px)';
+  grid.innerHTML = '';
+  for(let r=0;r<L.rows;r++){
+    for(let c=0;c<L.cols;c++){
+      const cell = document.createElement('div');
+      const key = r+','+c;
+      const isWall = L.grid[r][c]===1;
+      const isStart = r===L.start[0] && c===L.start[1];
+      const isEnd = r===L.end[0] && c===L.end[1];
+      const isPlayer = r===labState.pos[0] && c===labState.pos[1];
+      const onPath = labState.path.has(key);
+
+      cell.className = 'lab-cell';
+      if(isWall) cell.classList.add('wall');
+      else if(isPlayer) cell.classList.add('player');
+      else if(isStart) cell.classList.add('start');
+      else if(isEnd) cell.classList.add('end');
+      else if(onPath) cell.classList.add('path');
+
+      if(isPlayer) cell.textContent = '⚡';
+      else if(isStart) cell.textContent = '🔋';
+      else if(isEnd) cell.textContent = '💡';
+      else if(isWall) cell.textContent = '⬛';
+      else cell.textContent = '';
+
+      if(!isWall){
+        cell.style.touchAction = 'none';
+        cell.onpointerdown = (function(rr,cc){ return function(e){ labPointerDown(rr,cc,e); }; })(r,c);
+        cell.onpointerenter = (function(rr,cc){ return function(){ labPointerEnter(rr,cc); }; })(r,c);
+        cell.onclick = (function(rr,cc){ return function(){ tryMoveLab(rr,cc); }; })(r,c);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+let labHolding = false;
+let labWon = false;
+
+function tryMoveLab(r,c){
+  if(labWon) return;
+  const L = LAB_LEVELS[labState.level];
+  if(L.grid[r][c]===1) return;
+  const pr = labState.pos[0], pc = labState.pos[1];
+  if(Math.abs(r-pr)+Math.abs(c-pc)!==1) return;
+  labState.pos = [r,c];
+  labState.steps++;
+  labState.path.add(r+','+c);
+  const stepsEl = document.getElementById('labSteps');
+  if(stepsEl) stepsEl.textContent = labState.steps;
+  renderLaberinto();
+  if(r===L.end[0] && c===L.end[1]){
+    labWon = true;
+    labHolding = false;
+    const res = document.getElementById('labResult');
+    res.innerHTML = '✅ ¡Llegaste! La corriente encendió el LED en ' + labState.steps + ' pasos.';
+    res.className = 'cb-result ok';
+    if(window.PG){ PG.sfxWin(); PG.confetti(40); PG.toast('🌀 ¡Laberinto completado!'); }
+  }
+}
+
+function moveLab(r,c){ tryMoveLab(r,c); }
+
+function labPointerDown(r,c,e){
+  e.preventDefault();
+  labHolding = true;
+  tryMoveLab(r,c);
+}
+function labPointerEnter(r,c){
+  if(labHolding) tryMoveLab(r,c);
+}
+function labPointerUp(){ labHolding = false; }
+
+// global release
+if(typeof window._labPointerUpBound === 'undefined'){
+  window.addEventListener('pointerup', labPointerUp);
+  window.addEventListener('pointercancel', labPointerUp);
+  window._labPointerUpBound = true;
+}
+
+/* ============================================================
+   JUEGO: PUZZLE DE COMPONENTES
+   ============================================================ */
+const PUZ_POOL = [
+  {id:'resistencia', name:'Resistencia'},
+  {id:'led', name:'LED'},
+  {id:'bateria', name:'Pila'},
+  {id:'interruptor', name:'Interruptor'},
+  {id:'capacitor', name:'Capacitor'},
+  {id:'ldr', name:'LDR'},
+  {id:'buzzer', name:'Buzzer'},
+  {id:'motor', name:'Motor'},
+  {id:'potenciometro', name:'Potenciómetro'},
+  {id:'transistor', name:'Transistor'}
+];
+let puzLevel = 'facil';
+let puzState = {items:[], placed:{}};
+
+function setPuzLevel(level){
+  puzLevel = level;
+  document.querySelectorAll('.puz-level-btn').forEach(b=>b.classList.toggle('active', b.dataset.level===level));
+  initPuzzle();
+}
+
+function initPuzzle(){
+  const n = puzLevel==='facil' ? 4 : (puzLevel==='normal' ? 6 : 8);
+  const pool = PUZ_POOL.filter(function(p){ return ICONS[p.id]; }).sort(function(){ return Math.random()-0.5; }).slice(0,n);
+  puzState.items = pool;
+  puzState.placed = {};
+  const score = document.getElementById('puzScore');
+  const total = document.getElementById('puzTotal');
+  if(score) score.textContent = 0;
+  if(total) total.textContent = n;
+  const res = document.getElementById('puzResult');
+  if(res){ res.textContent=''; res.className='cb-result'; }
+  renderPuzzle();
+}
+
+function renderPuzzle(){
+  const board = document.getElementById('puzBoard');
+  if(!board) return;
+  board.innerHTML = '';
+
+  const slotsCol = document.createElement('div');
+  slotsCol.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;';
+  const names = puzState.items.slice().sort(function(){ return Math.random()-0.5; });
+  names.forEach(function(item){
+    const slot = document.createElement('div');
+    slot.className = 'puz-slot' + (puzState.placed[item.id] ? ' filled' : '');
+    slot.dataset.id = item.id;
+    var inner = '<span style="font-size:0.85rem;font-weight:700;text-align:center;">' + item.name + '</span>';
+    if(puzState.placed[item.id]){
+      inner += '<div style="width:48px;height:48px;">' + (ICONS[item.id]||'') + '</div>';
+    } else {
+      inner += '<div class="puz-drop" data-id="' + item.id + '" style="min-height:40px;width:100%;"></div>';
+    }
+    slot.innerHTML = inner;
+    slot.addEventListener('dragover', function(e){ e.preventDefault(); });
+    slot.addEventListener('drop', function(e){
+      e.preventDefault();
+      var id = e.dataTransfer.getData('text/plain');
+      placePuzzle(id, item.id, slot);
+    });
+    slotsCol.appendChild(slot);
+  });
+
+  const piecesCol = document.createElement('div');
+  piecesCol.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;margin-top:8px;';
+  const pieces = puzState.items.slice().sort(function(){ return Math.random()-0.5; });
+  pieces.forEach(function(item){
+    if(puzState.placed[item.id]) return;
+    const piece = document.createElement('div');
+    piece.className = 'puz-piece';
+    piece.draggable = true;
+    piece.dataset.id = item.id;
+    piece.innerHTML = ICONS[item.id] || item.name;
+    piece.addEventListener('dragstart', function(e){ e.dataTransfer.setData('text/plain', item.id); });
+    piecesCol.appendChild(piece);
+  });
+
+  board.appendChild(slotsCol);
+  const label = document.createElement('div');
+  label.style.cssText = 'width:100%;text-align:center;opacity:0.7;font-size:0.85rem;margin:8px 0 4px;';
+  label.textContent = 'Arrastra el símbolo hacia su nombre';
+  board.appendChild(label);
+  board.appendChild(piecesCol);
+}
+
+function placePuzzle(pieceId, slotId, slotEl){
+  if(puzState.placed[pieceId]) return;
+  if(pieceId === slotId){
+    puzState.placed[pieceId] = true;
+    var score = Object.keys(puzState.placed).length;
+    document.getElementById('puzScore').textContent = score;
+    if(window.PG) PG.sfxOk();
+    renderPuzzle();
+    if(score >= puzState.items.length){
+      var res = document.getElementById('puzResult');
+      res.innerHTML = '✅ ¡Puzzle completo! Reconociste todos los componentes.';
+      res.className = 'cb-result ok';
+      if(window.PG){ PG.confetti(45); PG.toast('🧩 ¡Puzzle resuelto!'); }
+    }
+  } else {
+    slotEl.classList.add('wrong');
+    if(window.PG) PG.sfxBad();
+    setTimeout(function(){ slotEl.classList.remove('wrong'); }, 600);
+  }
+}
+
+
 function switchGame(name){
   document.querySelectorAll('.game-tab').forEach(t=>t.classList.toggle('active', t.dataset.game===name));
   document.querySelectorAll('.game-view').forEach(v=>v.classList.toggle('active', v.id === 'game-'+name));
   if(name==='cables' && !wireInitDone){ initWireGame(); wireInitDone = true; }
   if(name==='ohm' && typeof updateOhmLive==='function') updateOhmLive();
+  if(name==='laberinto' && typeof initLaberinto==='function') initLaberinto();
+  if(name==='puzzle' && typeof initPuzzle==='function') initPuzzle();
 }
 
 /* ============================================================
@@ -1961,21 +2300,57 @@ if(document.getElementById('memoGrid')) initMemory();
 /* ============================================================
    JUEGO 2: ARMA EL CIRCUITO (drag & drop)
    ============================================================ */
-const CIRCUIT_PARTS = [
-  {id:'bateria', label:'Pila', icon:ICONS.bateria},
-  {id:'interruptor', label:'Interruptor', icon:ICONS.interruptor},
-  {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
-  {id:'led', label:'LED', icon:ICONS.led}
-];
-const CORRECT_ORDER = ['bateria','interruptor','resistencia','led'];
+const CIRCUIT_LEVELS = {
+  facil: {
+    parts: [
+      {id:'bateria', label:'Pila', icon:ICONS.bateria},
+      {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
+      {id:'led', label:'LED', icon:ICONS.led}
+    ],
+    order: ['bateria','resistencia','led'],
+    hint: 'Pila → Resistencia → LED'
+  },
+  normal: {
+    parts: [
+      {id:'bateria', label:'Pila', icon:ICONS.bateria},
+      {id:'interruptor', label:'Interruptor', icon:ICONS.interruptor},
+      {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
+      {id:'led', label:'LED', icon:ICONS.led}
+    ],
+    order: ['bateria','interruptor','resistencia','led'],
+    hint: 'Pila → Interruptor → Resistencia → LED'
+  },
+  dificil: {
+    parts: [
+      {id:'bateria', label:'Pila', icon:ICONS.bateria},
+      {id:'interruptor', label:'Interruptor', icon:ICONS.interruptor},
+      {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
+      {id:'led', label:'LED', icon:ICONS.led},
+      {id:'buzzer', label:'Buzzer', icon:ICONS.buzzer || ICONS.led}
+    ],
+    order: ['bateria','interruptor','resistencia','led','buzzer'],
+    hint: 'Pila → Interruptor → Resistencia → LED → Buzzer'
+  }
+};
+let circuitLevel = 'facil';
+
+function setCircuitLevel(level){
+  circuitLevel = level;
+  document.querySelectorAll('.cb-level-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.level===level);
+  });
+  initCircuitBuilder();
+}
 
 function initCircuitBuilder(){
+  const lvl = CIRCUIT_LEVELS[circuitLevel] || CIRCUIT_LEVELS.facil;
   const tray = document.getElementById('cbParts');
   const slotsWrap = document.getElementById('cbSlots');
-  document.getElementById('cbResult').textContent='';
-  document.getElementById('cbResult').className='cb-result';
+  if(!tray || !slotsWrap) return;
+  const res = document.getElementById('cbResult');
+  if(res){ res.textContent=''; res.className='cb-result'; }
   tray.innerHTML='';
-  const shuffled = [...CIRCUIT_PARTS].sort(()=>Math.random()-0.5);
+  const shuffled = [...lvl.parts].sort(()=>Math.random()-0.5);
   shuffled.forEach(p=>{
     const el = document.createElement('div');
     el.className='cb-part';
@@ -1986,7 +2361,8 @@ function initCircuitBuilder(){
     tray.appendChild(el);
   });
   slotsWrap.innerHTML='';
-  for(let i=0;i<4;i++){
+  const n = lvl.order.length;
+  for(let i=0;i<n;i++){
     const slot = document.createElement('div');
     slot.className='cb-slot';
     slot.dataset.index = i;
@@ -1999,7 +2375,7 @@ function initCircuitBuilder(){
       placeInSlot(slot, id);
     });
     slotsWrap.appendChild(slot);
-    if(i<3){
+    if(i<n-1){
       const wire = document.createElement('div');
       wire.className='cb-wire';
       slotsWrap.appendChild(wire);
@@ -2008,7 +2384,8 @@ function initCircuitBuilder(){
 }
 function placeInSlot(slot, id){
   if(slot.dataset.filled) return;
-  const part = CIRCUIT_PARTS.find(p=>p.id===id);
+  const lvl = CIRCUIT_LEVELS[circuitLevel] || CIRCUIT_LEVELS.facil;
+  const part = lvl.parts.find(p=>p.id===id);
   if(!part) return;
   const trayItem = document.querySelector(`#cbParts .cb-part[data-id="${id}"]`);
   if(!trayItem || trayItem.classList.contains('used')) return;
@@ -2018,22 +2395,23 @@ function placeInSlot(slot, id){
   trayItem.classList.add('used');
 }
 function testCircuit(){
-  const slots = [...document.querySelectorAll('.cb-slot')];
+  const lvl = CIRCUIT_LEVELS[circuitLevel] || CIRCUIT_LEVELS.facil;
+  const slots = [...document.querySelectorAll('#cbSlots .cb-slot')];
   const order = slots.map(s=>s.dataset.filled);
   const result = document.getElementById('cbResult');
   if(order.includes('')){
-    result.textContent = '⚠️ Coloca las 4 piezas antes de probar el circuito.';
+    result.textContent = `⚠️ Coloca las ${lvl.order.length} piezas antes de probar.`;
     result.className = 'cb-result bad';
     return;
   }
-  const correct = JSON.stringify(order) === JSON.stringify(CORRECT_ORDER);
+  const correct = JSON.stringify(order) === JSON.stringify(lvl.order);
   if(correct){
-    result.innerHTML = '✅ ¡Circuito correcto! La corriente fluye y el LED enciende sin quemarse.';
+    result.innerHTML = '✅ ¡Circuito correcto! La corriente fluye sin problemas.';
     if(window.PG){ PG.sfxWin(); PG.confetti(45); PG.toast('🔌 ¡Circuito armado!'); PG.award('circuito','Constructor de Circuitos'); }
     result.className = 'cb-result ok';
     slots.forEach(s=>s.style.borderColor='#4ade80');
   } else {
-    result.innerHTML = '❌ Ese orden no funciona. Recuerda: Pila → Interruptor → Resistencia → LED.';
+    result.innerHTML = `❌ Orden incorrecto. Recuerda: ${lvl.hint}`;
     result.className = 'cb-result bad';
     slots.forEach(s=>s.style.borderColor='#ff5c5c');
   }
@@ -2079,11 +2457,31 @@ const POL_ITEMS = [
     <text x="120" y="175" fill="#fef8ec" text-anchor="middle" font-size="16">B</text>
   </svg>`, hint:'En este capacitor electrolítico, A está marcado como positivo (+) y B como negativo (−).'}
 ];
-let polState = {order:[], idx:0, score:0, answered:false};
+let polState = {order:[], idx:0, score:0, answered:false, total:3};
+let polLevel = 'facil';
+
+function setPolLevel(level){
+  polLevel = level;
+  if(level==='facil') polState.total = 3;
+  else if(level==='normal') polState.total = 5;
+  else polState.total = Math.min(7, POL_ITEMS.length);
+  document.querySelectorAll('.pol-level-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.level===level);
+  });
+  const tot = document.getElementById('polTotal');
+  if(tot) tot.textContent = polState.total;
+  initPolarity();
+}
+
 function initPolarity(){
-  polState.order = [...POL_ITEMS.keys()].sort(()=>Math.random()-0.5);
+  if(typeof polState.total === 'undefined') polState.total = 3;
+  const n = Math.min(polState.total, POL_ITEMS.length);
+  polState.order = [...POL_ITEMS.keys()].sort(()=>Math.random()-0.5).slice(0, n);
   polState.idx = 0; polState.score = 0; polState.answered=false;
-  document.getElementById('polScore').textContent = 0;
+  const sc = document.getElementById('polScore');
+  const tot = document.getElementById('polTotal');
+  if(sc) sc.textContent = 0;
+  if(tot) tot.textContent = n;
   renderPolarity();
 }
 function renderPolarity(){
@@ -2104,7 +2502,7 @@ function answerPolarity(choice){
     document.getElementById('polScore').textContent = polState.score;
     fb.textContent = '✅ ¡Correcto! ' + item.hint;
     if(window.PG){ PG.sfxOk(); }
-    if(polState.score >= 3 && window.PG){ PG.award('polar','Maestro de la Polaridad'); PG.confetti(40); PG.toast('🔋 ¡Polaridad dominada!'); if(typeof saveScore==='function') saveScore('polar_score', polState.score); }
+    if(polState.score >= polState.total && window.PG){ PG.award('polar','Maestro de la Polaridad'); PG.confetti(40); PG.toast('🔋 ¡Polaridad dominada!'); if(typeof saveScore==='function') saveScore('polar_score', polState.score); }
     fb.className = 'feedback ok';
   } else {
     fb.textContent = '❌ Casi. ' + item.hint;
@@ -2114,7 +2512,7 @@ function answerPolarity(choice){
   setTimeout(()=>{
     polState.idx++;
     if(polState.idx >= polState.order.length){
-      document.getElementById('polItem').innerHTML = `<h3 style="text-align:center;">🏁 Terminaste: ${polState.score}/${POL_ITEMS.length}</h3>`;
+      document.getElementById('polItem').innerHTML = `<h3 style="text-align:center;">🏁 Terminaste: ${polState.score}/${polState.order.length}</h3>`;
       document.getElementById('polFeedback').innerHTML = '<button class="btn" onclick="initPolarity()">Jugar de nuevo</button>';
       document.getElementById('polFeedback').className='feedback';
     } else {
