@@ -226,6 +226,59 @@
   .stat{font-family:'Space Mono',monospace; font-size:0.85rem; background:rgba(0,0,0,0.25); padding:8px 14px; border-radius:10px;}
   .stat b{color:var(--wire-yellow);}
 
+  /* ========== TABLAS FORMALES ========== */
+  .table-wrap{
+    overflow-x:auto;
+    margin:22px 0 10px;
+    border-radius:14px;
+    border:1px solid rgba(255,180,84,0.25);
+  }
+  .data-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.9rem;
+    background:rgba(0,0,0,0.18);
+  }
+  .data-table th{
+    background:rgba(255,138,61,0.18);
+    color:var(--wire-yellow);
+    font-family:'Space Mono',monospace;
+    font-size:0.78rem;
+    letter-spacing:0.5px;
+    padding:12px 14px;
+    text-align:left;
+    border-bottom:2px solid rgba(255,180,84,0.35);
+  }
+  .data-table td{
+    padding:11px 14px;
+    border-bottom:1px solid rgba(255,248,236,0.08);
+    vertical-align:middle;
+  }
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table tr:hover td{background:rgba(255,180,84,0.06);}
+  .data-table .color-swatch{
+    display:inline-block;
+    width:22px; height:22px;
+    border-radius:6px;
+    border:2px solid rgba(255,248,236,0.25);
+    vertical-align:middle;
+    margin-right:8px;
+  }
+  .table-caption{
+    font-family:'Space Mono',monospace;
+    font-size:0.8rem;
+    color:var(--copper-2);
+    letter-spacing:1px;
+    margin:0 0 10px;
+    text-align:center;
+  }
+  .table-title{
+    font-size:1.15rem;
+    font-weight:800;
+    margin:28px 0 6px;
+    text-align:center;
+  }
+
   /* GAME 1 memory */
   .memo-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;}
   .memo-card{
@@ -386,6 +439,11 @@
     padding:0 22px;
   }
   .theory-item.open .theory-body{max-height:1400px; padding:0 22px 20px;}
+  .memo-level-btn.active{
+    background: var(--copper) !important;
+    color: var(--ink) !important;
+    border-color: var(--copper) !important;
+  }
   .theory-body p{margin:0 0 10px; opacity:0.85; line-height:1.6; font-size:0.94rem;}
   .theory-body p:last-child{margin-bottom:0;}
   .theory-mini-diagram{margin:6px 0 14px; display:flex; justify-content:center;}
@@ -747,6 +805,49 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
   <p style="text-align:center;opacity:.55;font-size:.75rem;margin-top:18px;">
     Imágenes de componentes reales. Las figuras se numeran para facilitar su identificación en el proyecto.
   </p>
+
+  <!-- TABLA RESUMEN DE COMPONENTES -->
+  <div class="panel" style="margin-top:40px;">
+    <h3 class="table-title">Resumen de componentes electrónicos</h3>
+    <p style="text-align:center; opacity:0.75; margin:0 0 18px; font-size:0.92rem;">
+      Tabla de consulta rápida con todos los componentes del proyecto.
+    </p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Figura</th>
+            <th>Componente</th>
+            <th>Símbolo</th>
+            <th>Polaridad</th>
+            <th>Uso principal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Resistencia</td><td>R</td><td>No polarizado</td><td>Limita la corriente y protege otros componentes</td></tr>
+          <tr><td>2</td><td>LED</td><td>LED</td><td>Polarizado</td><td>Emite luz cuando pasa corriente en el sentido correcto</td></tr>
+          <tr><td>3</td><td>Capacitor</td><td>C</td><td>Según tipo</td><td>Almacena energía eléctrica temporalmente</td></tr>
+          <tr><td>4</td><td>Transistor</td><td>Q</td><td>No polarizado*</td><td>Amplifica o actúa como interruptor controlado</td></tr>
+          <tr><td>5</td><td>LDR (Fotoresistencia)</td><td>LDR</td><td>No polarizado</td><td>Cambia su resistencia según la luz</td></tr>
+          <tr><td>6</td><td>Jumpers</td><td>J</td><td>No polarizado</td><td>Conectan componentes en la protoboard</td></tr>
+          <tr><td>7</td><td>Pulsador</td><td>PB</td><td>No polarizado</td><td>Cierra el circuito solo mientras se presiona</td></tr>
+          <tr><td>8</td><td>Interruptor</td><td>SW</td><td>No polarizado</td><td>Abre o cierra el circuito y se queda en esa posición</td></tr>
+          <tr><td>9</td><td>Buzzer (Zumbador)</td><td>BZ</td><td>Polarizado</td><td>Emite sonido cuando recibe corriente</td></tr>
+          <tr><td>10</td><td>Motor DC</td><td>M</td><td>Polarizado</td><td>Convierte electricidad en movimiento</td></tr>
+          <tr><td>11</td><td>Batería / Pila</td><td>B</td><td>Polarizado</td><td>Fuente de energía del circuito</td></tr>
+          <tr><td>12</td><td>Potenciómetro</td><td>POT</td><td>No polarizado</td><td>Resistencia variable (volumen, brillo…)</td></tr>
+          <tr><td>13</td><td>Fusible</td><td>F</td><td>No polarizado</td><td>Protege el circuito de corrientes excesivas</td></tr>
+          <tr><td>14</td><td>Relé</td><td>K</td><td>No polarizado</td><td>Interruptor electromagnético</td></tr>
+          <tr><td>15</td><td>Diodo rectificador</td><td>D</td><td>Polarizado</td><td>Deja pasar la corriente en un solo sentido</td></tr>
+          <tr><td>16</td><td>Transformador</td><td>T</td><td>No polarizado</td><td>Sube o baja el voltaje (corriente alterna)</td></tr>
+          <tr><td>17</td><td>Microcontrolador</td><td>MCU</td><td>No polarizado</td><td>Cerebro programable del circuito</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center; margin:14px 0 0; font-size:0.82rem; opacity:0.7;">
+      * El transistor tiene terminales específicos (emisor, base y colector), por eso se debe conectar correctamente.
+    </p>
+  </div>
 </section>
 
 <!-- ===================== CENTRO DE TEORÍA ===================== -->
@@ -767,7 +868,47 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
     <h2>Código de colores de resistencias</h2>
     <p>Elige las bandas y descubre el valor en ohms. Así se leen las resistencias reales.</p>
   </div>
+
+  <div class="panel" style="margin-bottom:28px;">
+    <h3 class="table-title">Código de colores de resistencias</h3>
+    <p style="text-align:center; opacity:0.75; margin:0 0 18px; font-size:0.92rem;">
+      Tabla de referencia completa. Úsala para leer el valor de cualquier resistencia de 4 bandas.
+    </p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Color</th>
+            <th>1ª Banda (decenas)</th>
+            <th>2ª Banda (unidades)</th>
+            <th>Multiplicador</th>
+            <th>Tolerancia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="color-swatch" style="background:#1a1a1a"></span>Negro</td><td>0</td><td>0</td><td>×1</td><td>—</td></tr>
+          <tr><td><span class="color-swatch" style="background:#6b3a1f"></span>Marrón</td><td>1</td><td>1</td><td>×10</td><td>±1%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#c0392b"></span>Rojo</td><td>2</td><td>2</td><td>×100</td><td>±2%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#e67e22"></span>Naranja</td><td>3</td><td>3</td><td>×1 000</td><td>—</td></tr>
+          <tr><td><span class="color-swatch" style="background:#f1c40f"></span>Amarillo</td><td>4</td><td>4</td><td>×10 000</td><td>—</td></tr>
+          <tr><td><span class="color-swatch" style="background:#27ae60"></span>Verde</td><td>5</td><td>5</td><td>×100 000</td><td>±0,5%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#2980b9"></span>Azul</td><td>6</td><td>6</td><td>×1 000 000</td><td>±0,25%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#8e44ad"></span>Violeta</td><td>7</td><td>7</td><td>×10 000 000</td><td>±0,1%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#7f8c8d"></span>Gris</td><td>8</td><td>8</td><td>×100 000 000</td><td>±0,05%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#ecf0f1"></span>Blanco</td><td>9</td><td>9</td><td>×1 000 000 000</td><td>—</td></tr>
+          <tr><td><span class="color-swatch" style="background:#d4a574"></span>Dorado</td><td>—</td><td>—</td><td>×0,1</td><td>±5%</td></tr>
+          <tr><td><span class="color-swatch" style="background:#c0c0c0"></span>Plateado</td><td>—</td><td>—</td><td>×0,01</td><td>±10%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center; margin:16px 0 0; font-size:0.88rem; opacity:0.8;">
+      <b>Cómo se lee:</b> (1ª banda × 10 + 2ª banda) × Multiplicador. Ejemplo: Marrón-Negro-Rojo = (1×10 + 0) × 100 = <b>1 000 Ω</b> (1 kΩ).
+    </p>
+  </div>
+
   <div class="panel">
+    <p class="table-caption">HERRAMIENTA INTERACTIVA</p>
+    <h3 class="table-title" style="margin-top:0;">Calculadora de código de colores</h3>
     <div id="colorCodeHost"></div>
   </div>
   <div id="leaderboardHost"></div>
@@ -798,9 +939,14 @@ document.addEventListener('DOMContentLoaded', () => PG.renderMedals());
         <h3>🧠 Memorama de símbolos</h3>
         <p>Encuentra la pareja: el nombre del componente con su símbolo de circuito.</p>
       </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost memo-level-btn active" data-level="facil" onclick="setMemoLevel('facil')">Fácil (4)</button>
+        <button class="btn ghost memo-level-btn" data-level="normal" onclick="setMemoLevel('normal')">Normal (6)</button>
+        <button class="btn ghost memo-level-btn" data-level="dificil" onclick="setMemoLevel('dificil')">Difícil (8)</button>
+      </div>
       <div class="panel-top">
         <div class="stat">Movimientos: <b id="memoMoves">0</b></div>
-        <div class="stat">Parejas: <b id="memoPairs">0</b>/6</div>
+        <div class="stat">Parejas: <b id="memoPairs">0</b>/<span id="memoTotal">4</span></div>
         <button class="btn ghost" onclick="initMemory()">🔄 Reiniciar</button>
       </div>
       <div class="memo-grid" id="memoGrid"></div>
@@ -1213,159 +1359,34 @@ const SYMBOL_LABELS = {
    ============================================================ */
 const THEORY_PRIMARIA = [
   {
-    title:'¿Qué es un circuito eléctrico?',
-    body:`<p>Un circuito eléctrico es un camino cerrado por donde viajan los electrones. Necesita tres cosas: una <b>fuente</b> (como una pila, con su terminal <b>positivo +</b> y su terminal <b>negativo −</b>) que da la energía, una <b>carga</b> (como un LED) que la consume, y <b>conductores</b> (cables) que conectan todo en un lazo continuo.</p>
-      <p>Casi siempre se agrega una <b>resistencia</b> antes del LED, porque el LED por sí solo no limita la corriente y se quema. Con una pila de 9V, una resistencia de <b>330 Ω</b> es un valor típico y seguro.</p>
-      <p>La corriente sale del terminal <b>+</b> de la pila, pasa por la resistencia, atraviesa el <b>ánodo</b> del LED (el triángulo) y sale por el <b>cátodo</b> (la barra), hasta regresar al terminal <b>−</b> de la pila. Si el camino se interrumpe en cualquier punto, la corriente deja de fluir y nada funciona.</p>`,
-    diagram:`<svg viewBox="0 0 280 150">
-      <line x1="40" y1="20" x2="230" y2="20" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="40" y1="130" x2="230" y2="130" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="40" y1="20" x2="40" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="40" y1="55" x2="40" y2="63" stroke="#4ade80" stroke-width="3"/>
-      <line x1="40" y1="69" x2="40" y2="77" stroke="#4ade80" stroke-width="8"/>
-      <line x1="40" y1="77" x2="40" y2="130" stroke="#ffd23f" stroke-width="3"/>
-      <text x="24" y="63" fill="#fef8ec" font-size="13">+</text>
-      <text x="24" y="80" fill="#fef8ec" font-size="13">−</text>
-      <line x1="230" y1="20" x2="230" y2="40" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="230,40 230,43.75 218,46.7 242,49.6 218,52.5 242,55.4 218,58.3 230,61.25 230,65" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="252" y="57" fill="#fef8ec" font-size="11">330 Ω</text>
-      <line x1="230" y1="65" x2="230" y2="80" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="215,80 245,80 230,100" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="215" y1="100" x2="245" y2="100" stroke="#ff4d5e" stroke-width="4"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="248" y1="82" x2="260" y2="70"/><polyline points="249,70 260,70 260,81"/>
-        <line x1="248" y1="93" x2="260" y2="81"/><polyline points="249,81 260,81 260,92"/>
-      </g>
-      <line x1="230" y1="100" x2="230" y2="130" stroke="#ffd23f" stroke-width="3"/>
-      <text x="248" y="87" fill="#fef8ec" font-size="10">ánodo</text>
-      <text x="248" y="115" fill="#fef8ec" font-size="10">cátodo</text></svg>`
+    title:'Simbología electrónica',
+    body:`<p>Cada componente tiene un <b>símbolo</b> especial para dibujar esquemas de circuitos. Es como un idioma dibujado:</p>
+      <ul style="margin:10px 0 10px 20px; line-height:1.7;">
+        <li>Un <b>zigzag</b> = Resistencia</li>
+        <li>Un <b>triángulo apuntando a una barra</b> = LED o diodo</li>
+        <li>Dos <b>líneas paralelas</b> = Capacitor</li>
+        <li>Líneas largas y cortas = Pila / Batería</li>
+        <li>Una <b>abertura</b> = Interruptor</li>
+      </ul>
+      <p>Aprender estos símbolos te permite leer cualquier esquema de circuito. ¡Practica en el juego de Memorama!</p>`,
+    diagram:`<svg viewBox="0 0 280 90"><line x1="8" y1="45" x2="20" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <polyline points="20,45 26.0,45 30.7,35 35.3,55 40.0,35 44.7,55 49.3,35 54.0,45 60,45" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="60" y1="45" x2="72" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="100" y1="45" x2="115" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <polygon points="115,28 115,62 145,45" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
+      <line x1="145" y1="28" x2="145" y2="62" stroke="#ff4d5e" stroke-width="3"/>
+      <line x1="145" y1="45" x2="160" y2="45" stroke="#ffd23f" stroke-width="3"/>
+      <line x1="190" y1="25" x2="190" y2="65" stroke="#4dd8ff" stroke-width="4"/><path d="M205 25 Q198 45 205 65" fill="none" stroke="#4dd8ff" stroke-width="4"/></svg>`
   },
   {
-    title:'Circuito en serie',
-    body:`<p>Los componentes se conectan uno detrás del otro, formando <b>un solo camino</b> para la corriente. La energía sale del <b>+</b> de la pila, pasa por una <b>resistencia</b> (basta una sola, porque la corriente es la misma en todo el lazo), luego por el ánodo de cada LED (triángulo) hacia su cátodo (barra), uno tras otro, y regresa al <b>−</b> de la pila. Es como una fila de amigos tomados de la mano: si uno suelta la mano, se rompe la cadena.</p>
-      <p>Por eso, si un foco de una guirnalda antigua se funde, toda la cadena de luces se apaga.</p>`,
-    diagram:`<svg viewBox="0 0 340 100">
-      <line x1="10" y1="55" x2="10" y2="90" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="10" y1="90" x2="310" y2="90" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="310" y1="90" x2="310" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="10" y1="55" x2="30" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="30" y1="40" x2="30" y2="70" stroke="#4ade80" stroke-width="3"/>
-      <line x1="42" y1="47" x2="42" y2="63" stroke="#4ade80" stroke-width="8"/>
-      <text x="24" y="32" fill="#fef8ec" font-size="12">+</text>
-      <text x="38" y="32" fill="#fef8ec" font-size="12">−</text>
-      <line x1="42" y1="55" x2="65" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="65,55 69.5,55 73.0,46 76.5,64 80.0,46 83.5,64 87.0,46 90.5,55 95,55" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="80" y="35" text-anchor="middle" fill="#fef8ec" font-size="10">330Ω</text>
-      <line x1="95" y1="55" x2="115" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="115,40 115,70 145,55" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="145" y1="40" x2="145" y2="70" stroke="#ff4d5e" stroke-width="4"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="136" y1="32" x2="146" y2="18"/><polyline points="138,18 146,18 146,28"/>
-        <line x1="149" y1="32" x2="159" y2="18"/><polyline points="151,18 159,18 159,28"/>
-      </g>
-      <line x1="147" y1="55" x2="180" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="180,40 180,70 210,55" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
-      <line x1="210" y1="40" x2="210" y2="70" stroke="#4dd8ff" stroke-width="4"/>
-      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="201" y1="32" x2="211" y2="18"/><polyline points="203,18 211,18 211,28"/>
-        <line x1="214" y1="32" x2="224" y2="18"/><polyline points="216,18 224,18 224,28"/>
-      </g>
-      <line x1="212" y1="55" x2="310" y2="55" stroke="#ffd23f" stroke-width="3"/>
-      <text x="130" y="30" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
-      <text x="195" y="30" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
-  },
-  {
-    title:'Circuito en paralelo',
-    body:`<p>Cada componente tiene <b>su propia rama</b>, conectada a los mismos dos puntos (los mismos dos rieles que salen de la pila, uno unido al <b>+</b> y otro al <b>−</b>). A diferencia del circuito en serie, aquí <b>cada rama necesita su propia resistencia</b>, porque cada una es un camino independiente con su propia corriente. Si un LED falla, los demás siguen encendidos porque tienen caminos independientes hacia la fuente.</p>
-      <p>Así funciona la instalación eléctrica de una casa: puedes apagar una luz sin que se apaguen las demás.</p>`,
-    diagram:`<svg viewBox="0 0 280 160">
-      <line x1="30" y1="20" x2="230" y2="20" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="30" y1="140" x2="230" y2="140" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="230" y1="20" x2="230" y2="140" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="30" y1="20" x2="30" y2="48" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="15" y1="48" x2="45" y2="48" stroke="#4ade80" stroke-width="3"/>
-      <line x1="15" y1="60" x2="45" y2="60" stroke="#4ade80" stroke-width="8"/>
-      <line x1="30" y1="60" x2="30" y2="140" stroke="#ffd23f" stroke-width="3"/>
-      <text x="5" y="44" fill="#fef8ec" font-size="12">+</text>
-      <text x="5" y="72" fill="#fef8ec" font-size="12">−</text>
-      <line x1="110" y1="20" x2="110" y2="35" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="110,35 110,37.7 98,39.8 122,41.9 98,44.0 122,46.1 98,48.2 110,50.3 110,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="110" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">330Ω</text>
-      <line x1="110" y1="53" x2="110" y2="65" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="95,65 125,65 110,85" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="95" y1="85" x2="125" y2="85" stroke="#ff4d5e" stroke-width="4"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="118" y1="60" x2="130" y2="48"/><polyline points="120,48 130,48 130,58"/>
-        <line x1="127" y1="68" x2="139" y2="56"/><polyline points="129,56 139,56 139,66"/>
-      </g>
-      <line x1="110" y1="85" x2="110" y2="140" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="190" y1="20" x2="190" y2="35" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="190,35 190,37.7 178,39.8 202,41.9 178,44.0 202,46.1 178,48.2 190,50.3 190,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="190" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">220Ω</text>
-      <line x1="190" y1="53" x2="190" y2="65" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="175,65 205,65 190,85" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
-      <line x1="175" y1="85" x2="205" y2="85" stroke="#4dd8ff" stroke-width="4"/>
-      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="198" y1="60" x2="210" y2="48"/><polyline points="200,48 210,48 210,58"/>
-        <line x1="207" y1="68" x2="219" y2="56"/><polyline points="209,56 219,56 219,66"/>
-      </g>
-      <line x1="190" y1="85" x2="190" y2="140" stroke="#ffd23f" stroke-width="3"/>
-      <text x="110" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
-      <text x="190" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
-  },
-  {
-    title:'Circuito mixto',
-    body:`<p>Combina conexiones en serie y en paralelo dentro de la misma red. La energía sale del <b>+</b> de la pila, pasa primero por una <b>resistencia principal</b> en serie, y luego se reparte en dos ramas en paralelo. Como cada rama es independiente, <b>cada una lleva además su propia resistencia</b> junto a su LED (ánodo y cátodo), antes de volver al <b>−</b> de la pila.</p>
-      <p>Para entenderlo, se analiza por partes: primero se resuelven las secciones en serie, luego las paralelas, hasta simplificar todo el circuito.</p>`,
-    diagram:`<svg viewBox="0 -8 380 148">
-      <line x1="20" y1="20" x2="20" y2="48" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="5" y1="48" x2="35" y2="48" stroke="#4ade80" stroke-width="3"/>
-      <line x1="5" y1="60" x2="35" y2="60" stroke="#4ade80" stroke-width="8"/>
-      <line x1="20" y1="60" x2="20" y2="120" stroke="#ffd23f" stroke-width="3"/>
-      <text x="0" y="44" fill="#fef8ec" font-size="11">+</text>
-      <text x="0" y="72" fill="#fef8ec" font-size="11">−</text>
-      <line x1="20" y1="20" x2="90" y2="20" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="90,20 96.0,20 100.7,11 105.3,29 110.0,11 114.7,29 119.3,11 124.0,20 130,20" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="110" y="8" text-anchor="middle" fill="#fef8ec" font-size="9">100Ω</text>
-      <line x1="130" y1="20" x2="310" y2="20" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="310" y1="20" x2="310" y2="120" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="20" y1="120" x2="310" y2="120" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="220" y1="20" x2="220" y2="35" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="220,35 220,37.7 208,39.8 232,41.9 208,44.0 232,46.1 208,48.2 220,50.3 220,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="220" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">220Ω</text>
-      <line x1="220" y1="53" x2="220" y2="65" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="205,65 235,65 220,85" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="205" y1="85" x2="235" y2="85" stroke="#ff4d5e" stroke-width="4"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="228" y1="60" x2="240" y2="48"/><polyline points="230,48 240,48 240,58"/>
-        <line x1="237" y1="68" x2="249" y2="56"/><polyline points="239,56 249,56 249,66"/>
-      </g>
-      <line x1="220" y1="85" x2="220" y2="120" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="280" y1="20" x2="280" y2="35" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="280,35 280,37.7 268,39.8 292,41.9 268,44.0 292,46.1 268,48.2 280,50.3 280,53" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="280" y="30" text-anchor="middle" fill="#fef8ec" font-size="9">330Ω</text>
-      <line x1="280" y1="53" x2="280" y2="65" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="265,65 295,65 280,85" fill="#4dd8ff" stroke="#4dd8ff" stroke-width="2"/>
-      <line x1="265" y1="85" x2="295" y2="85" stroke="#4dd8ff" stroke-width="4"/>
-      <g stroke="#4dd8ff" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="288" y1="60" x2="300" y2="48"/><polyline points="290,48 300,48 300,58"/>
-        <line x1="297" y1="68" x2="309" y2="56"/><polyline points="299,56 309,56 309,66"/>
-      </g>
-      <line x1="280" y1="85" x2="280" y2="120" stroke="#ffd23f" stroke-width="3"/>
-      <text x="220" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 1</text>
-      <text x="280" y="100" text-anchor="middle" fill="#fef8ec" font-size="10">LED 2</text></svg>`
-  },
-  {
-    title:'Polaridad: cuidado con el sentido',
-    body:`<p>Algunos componentes son <b>polarizados</b>: solo funcionan si los conectas en el sentido correcto (LED, batería y capacitor electrolítico). Otros, como la resistencia o el interruptor, son <b>no polarizados</b> y funcionan en cualquier sentido.</p>
-      <p>Conectar al revés un LED o un capacitor electrolítico puede dañarlo o incluso hacer que se caliente peligrosamente, así que siempre hay que revisar el terminal positivo (+) y el negativo (−) antes de conectar.</p>`,
+    title:'Polaridad: el sentido importa',
+    body:`<p>Algunos componentes son <b>polarizados</b>: solo funcionan si los conectas en el sentido correcto. Otros son <b>no polarizados</b> y funcionan en cualquier sentido.</p>
+      <p><b>Polarizados</b> (tienen + y −): pila, LED, capacitor electrolítico, buzzer, motor.</p>
+      <p><b>No polarizados</b>: resistencia, interruptor, pulsador, jumpers.</p>
+      <p>Si conectas al revés un componente polarizado, puede que no funcione o incluso se dañe. Por eso siempre hay que revisar el terminal positivo (+) y el negativo (−).</p>`,
     diagram:`<svg viewBox="0 0 260 100"><line x1="60" y1="55" x2="95" y2="55" stroke="#ffd23f" stroke-width="4"/>
       <polygon points="95,35 95,75 135,55" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
       <line x1="135" y1="35" x2="135" y2="75" stroke="#ff4d5e" stroke-width="4"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="125" y1="28" x2="135" y2="14"/><polyline points="127,14 135,14 135,24"/>
-        <line x1="138" y1="28" x2="148" y2="14"/><polyline points="140,14 148,14 148,24"/>
-      </g>
       <line x1="135" y1="55" x2="170" y2="55" stroke="#ffd23f" stroke-width="4"/>
       <text x="60" y="20" text-anchor="middle" fill="#fef8ec" font-size="12">ánodo (+)</text>
       <text x="170" y="20" text-anchor="middle" fill="#fef8ec" font-size="12">cátodo (−)</text>
@@ -1373,76 +1394,202 @@ const THEORY_PRIMARIA = [
       <text x="135" y="94" text-anchor="middle" fill="#fef8ec" font-size="12">barra</text></svg>`
   },
   {
-    title:'Simbología electrónica',
-    body:`<p>Cada componente tiene un símbolo estándar para dibujar esquemas: un <b>zigzag (como un rayito)</b> para la resistencia, un <b>triángulo apuntando a una barra</b> para el LED (el lado de entrada corresponde al ánodo y la barra al cátodo), dos placas para el capacitor, líneas largas y cortas para la pila, una abertura para el interruptor y una resistencia en zigzag con flechas de luz para la LDR.</p>
-      <p>Aprender estos símbolos te permite leer cualquier esquema de circuito, incluso antes de tener los componentes físicos en la mano. ¡Practica en el juego de Memorama!</p>`,
-    diagram:`<svg viewBox="0 0 260 90"><line x1="8" y1="45" x2="20" y2="45" stroke="#ffd23f" stroke-width="3"/>
-      <polyline points="20,45 26.0,45 30.7,35 35.3,55 40.0,35 44.7,55 49.3,35 54.0,45 60,45" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <line x1="60" y1="45" x2="72" y2="45" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="100" y1="45" x2="115" y2="45" stroke="#ffd23f" stroke-width="3"/>
-      <polygon points="115,28 115,62 145,45" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="145" y1="28" x2="145" y2="62" stroke="#ff4d5e" stroke-width="3"/>
-      <g stroke="#ff4d5e" stroke-width="2" stroke-linecap="round" fill="none">
-        <line x1="136" y1="20" x2="146" y2="6"/><polyline points="138,6 146,6 146,16"/>
-        <line x1="149" y1="20" x2="159" y2="6"/><polyline points="151,6 159,6 159,16"/>
+    title:'¿Qué es un circuito eléctrico?',
+    body:`<p style="text-align:center; font-size:1.15rem; font-weight:700; color:#ffd23f; margin-bottom:12px;">
+        ¡La corriente necesita un camino REDONDO!
+      </p>
+      <p>Imagina una pista de carreras 🏎️. Los electrones salen del <b>+</b> de la pila, dan la vuelta completa y <b>regresan al −</b>. Si hay un hueco en la pista… ¡se detienen todos!</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:16px 0;">
+        <div style="background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; text-align:center; min-width:120px;">
+          <div style="font-size:1.6rem;">🔋</div>
+          <b>1. Fuente</b><br><span style="font-size:0.85rem;opacity:0.85">La pila da energía</span>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; text-align:center; min-width:120px;">
+          <div style="font-size:1.6rem;">💡</div>
+          <b>2. Carga</b><br><span style="font-size:0.85rem;opacity:0.85">Usa la energía</span>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; text-align:center; min-width:120px;">
+          <div style="font-size:1.6rem;">🔌</div>
+          <b>3. Cables</b><br><span style="font-size:0.85rem;opacity:0.85">Cierran el camino</span>
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:8px;"><b>Regla de oro:</b> Si el camino no está cerrado… ¡no hay corriente!</p>`,
+    diagram:`<svg viewBox="0 0 300 160">
+      <!-- Top wire -->
+      <line x1="50" y1="30" x2="250" y2="30" stroke="#ffd23f" stroke-width="4" stroke-linecap="round"/>
+      <!-- Bottom wire (return to negative) -->
+      <line x1="50" y1="130" x2="250" y2="130" stroke="#ffd23f" stroke-width="4" stroke-linecap="round"/>
+      <!-- Left side - Battery -->
+      <line x1="50" y1="30" x2="50" y2="55" stroke="#ffd23f" stroke-width="4"/>
+      <line x1="38" y1="55" x2="62" y2="55" stroke="#4ade80" stroke-width="3"/>
+      <line x1="38" y1="68" x2="62" y2="68" stroke="#4ade80" stroke-width="8"/>
+      <line x1="50" y1="68" x2="50" y2="130" stroke="#ffd23f" stroke-width="4"/>
+      <text x="22" y="60" fill="#4ade80" font-size="14" font-weight="700">+</text>
+      <text x="22" y="80" fill="#ff8a3d" font-size="14" font-weight="700">−</text>
+      <!-- Right side - Load -->
+      <line x1="250" y1="30" x2="250" y2="55" stroke="#ffd23f" stroke-width="4"/>
+      <circle cx="250" cy="80" r="22" fill="rgba(255,138,61,0.15)" stroke="#ff8a3d" stroke-width="3"/>
+      <text x="250" y="85" text-anchor="middle" fill="#fef8ec" font-size="13" font-weight="700">Carga</text>
+      <line x1="250" y1="102" x2="250" y2="130" stroke="#ffd23f" stroke-width="4"/>
+      <!-- Direction arrows -->
+      <polygon points="140,24 152,30 140,36" fill="#ffd23f"/>
+      <polygon points="160,136 148,130 160,124" fill="#ffd23f"/>
+      <!-- Labels -->
+      <text x="150" y="18" text-anchor="middle" fill="#ffd23f" font-size="11">sale del +</text>
+      <text x="150" y="152" text-anchor="middle" fill="#ffd23f" font-size="11">regresa al −</text>
+    </svg>`
+  },
+  {
+    title:'Circuito en serie',
+    body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Un solo camino ➡️ si se rompe uno, se apaga todo</p>
+      <p>Los componentes van <b>uno detrás del otro</b>, como amigos tomados de la mano. La corriente sale del <b>+</b>, pasa por todos y <b>regresa al −</b>.</p>
+      <p>Si un componente falla → se interrumpe el camino → todo se apaga.</p>
+      <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>`,
+    diagram:`<svg viewBox="0 0 480 140">
+      <!-- Battery -->
+      <rect x="8" y="40" width="56" height="50" rx="6" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2"/>
+      <line x1="22" y1="55" x2="50" y2="55" stroke="#4ade80" stroke-width="3"/>
+      <line x1="22" y1="75" x2="50" y2="75" stroke="#ff8a3d" stroke-width="6"/>
+      <text x="38" y="32" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="800">+</text>
+      <text x="38" y="108" text-anchor="middle" fill="#ff8a3d" font-size="16" font-weight="800">−</text>
+      <text x="38" y="70" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
+
+      <!-- Wire from + (longer) -->
+      <line x1="64" y1="58" x2="110" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
+      <polygon points="108,52 120,58 108,64" fill="#ffd23f"/>
+
+      <!-- Resistor -->
+      <polyline points="120,58 130,58 136,44 145,72 154,44 163,72 170,58 180,58" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
+      <text x="150" y="34" text-anchor="middle" fill="#ff8a3d" font-size="13" font-weight="700">R</text>
+
+      <!-- Wire -->
+      <line x1="180" y1="58" x2="220" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
+
+      <!-- LED 1 -->
+      <polygon points="220,42 220,74 255,58" fill="none" stroke="#ff4d5e" stroke-width="2.5"/>
+      <line x1="255" y1="42" x2="255" y2="74" stroke="#ff4d5e" stroke-width="3"/>
+      <g stroke="#ff4d5e" stroke-width="1.5" fill="none">
+        <line x1="262" y1="40" x2="274" y2="28"/>
+        <line x1="264" y1="52" x2="278" y2="46"/>
       </g>
-      <line x1="145" y1="45" x2="160" y2="45" stroke="#ffd23f" stroke-width="3"/>
-      <line x1="190" y1="25" x2="190" y2="65" stroke="#4dd8ff" stroke-width="4"/><path d="M205 25 Q198 45 205 65" fill="none" stroke="#4dd8ff" stroke-width="4"/></svg>`
+      <text x="238" y="92" text-anchor="middle" fill="#fef8ec" font-size="12">LED 1</text>
+
+      <!-- Wire -->
+      <line x1="255" y1="58" x2="300" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
+
+      <!-- LED 2 -->
+      <polygon points="300,42 300,74 335,58" fill="none" stroke="#4dd8ff" stroke-width="2.5"/>
+      <line x1="335" y1="42" x2="335" y2="74" stroke="#4dd8ff" stroke-width="3"/>
+      <g stroke="#4dd8ff" stroke-width="1.5" fill="none">
+        <line x1="342" y1="40" x2="354" y2="28"/>
+        <line x1="344" y1="52" x2="358" y2="46"/>
+      </g>
+      <text x="318" y="92" text-anchor="middle" fill="#fef8ec" font-size="12">LED 2</text>
+
+      <!-- Return path (long) -->
+      <line x1="335" y1="58" x2="400" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
+      <line x1="400" y1="58" x2="400" y2="110" stroke="#ffd23f" stroke-width="3.5"/>
+      <line x1="400" y1="110" x2="38" y2="110" stroke="#ffd23f" stroke-width="3.5"/>
+      <line x1="38" y1="110" x2="38" y2="90" stroke="#ffd23f" stroke-width="3.5"/>
+      <polygon points="44,108 38,118 32,108" fill="#ffd23f"/>
+
+      <!-- Labels -->
+      <text x="240" y="18" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">SALE DEL POSITIVO (+)</text>
+      <text x="240" y="132" text-anchor="middle" fill="#ff8a3d" font-size="13" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+    </svg>`
+  },
+  {
+    title:'Circuito en paralelo',
+    body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Varios caminos ➡️ si se rompe uno, los demás siguen</p>
+      <p>Cada componente tiene <b>su propia rama</b>. Todos salen del <b>+</b> y todos regresan al <b>−</b>, pero por caminos separados.</p>
+      <p>Si una rama falla → las otras siguen funcionando.</p>
+      <p>💡 Ejemplo: las luces de tu casa. Apagas una y las demás siguen encendidas.</p>`,
+    diagram:`<svg viewBox="0 0 500 290">
+      <!-- Battery -->
+      <rect x="14" y="90" width="58" height="52" rx="6" fill="#0a2a1a" stroke="#5eead4" stroke-width="2.5"/>
+      <line x1="30" y1="108" x2="56" y2="108" stroke="#4ade80" stroke-width="4"/>
+      <line x1="30" y1="128" x2="56" y2="128" stroke="#fb923c" stroke-width="7"/>
+      <text x="44" y="82" text-anchor="middle" fill="#4ade80" font-size="18" font-weight="800">+</text>
+      <text x="44" y="165" text-anchor="middle" fill="#fb923c" font-size="18" font-weight="800">−</text>
+      <text x="44" y="123" text-anchor="middle" fill="#fef8ec" font-size="12" font-weight="700">PILA</text>
+
+      <!-- Top rail -->
+      <line x1="72" y1="108" x2="470" y2="108" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+      <polygon points="150,100 165,108 150,116" fill="#fde047"/>
+
+      <!-- Bottom rail - low enough -->
+      <line x1="72" y1="250" x2="470" y2="250" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+      <line x1="44" y1="250" x2="44" y2="154" stroke="#fde047" stroke-width="4"/>
+
+      <!-- Right close -->
+      <line x1="470" y1="108" x2="470" y2="250" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
+
+      <!-- ===== RAMA 1 ===== -->
+      <line x1="190" y1="108" x2="190" y2="140" stroke="#fde047" stroke-width="4"/>
+      <!-- R -->
+      <polyline points="190,140 190,150 174,160 206,170 174,180 190,190" fill="none" stroke="#fb923c" stroke-width="3.5" stroke-linejoin="round"/>
+      <text x="158" y="168" fill="#fb923c" font-size="16" font-weight="800">R</text>
+      <!-- cable R -> LED -->
+      <line x1="190" y1="190" x2="190" y2="200" stroke="#fde047" stroke-width="4"/>
+      <!-- LED completely above bottom rail -->
+      <polygon points="172,200 172,230 208,215" fill="none" stroke="#f87171" stroke-width="3"/>
+      <line x1="208" y1="200" x2="208" y2="230" stroke="#f87171" stroke-width="3.5"/>
+      <g stroke="#f87171" stroke-width="2" fill="none">
+        <line x1="214" y1="198" x2="228" y2="184"/>
+        <line x1="216" y1="212" x2="232" y2="204"/>
+      </g>
+      <!-- short wire from LED down to bottom rail -->
+      <line x1="190" y1="230" x2="190" y2="250" stroke="#fde047" stroke-width="4"/>
+      <text x="190" y="275" text-anchor="middle" fill="#fef8ec" font-size="15" font-weight="700">LED 1</text>
+
+      <!-- ===== RAMA 2 ===== -->
+      <line x1="360" y1="108" x2="360" y2="140" stroke="#fde047" stroke-width="4"/>
+      <polyline points="360,140 360,150 344,160 376,170 344,180 360,190" fill="none" stroke="#fb923c" stroke-width="3.5" stroke-linejoin="round"/>
+      <text x="328" y="168" fill="#fb923c" font-size="16" font-weight="800">R</text>
+      <line x1="360" y1="190" x2="360" y2="200" stroke="#fde047" stroke-width="4"/>
+      <polygon points="342,200 342,230 378,215" fill="none" stroke="#38bdf8" stroke-width="3"/>
+      <line x1="378" y1="200" x2="378" y2="230" stroke="#38bdf8" stroke-width="3.5"/>
+      <g stroke="#38bdf8" stroke-width="2" fill="none">
+        <line x1="384" y1="198" x2="398" y2="184"/>
+        <line x1="386" y1="212" x2="402" y2="204"/>
+      </g>
+      <line x1="360" y1="230" x2="360" y2="250" stroke="#fde047" stroke-width="4"/>
+      <text x="360" y="275" text-anchor="middle" fill="#fef8ec" font-size="15" font-weight="700">LED 2</text>
+
+      <!-- Labels -->
+      <text x="270" y="40" text-anchor="middle" fill="#4ade80" font-size="15" font-weight="800">SALE DEL POSITIVO (+)</text>
+      <text x="270" y="288" text-anchor="middle" fill="#fb923c" font-size="15" font-weight="800">REGRESA AL NEGATIVO (−)</text>
+    </svg>`
   },
   {
     title:'Ley de Ohm: la fórmula mágica',
-    body:`<p>La <b>Ley de Ohm</b> nos dice cómo se relacionan tres cosas importantes en un circuito:</p>
-      <p style="text-align:center; font-size:1.4rem; font-weight:800; color:#ffd23f; margin:16px 0;">
-        I = V ÷ R
-      </p>
-      <ul style="margin:12px 0 12px 20px; line-height:1.7;">
-        <li><b>V</b> = Voltaje (la “fuerza” de la pila, se mide en <b>voltios</b>)</li>
-        <li><b>R</b> = Resistencia (lo que frena la corriente, se mide en <b>ohms Ω</b>)</li>
-        <li><b>I</b> = Corriente (cuánta electricidad pasa, se mide en <b>amperios</b> o milamperios mA)</li>
+    body:`<p>La <b>Ley de Ohm</b> nos dice cómo se relacionan tres cosas en un circuito:</p>
+      <p style="text-align:center; font-size:1.4rem; font-weight:800; color:#ffd23f; margin:14px 0;">I = V ÷ R</p>
+      <ul style="margin:10px 0 10px 20px; line-height:1.7;">
+        <li><b>V</b> = Voltaje (la “fuerza” de la pila, en voltios)</li>
+        <li><b>R</b> = Resistencia (lo que frena la corriente, en ohms Ω)</li>
+        <li><b>I</b> = Corriente (cuánta electricidad pasa, en amperios o mA)</li>
       </ul>
-      <p>Imagina que el voltaje es como la presión del agua, la resistencia es como un grifo semienterrado y la corriente es la cantidad de agua que sale. Si aumentas la resistencia (cierras más el grifo), sale menos corriente. Si aumentas el voltaje (más presión), sale más corriente.</p>
-
-      <p style="margin-top:18px;"><b>¡Vamos a practicar con cálculos fáciles!</b></p>
-
-      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
-        <p style="margin:0 0 6px;"><b>Ejemplo 1:</b> Pila de <b>9 V</b> + resistencia de <b>300 Ω</b></p>
-        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 300 = 0,03 A = <b style="color:#4ade80;">30 mA</b></p>
-        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ Perfecto para un LED. Brilla bien y no se quema.</p>
+      <p>Imagina el voltaje como la presión del agua, la resistencia como un grifo y la corriente como la cantidad de agua que sale.</p>
+      <p style="text-align:center; font-weight:700; margin:0 0 8px;">Ejemplos de la Ley de Ohm</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Voltaje</th><th>Resistencia</th><th>Corriente</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td>9 V</td><td>300 Ω</td><td style="color:#4ade80;font-weight:700">30 mA</td><td>Ideal y seguro</td></tr>
+            <tr><td>9 V</td><td>1 000 Ω</td><td style="color:#4ade80;font-weight:700">9 mA</td><td>Corriente más baja</td></tr>
+            <tr><td>3 V</td><td>150 Ω</td><td style="color:#4ade80;font-weight:700">20 mA</td><td>Correcto</td></tr>
+            <tr><td>9 V</td><td>100 Ω</td><td style="color:#ff5c5c;font-weight:700">90 mA</td><td>¡Demasiada corriente!</td></tr>
+          </tbody>
+        </table>
       </div>
-
-      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
-        <p style="margin:0 0 6px;"><b>Ejemplo 2:</b> Pila de <b>9 V</b> + resistencia de <b>1000 Ω</b> (1 kΩ)</p>
-        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 1000 = 0,009 A = <b style="color:#4ade80;">9 mA</b></p>
-        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ El LED brilla un poco menos (más suave).</p>
-      </div>
-
-      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
-        <p style="margin:0 0 6px;"><b>Ejemplo 3:</b> Pila de <b>3 V</b> + resistencia de <b>150 Ω</b></p>
-        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 3 ÷ 150 = 0,02 A = <b style="color:#4ade80;">20 mA</b></p>
-        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ También está bien para un LED.</p>
-      </div>
-
-      <div style="background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; margin:12px 0;">
-        <p style="margin:0 0 6px;"><b>Ejemplo 4 (¡cuidado!):</b> Pila de <b>9 V</b> + resistencia de <b>100 Ω</b></p>
-        <p style="font-family:'Space Mono',monospace; margin:0; color:#ffd23f;">I = 9 ÷ 100 = 0,09 A = <b style="color:#ff5c5c;">90 mA</b></p>
-        <p style="margin:6px 0 0; font-size:0.9rem; opacity:0.85;">→ ¡Demasiada corriente! El LED se puede quemar. Por eso usamos valores más altos.</p>
-      </div>
-
-      <p style="margin-top:14px;"><b>Regla fácil de recordar:</b></p>
-      <ul style="margin:8px 0 8px 20px; line-height:1.6;">
-        <li>Más resistencia → menos corriente → LED más apagado</li>
-        <li>Menos resistencia → más corriente → LED más brillante (¡o se quema!)</li>
-        <li>Más voltaje → más corriente</li>
-      </ul>
-      <p>¡Ahora ya puedes calcular la corriente de cualquier circuito simple!</p>`,
-    diagram:`<svg viewBox="0 0 280 140">
-      <!-- Formula triangle style -->
-      <polygon points="140,20 40,120 240,120" fill="none" stroke="#ff8a3d" stroke-width="3"/>
-      <text x="140" y="55" text-anchor="middle" fill="#ffd23f" font-size="22" font-weight="700">V</text>
-      <text x="80" y="110" text-anchor="middle" fill="#4dd8ff" font-size="20" font-weight="700">I</text>
-      <text x="200" y="110" text-anchor="middle" fill="#ff8a3d" font-size="20" font-weight="700">R</text>
-      <!-- Labels -->
-      <text x="140" y="135" text-anchor="middle" fill="#fef8ec" font-size="12">Voltaje = Corriente × Resistencia</text>
+      <p style="margin-top:12px;"><b>Regla fácil:</b> Más resistencia → menos corriente. Más voltaje → más corriente.</p>`,
+    diagram:`<svg viewBox="0 0 280 130">
+      <polygon points="140,15 40,110 240,110" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+      <text x="140" y="50" text-anchor="middle" fill="#ffd23f" font-size="22" font-weight="700">V</text>
+      <text x="80" y="100" text-anchor="middle" fill="#4dd8ff" font-size="18" font-weight="700">I</text>
+      <text x="200" y="100" text-anchor="middle" fill="#ff8a3d" font-size="18" font-weight="700">R</text>
+      <text x="140" y="125" text-anchor="middle" fill="#fef8ec" font-size="11">Voltaje = Corriente × Resistencia</text>
     </svg>`
   }
 ];
@@ -1688,67 +1835,128 @@ COMPONENTS.forEach(c=>{
 });
 
 /* ============================================================
-   JUEGO 1: MEMORAMA
+   JUEGO 1: MEMORAMA (con niveles)
    ============================================================ */
-let memoState = {flipped:[], matched:0, moves:0, lock:false};
-function initMemory(){
-  memoState = {flipped:[], matched:0, moves:0, lock:false};
-  document.getElementById('memoMoves').textContent = 0;
-  document.getElementById('memoPairs').textContent = 0;
-  const pool = [...COMPONENTS].sort(()=>Math.random()-0.5).slice(0,6);
-  let cards = [];
-  pool.forEach(c=>{
-    cards.push({type:'name', id:c.id, label:c.name});
-    cards.push({type:'icon', id:c.id, label:c.name});
+let memoState = {flipped:[], matched:0, moves:0, lock:false, pairs:4, level:'facil'};
+
+// Solo componentes que tienen icono SVG seguro
+const MEMO_SAFE = ['resistencia','led','bateria','interruptor','capacitor','ldr','buzzer','motor','potenciometro','transistor'];
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function setMemoLevel(level){
+  memoState.level = level;
+  if(level==='facil') memoState.pairs = 4;
+  else if(level==='normal') memoState.pairs = 6;
+  else memoState.pairs = 8;
+  // update buttons
+  document.querySelectorAll('.memo-level-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.level===level);
   });
-  cards = cards.sort(()=>Math.random()-0.5);
+  initMemory();
+}
+
+function initMemory(){
+  memoState.flipped = [];
+  memoState.matched = 0;
+  memoState.moves = 0;
+  memoState.lock = false;
+  const movesEl = document.getElementById('memoMoves');
+  const pairsEl = document.getElementById('memoPairs');
+  const totalEl = document.getElementById('memoTotal');
+  if(movesEl) movesEl.textContent = 0;
+  if(pairsEl) pairsEl.textContent = 0;
+  if(totalEl) totalEl.textContent = memoState.pairs;
+
+  // Elegir componentes seguros que existan en ICONS
+  const available = MEMO_SAFE.filter(id => ICONS[id]);
+  const pool = shuffle(available).slice(0, memoState.pairs);
+
+  let cards = [];
+  pool.forEach(id=>{
+    const comp = COMPONENTS.find(c=>c.id===id) || {id, name:id};
+    cards.push({type:'name', id, label:comp.name});
+    cards.push({type:'icon', id, label:comp.name});
+  });
+  cards = shuffle(cards);
+
   const grid = document.getElementById('memoGrid');
-  grid.innerHTML='';
+  if(!grid) return;
+  grid.innerHTML = '';
+  // Ajustar columnas según cantidad
+  const cols = memoState.pairs <= 4 ? 4 : (memoState.pairs <= 6 ? 4 : 4);
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
   cards.forEach((c,i)=>{
     const el = document.createElement('div');
-    el.className='memo-card';
+    el.className = 'memo-card';
     el.dataset.id = c.id;
     el.dataset.index = i;
+    const iconHtml = (c.type==='icon' && ICONS[c.id]) ? ICONS[c.id] : '';
+    const nameHtml = c.type==='name' ? `<span style="font-size:0.75rem;font-weight:700;text-align:center;padding:4px;">${c.label}</span>` : '';
     el.innerHTML = `<div class="memo-inner">
       <div class="memo-face memo-front"></div>
-      <div class="memo-face memo-back">${c.type==='icon'?ICONS[c.id]:''}<span>${c.type==='name'?c.label:''}</span></div>
+      <div class="memo-face memo-back">${iconHtml}${nameHtml}</div>
     </div>`;
-    el.onclick=()=>flipMemo(el);
+    el.onclick = ()=>flipMemo(el);
     grid.appendChild(el);
   });
 }
+
 function flipMemo(el){
   if(memoState.lock || el.classList.contains('flip') || el.classList.contains('matched')) return;
   el.classList.add('flip');
   memoState.flipped.push(el);
-  if(memoState.flipped.length===2){
+
+  if(memoState.flipped.length === 2){
     memoState.moves++;
-    document.getElementById('memoMoves').textContent = memoState.moves;
+    const movesEl = document.getElementById('memoMoves');
+    if(movesEl) movesEl.textContent = memoState.moves;
     memoState.lock = true;
     const [a,b] = memoState.flipped;
+
     if(a.dataset.id === b.dataset.id){
+      // Match!
       setTimeout(()=>{
-        a.classList.add('matched'); b.classList.add('matched');
+        a.classList.add('matched');
+        b.classList.add('matched');
         memoState.matched++;
-        document.getElementById('memoPairs').textContent = memoState.matched;
-        if(window.PG){ PG.sfxOk(); }
-        if(memoState.matched >= 6 && window.PG){
-          PG.toast('🎉 ¡Memorama completo!');
-          PG.confetti(50);
-          PG.award('memo', 'Maestro de la Memoria');
+        const pairsEl = document.getElementById('memoPairs');
+        if(pairsEl) pairsEl.textContent = memoState.matched;
+        if(window.PG) PG.sfxOk();
+
+        if(memoState.matched >= memoState.pairs){
+          if(window.PG){
+            PG.toast('🎉 ¡Memorama completo!');
+            PG.confetti(50);
+            PG.award('memo', 'Maestro de la Memoria');
+          }
           if(typeof saveScore==='function') saveScore('memo_moves', memoState.moves);
         }
-        memoState.flipped=[]; memoState.lock=false;
-      },400);
+        memoState.flipped = [];
+        memoState.lock = false;
+      }, 420);
     } else {
+      // No match
       setTimeout(()=>{
-        a.classList.remove('flip'); b.classList.remove('flip');
-        memoState.flipped=[]; memoState.lock=false;
-      },800);
+        a.classList.remove('flip');
+        b.classList.remove('flip');
+        memoState.flipped = [];
+        memoState.lock = false;
+      }, 750);
     }
   }
 }
-initMemory();
+
+// Inicializar en nivel fácil
+if(document.getElementById('memoGrid')) initMemory();
 
 /* ============================================================
    JUEGO 2: ARMA EL CIRCUITO (drag & drop)
