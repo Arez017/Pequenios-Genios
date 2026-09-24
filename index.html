@@ -36,6 +36,7 @@
   <div class="badge mono">PROYECTO DE INNOVACIÓN · U.E. LA PRIMERA</div>
   <h1>Pequeños Genios<br><span>electrónica básica jugando</span></h1>
   <p class="hero-sub">Aprende circuitos, polaridad y la Ley de Ohm jugando. Hecho para primaria.</p>
+  <button type="button" class="btn ghost" style="margin-bottom:1rem;font-size:.85rem;" onclick="replayTutorial()">🗺️ Ver ruta sugerida</button>
   
   <div class="hero-features">
     <button class="hero-card" onclick="showView('inicio'); setTimeout(()=>{const t=document.getElementById('teoria'); if(t)t.scrollIntoView({behavior:'smooth'});},80);">
@@ -198,7 +199,7 @@
     <h2>Zona de juegos</h2>
     <p>Actividades interactivas diseñadas exclusivamente para primaria.</p>
   </div>
-  <div class="medal-bar" id="medalBar" style="display:none !important" aria-label="Medallas obtenidas"></div>
+  <div class="medal-bar" id="medalBar" aria-label="Medallas obtenidas"></div>
 
   <div class="panel">
     <div class="game-tabs" id="gameTabs">
@@ -235,7 +236,7 @@
     <!-- JUEGO 2: ARMA EL CIRCUITO -->
     <div class="game-view" id="game-armado">
       <div class="game-view-head">
-        <h3>🔌 Arma el circuito en serie</h3>
+        <h3>🔌 Arma el circuito cerrado (serie)</h3>
         <p>Ordena las piezas para formar un circuito en serie. Recuerda: la corriente necesita un camino cerrado. Sin resistencia, ¡el LED se quema!</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
@@ -272,7 +273,7 @@
         <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil (10)</button>
       </div>
       <div class="panel-top">
-        <div class="stat">Puntaje: <b id="polScore">0</b>/<span id="polTotal">3</span></div>
+        <div class="stat">Puntaje: <b id="polScore">0</b>/<span id="polTotal">5</span></div>
         <button class="btn ghost" onclick="initPolarity()">🔄 Reiniciar</button>
       </div>
       <div class="pol-stage">
@@ -328,7 +329,7 @@
     <div class="game-view" id="game-serieparalelo">
       <div class="game-view-head">
         <h3>💡 Simulador: Serie vs Paralelo</h3>
-        <p>Apaga y enciende los interruptores y observa qué le pasa a los LEDs en cada tipo de circuito.</p>
+        <p>Apaga y enciende los interruptores. Observa los LEDs: patita larga = + (ánodo), patita corta = − (cátodo).</p>
       </div>
       <div class="sp-tabs">
         <button class="sp-tab active" data-view="serie" onclick="switchSP('serie')">Circuito en Serie</button>
@@ -350,7 +351,7 @@
     <div class="game-view" id="game-cables">
       <div class="game-view-head">
         <h3>🔗 Conecta los cables</h3>
-        <p>Toca una terminal y arrastra hasta otra para tender el cable. Forma un circuito cerrado: pila (+) → interruptor → resistencia → LED (+) → pila (−). La resistencia e interruptor no tienen polaridad.</p>
+        <p>Toca una terminal y arrastra hasta otra. Circuito cerrado: pila (+) → interruptor → resistencia → LED (+) → pila (−). Interruptor y resistencia NO tienen polaridad (cualquier lado vale).</p>
       </div>
       <div class="panel-top">
         <div class="stat">Cables tendidos: <b id="wireCount">0</b>/4</div>
@@ -417,14 +418,30 @@
   <div class="section-head">
     <div class="eyebrow">Sin registro, sin instalar nada</div>
     <h2>Laboratorio de circuitos</h2>
-    <p>Arrastra componentes al tablero, conéctalos con cables tocando sus terminales y pulsa "Simular" para ver si tu circuito enciende. Copia el resultado con tus componentes reales en casa.</p>
+    <p>Protoboard virtual realista: rieles <b>+ / −</b>, agujeros, jumpers de colores y polaridad del LED (patita larga = +). Arrastra piezas, cablea y pulsa <b>Simular</b>. Copia el mismo circuito con tu kit real.</p>
   </div>
   <div class="panel">
-    <div class="lab-toolbar">
+    
+      <div id="labHowTo" class="lab-howto">
+        <b>Cómo usar el laboratorio</b>
+        <ol>
+          <li>Pulsa <b>▶️ Probar ahora</b> para ver un circuito que sí enciende.</li>
+          <li>La <b>pila</b> va a rieles <b>+</b> y <b>−</b>. El resto: patita → agujero. Misma columna = conectados.</li>
+          <li>Pulsa <b>⚡ Simular</b> para ver corriente, LED y el multímetro.</li>
+        </ol>
+      </div>
+
+      <div class="lab-toolbar">
       <button class="btn ghost" onclick="labAddComponent('bateria')">🔋 + Pila</button>
       <button class="btn ghost" onclick="labAddComponent('resistencia')">🟧 + Resistencia</button>
       <button class="btn ghost" onclick="labAddComponent('led')">💡 + LED</button>
       <button class="btn ghost" onclick="labAddComponent('interruptor')">🔀 + Interruptor</button>
+      <button class="btn ghost" onclick="labAddComponent('pulsador')">👆 + Pulsador</button>
+      <button class="btn ghost" onclick="labAddComponent('diodo')">▶ + Diodo</button>
+      <button class="btn ghost" onclick="labAddComponent('capacitor')">⏫ + Capacitor</button>
+      <button class="btn ghost" onclick="labAddComponent('ldr')">☀️ + LDR</button>
+      <button class="btn ghost" onclick="labAddComponent('potenciometro')">Knob + POT</button>
+      <button class="btn ghost" onclick="labAddComponent('fusible')">🧯 + Fusible</button>
       <button class="btn ghost" onclick="labAddComponent('motor')">⚙️ + Motor</button>
       <button class="btn ghost" onclick="labAddComponent('buzzer')">🔊 + Buzzer</button>
       <button class="btn" onclick="simulateLab()">⚡ Simular</button>
@@ -441,16 +458,28 @@
       <div><span class="step-num">5</span> Pulsa <b>Simular</b> y mira los mA</div>
     </div>
     <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
-      Toca y arrastra una pieza para moverla · Dos patitas alineadas en la misma columna quedan conectadas automáticamente, como en una protoboard real · Arrastra desde un círculo (terminal) a otro para cablear entre columnas distintas · Un toque corto cambia el valor de resistencia/voltaje/color o abre/cierra el interruptor · Toca la × para borrar una pieza
+      <b>Estilo Tinkercad / protoboard real:</b> la <b>pila</b> se clava en el riel <b>rojo (+)</b> y el riel <b>azul (−)</b>. Luego conectas jumpers desde los rieles a los componentes. Misma columna = mismo nodo. Toca patita → toca agujero para clavar.
     </p>
     <div class="wire-board" style="margin-top:14px;">
       <svg id="labSvg" viewBox="0 0 700 380"></svg>
     </div>
-    <div class="lab-hint-bar" id="labHintBar">Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar</div>
+    <div class="lab-hint-bar" 
+      <div class="lab-meter" id="labMeter" aria-live="polite">
+        <div class="lab-meter-title">📟 Multímetro</div>
+        <div class="lab-meter-row">
+          <span>V<sub>pila</sub> <b id="meterV">—</b></span>
+          <span>I<sub>est.</sub> <b id="meterI">—</b></span>
+          <span>Estado <b id="meterStatus">En espera</b></span>
+        </div>
+      </div>
+
+      <div id="labHintBar">Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar</div>
     <div class="cb-result" id="labResult"></div>
 
     <div class="lab-presets">
-      <h4>💡 O empieza desde una receta lista:</h4>
+      <h4><button type="button" class="btn" onclick="labDemoLED()" style="margin-bottom:10px;">▶️ Probar ahora: LED + resistencia</button>
+      <p style="opacity:.85;font-size:.9rem;margin:8px 0;">O elige otra receta:</p>
+      💡 Recetas listas:</h4>
       <div class="cta-row">
         <button class="btn ghost" onclick="loadPreset('simple')">LED simple</button>
         <button class="btn ghost" onclick="loadPreset('interruptor')">LED con interruptor</button>
@@ -467,7 +496,6 @@
 <footer class="mono" style="text-align:center; padding:30px 16px; opacity:.75; font-size:.75rem;">
   ⚡ Pequeños Genios — Proyecto de innovación · U.E. La Primera, Fe y Alegría, El Alto - Bolivia<br>
   <button class="btn ghost" style="margin-top:12px; font-size:.75rem; padding:8px 14px;" onclick="resetMedals()">🔄 Reiniciar medallas</button>
-  <span class="lang-toggle" onclick="toggleLang()" id="langToggle">Aymara / Qhichwa</span>
 </footer>
 
 <!-- Diploma overlay -->
@@ -477,6 +505,10 @@
     <h2>¡Certificado Pequeños Genios!</h2>
     <p>Se otorga el presente reconocimiento a</p>
     <div class="name" id="diplomaName">Un(a) pequeño(a) genio(a)</div>
+    <div class="diploma-name-edit">
+      <label for="diplomaNameInput">Escribe tu nombre:</label>
+      <input type="text" id="diplomaNameInput" maxlength="40" placeholder="Ej: María Quispe" autocomplete="name" oninput="updateDiplomaName(this.value)">
+    </div>
     <p>por dominar los fundamentos de electrónica básica:<br>componentes, polaridad, circuitos y laboratorio virtual.</p>
     <p style="margin-top:16px; font-size:.85rem; opacity:.7;">U.E. La Primera · Fe y Alegría · El Alto, Bolivia</p>
     <div class="cta-row" style="margin-top:18px;">
@@ -486,6 +518,40 @@
   </div>
 </div>
 
+
+  
+<!-- Tutorial de bienvenida -->
+<div class="tutorial-overlay" id="tutorialOverlay" aria-hidden="true">
+  <div class="tutorial-card" role="dialog" aria-labelledby="tutTitle">
+    <div class="tutorial-step" data-step="0">
+      <div class="tut-emoji">⚡</div>
+      <h2 id="tutTitle">¡Bienvenido a Pequeños Genios!</h2>
+      <p>Vas a aprender electrónica básica <b>jugando</b>: polaridad, circuitos y la Ley de Ohm.</p>
+    </div>
+    <div class="tutorial-step" data-step="1" hidden>
+      <div class="tut-emoji">🗺️</div>
+      <h2>Ruta sugerida</h2>
+      <ol class="tut-path">
+        <li><b>Teoría</b> — empieza por la Ley de Ohm y la polaridad</li>
+        <li><b>Polaridad</b> — practica + y − (patita larga / corta)</li>
+        <li><b>Arma el circuito</b> — ordena un camino cerrado</li>
+        <li><b>Conecta los cables</b> — cierra el lazo completo</li>
+        <li><b>Laboratorio</b> — experimenta libremente</li>
+      </ol>
+    </div>
+    <div class="tutorial-step" data-step="2" hidden>
+      <div class="tut-emoji">💡</div>
+      <h2>Consejo de oro</h2>
+      <p>La corriente necesita un <b>camino cerrado</b>: sale del <b>(+)</b> de la pila, pasa por los componentes y regresa al <b>(−)</b>.</p>
+      <p style="margin-top:10px;opacity:.85;font-size:.95rem;">Si te equivocas, el juego te dirá <b>qué revisar</b>. ¡Equivocarse es parte de aprender!</p>
+    </div>
+    <div class="tut-dots" id="tutDots"></div>
+    <div class="tut-actions">
+      <button type="button" class="btn ghost" id="tutSkip" onclick="closeTutorial(true)">Saltar</button>
+      <button type="button" class="btn" id="tutNext" onclick="tutorialNext()">Siguiente</button>
+    </div>
+  </div>
+</div>
 
   <script src="app.js"></script>
 </body>

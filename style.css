@@ -721,7 +721,7 @@
 }
 
 /* Medal bar already hidden via style */
-#medalBar { display: none !important; }
+/* medalBar restored - logros */
 
 /* Softer footer */
 footer, .site-footer {
@@ -877,4 +877,235 @@ header#inicio .home-theory .section-head h2 {
 header#inicio .mascot {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+
+/* Circuito cerrado – Arma el circuito */
+.cb-closed-loop {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+}
+.cb-loop-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cb-loop-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 12px;
+  border: 1px dashed rgba(255,210,63,0.35);
+}
+.cb-return-wire {
+  flex: 1;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ffd23f, transparent);
+  min-width: 40px;
+  border-radius: 2px;
+}
+.cb-return-label {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.cb-pol-label {
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  line-height: 1.2;
+}
+
+
+/* Barra de logros (medallas desbloqueadas) */
+#medalBar {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 0.8rem auto 1.2rem;
+  max-width: 720px;
+}
+#medalBar .medal, #medalBar > div {
+  opacity: 0.45;
+  transition: opacity 0.25s, transform 0.2s;
+}
+#medalBar .medal.earned, #medalBar .earned, #medalBar [data-earned="1"] {
+  opacity: 1;
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(255,210,63,0.45));
+}
+
+/* Nombre en certificado */
+.diploma-name-edit {
+  margin: 12px auto 8px;
+  max-width: 320px;
+  text-align: center;
+}
+.diploma-name-edit label {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-bottom: 6px;
+}
+.diploma-name-edit input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(11, 61, 46, 0.25);
+  font-size: 1.05rem;
+  text-align: center;
+  font-family: inherit;
+  background: #fff;
+  color: #0b1f18;
+}
+.diploma-name-edit input:focus {
+  outline: none;
+  border-color: #ffd23f;
+  box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.35);
+}
+.diploma-card .name {
+  min-height: 1.4em;
+}
+
+/* Tutorial de bienvenida */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 25, 18, 0.82);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.tutorial-overlay.show {
+  display: flex;
+}
+.tutorial-card {
+  background: linear-gradient(160deg, #124e3b 0%, #0b3d2e 100%);
+  border: 1px solid rgba(255, 210, 63, 0.35);
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  max-width: 440px;
+  width: 100%;
+  color: #f0fff8;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  animation: viewIn 0.35s ease;
+}
+.tutorial-card h2 {
+  margin: 8px 0 12px;
+  font-size: 1.35rem;
+  color: #ffd23f;
+}
+.tutorial-card p {
+  line-height: 1.5;
+  opacity: 0.95;
+  margin: 0;
+}
+.tut-emoji {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+.tut-path {
+  text-align: left;
+  margin: 12px auto;
+  padding-left: 1.3rem;
+  line-height: 1.65;
+  max-width: 360px;
+}
+.tut-path li { margin-bottom: 4px; }
+.tut-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 18px 0 14px;
+}
+.tut-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+}
+.tut-dots span.active {
+  background: #ffd23f;
+  transform: scale(1.2);
+}
+.tut-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tut-actions .btn { min-width: 110px; }
+
+/* Multímetro del laboratorio */
+.lab-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  background: #0d1f18;
+  border: 1px solid rgba(255,210,63,0.3);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin: 10px 0 12px;
+  font-family: ui-monospace, monospace;
+  color: #e8fff4;
+}
+.lab-meter-title {
+  font-weight: 700;
+  color: #ffd23f;
+  font-size: 0.9rem;
+}
+.lab-meter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-size: 0.88rem;
+}
+.lab-meter-row b {
+  color: #7dffa8;
+  margin-left: 4px;
+}
+/* Cables lab: el stroke se define en SVG */
+#labSvg path.wire-line {
+  stroke-linecap: round;
+}
+
+.lab-howto {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,210,63,0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.lab-howto ol { margin: 6px 0 0 1.2rem; padding: 0; }
+.lab-howto li { margin-bottom: 4px; }
+#labSvg .wire-terminal { cursor: pointer; }
+
+#labSvg .wire-terminal {
+  fill: #66bb6a;
+  stroke: #1b5e20;
+  stroke-width: 1.5;
+  opacity: 0.9;
+}
+#labSvg .wire-terminal.pending {
+  fill: #4dd8ff;
+  stroke: #0277bd;
+}
+#labSvg .bb-hole {
+  pointer-events: all;
 }
