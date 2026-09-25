@@ -1421,8 +1421,12 @@ initPolarity();
    ============================================================ */
 function switchSP(view){
   document.querySelectorAll('.sp-tab').forEach(t=>t.classList.toggle('active', t.dataset.view===view));
-  document.getElementById('view-serie').classList.toggle('active', view==='serie');
-  document.getElementById('view-paralelo').classList.toggle('active', view==='paralelo');
+  var vs = document.getElementById('view-serie');
+  var vp = document.getElementById('view-paralelo');
+  if(vs) vs.classList.toggle('active', view==='serie');
+  if(vp) vp.classList.toggle('active', view==='paralelo');
+  if(view==='serie' && typeof renderSerie==='function') renderSerie();
+  if(view==='paralelo' && typeof renderParalelo==='function') renderParalelo();
 }
 function ledSVG(on){
   // Patita larga = ánodo (+), patita corta = cátodo (−)
@@ -1446,59 +1450,56 @@ function switchSVG(on){
   </svg>`;
 }
 
+
 /* ============================================================
-   JUEGO: SERIE VS PARALELO (circuitos conectados + objetivo)
+   JUEGO: SERIE VS PARALELO (SVG conectado + objetivo)
    ============================================================ */
-let serieSwitches = [true, true, true];
-let paraSwitches = [true, true, true];
-let spGoalDone = { serie: false, paralelo: false };
+var serieSwitches = [true, true, true];
+var paraSwitches = [true, true, true];
+var spGoalDone = { serie: false, paralelo: false };
 
 function renderSerie(){
-  const wrap = document.getElementById('serieCircuit');
+  var wrap = document.getElementById('serieCircuit');
   if(!wrap) return;
-  const allOn = serieSwitches.every(function(s){ return s; });
-  const openCount = serieSwitches.filter(function(s){ return !s; }).length;
-
-  let goal = '';
+  var allOn = serieSwitches[0] && serieSwitches[1] && serieSwitches[2];
+  var goal;
   if(allOn){
-    goal = 'Objetivo: toca UN interruptor para abrirlo. En serie, si falla uno, se apagan TODOS.';
+    goal = '🎯 Objetivo: toca <b>un</b> interruptor (SW) y ábrelo. En serie, si se abre uno, se apagan <b>todos</b> los LEDs.';
   } else {
-    goal = 'Correcto: se abrio el camino y se apagaron todos los LEDs. Eso es un circuito en serie.';
-    if(!spGoalDone.serie && window.PG){
-      spGoalDone.serie = true;
-      PG.sfxOk();
-      PG.toast('Entendiste la serie');
-    }
+    goal = '✅ ¡Bien! El camino se cortó y se apagaron <b>todos</b>. Así funciona la serie.';
+    if(!spGoalDone.serie && window.PG){ spGoalDone.serie = true; PG.sfxOk(); PG.toast('💡 Serie entendida'); }
   }
 
-  function sw(i){
-    const on = serieSwitches[i];
-    return '<button type="button" onclick="toggleSerie('+i+')" style="min-width:54px;padding:6px 8px;border-radius:10px;border:2px solid '+(on?'#4ade80':'#f87171')+';background:rgba(0,0,0,0.35);color:#fef8ec;cursor:pointer;font-weight:700;font-size:0.75rem;">SW'+(i+1)+'<br>'+(on?'ON':'OFF')+'</button>';
+  function swBtn(i){
+    var on = serieSwitches[i];
+    var col = on ? '#4ade80' : '#f87171';
+    return '<button type="button" onclick="toggleSerie('+i+')" style="margin:0 2px;padding:8px 10px;border-radius:12px;border:2px solid '+col+';background:#0a1f18;color:#fef8ec;font-weight:800;cursor:pointer;">SW'+(i+1)+' '+(on?'ON':'OFF')+'</button>';
   }
-  function led(on, n){
-    return '<div style="text-align:center;"><div style="width:28px;height:28px;margin:0 auto;border-radius:50% 50% 40% 40%;background:'+(on?'#f87171':'#333')+';box-shadow:'+(on?'0 0 12px #f87171':'none')+';border:2px solid '+(on?'#ffb4b4':'#555')+';"></div><div style="font-size:0.7rem;margin-top:4px;">LED'+n+'</div></div>';
+  function ledDot(on, n){
+    var bg = on ? '#ff4d5e' : '#333';
+    var sh = on ? '0 0 14px #ff4d5e' : 'none';
+    return '<div style="display:inline-flex;flex-direction:column;align-items:center;margin:0 4px;"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';box-shadow:'+sh+';border:2px solid #888;"></div><span style="font-size:11px;margin-top:3px;">LED'+n+'</span></div>';
   }
-  function wire(){ return '<div style="flex:1;min-width:16px;height:4px;background:#fde047;border-radius:2px;"></div>'; }
-  function res(){ return '<div style="text-align:center;color:#fb923c;font-size:0.7rem;font-weight:700;">R<br>330</div>'; }
 
   var html = '';
-  html += '<div style="padding:14px;border:2px solid rgba(253,224,71,0.4);border-radius:16px;background:rgba(0,0,0,0.28);max-width:560px;margin:0 auto;">';
-  // top row closed loop visual
-  html += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:8px 4px;">';
-  html += '<div style="text-align:center;flex-shrink:0;"><div style="color:#4ade80;font-weight:800;font-size:0.75rem;">+ PILA -</div><div style="font-size:1.4rem;">🔋</div></div>';
+  html += '<div style="max-width:540px;margin:0 auto;padding:16px;border:2px solid #fde047;border-radius:18px;background:#071a14;">';
+  html += '<div style="text-align:center;font-size:13px;color:#4ade80;font-weight:800;margin-bottom:8px;">CIRCUITO EN SERIE — un solo camino</div>';
+  // closed loop box
+  html += '<div style="border:3px solid #fde047;border-radius:14px;padding:14px 10px;position:relative;">';
+  html += '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;">';
+  html += '<div style="text-align:center;"><div style="color:#4ade80;font-weight:800;">+</div><div style="font-size:28px;">🔋</div><div style="color:#fb923c;font-weight:800;">−</div></div>';
+  html += '<span style="color:#fde047;font-size:20px;">━</span>';
   for(var i=0;i<3;i++){
-    html += wire();
-    html += sw(i);
-    html += wire();
-    html += res();
-    html += wire();
-    html += led(allOn, i+1);
+    html += swBtn(i);
+    html += '<span style="color:#fb923c;font-weight:800;">R</span>';
+    html += ledDot(allOn, i+1);
+    if(i<2) html += '<span style="color:#fde047;font-size:20px;">━</span>';
   }
   html += '</div>';
-  // return path
-  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:10px 8px 0;"></div>';
-  html += '<p style="text-align:center;margin:10px 0 0;font-size:0.88rem;color:'+(allOn?'#4ade80':'#f87171')+';font-weight:700;">'+(allOn?'Lazo cerrado: hay corriente':'Lazo abierto: no hay corriente')+'</p>';
-  html += '<p style="text-align:center;margin:8px 0 0;font-size:0.88rem;line-height:1.4;">'+goal+'</p>';
+  html += '<div style="text-align:center;margin-top:10px;font-size:12px;color:#fde047;">↺ cable de retorno al negativo de la pila</div>';
+  html += '</div>';
+  html += '<p style="text-align:center;margin:12px 0 0;font-size:14px;line-height:1.45;">'+goal+'</p>';
+  html += '<p style="text-align:center;margin:6px 0 0;font-weight:800;color:'+(allOn?'#4ade80':'#f87171')+';">'+(allOn?'⚡ Hay corriente':'⛔ No hay corriente')+'</p>';
   html += '</div>';
   wrap.innerHTML = html;
 }
@@ -1509,53 +1510,52 @@ function toggleSerie(i){
 }
 
 function renderParalelo(){
-  const wrap = document.getElementById('paraleloCircuit');
+  var wrap = document.getElementById('paraleloCircuit');
   if(!wrap) return;
 
-  let goal = '';
+  var goal;
   if(paraSwitches[0] && paraSwitches[1] && paraSwitches[2]){
-    goal = 'Objetivo: apaga solo SW2 (rama del medio). LED1 y LED3 deben seguir encendidos.';
+    goal = '🎯 Objetivo: apaga <b>solo SW2</b>. LED1 y LED3 deben seguir encendidos.';
   } else if(!paraSwitches[1] && paraSwitches[0] && paraSwitches[2]){
-    goal = 'Correcto: en paralelo, apagar una rama NO apaga las demas.';
-    if(!spGoalDone.paralelo && window.PG){
-      spGoalDone.paralelo = true;
-      PG.sfxOk();
-      PG.toast('Entendiste el paralelo');
-    }
+    goal = '✅ ¡Exacto! En paralelo, una rama apagada <b>no apaga</b> las otras.';
+    if(!spGoalDone.paralelo && window.PG){ spGoalDone.paralelo = true; PG.sfxOk(); PG.toast('💡 Paralelo entendido'); }
   } else {
-    goal = 'Cada rama va del + al -. Prueba apagar una y mira las otras.';
+    goal = 'Cada rama tiene su propio camino del <b style="color:#4ade80">+</b> al <b style="color:#fb923c">−</b>.';
   }
 
-  function sw(i){
-    const on = paraSwitches[i];
-    return '<button type="button" onclick="toggleParalelo('+i+')" style="min-width:54px;padding:6px 8px;border-radius:10px;border:2px solid '+(on?'#4ade80':'#f87171')+';background:rgba(0,0,0,0.35);color:#fef8ec;cursor:pointer;font-weight:700;font-size:0.75rem;">SW'+(i+1)+'<br>'+(on?'ON':'OFF')+'</button>';
+  function swBtn(i){
+    var on = paraSwitches[i];
+    var col = on ? '#4ade80' : '#f87171';
+    return '<button type="button" onclick="toggleParalelo('+i+')" style="padding:8px 10px;border-radius:12px;border:2px solid '+col+';background:#0a1f18;color:#fef8ec;font-weight:800;cursor:pointer;">SW'+(i+1)+' '+(on?'ON':'OFF')+'</button>';
   }
-  function led(on, n){
-    return '<div style="text-align:center;"><div style="width:28px;height:28px;margin:0 auto;border-radius:50% 50% 40% 40%;background:'+(on?'#f87171':'#333')+';box-shadow:'+(on?'0 0 12px #f87171':'none')+';border:2px solid '+(on?'#ffb4b4':'#555')+';"></div><div style="font-size:0.7rem;margin-top:4px;">LED'+n+'</div></div>';
+  function ledDot(on, n){
+    var bg = on ? '#ff4d5e' : '#333';
+    var sh = on ? '0 0 14px #ff4d5e' : 'none';
+    return '<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';box-shadow:'+sh+';border:2px solid #888;"></div><span style="font-size:11px;margin-top:3px;">LED'+n+'</span></div>';
   }
 
   var html = '';
-  html += '<div style="padding:14px;border:2px solid rgba(253,224,71,0.4);border-radius:16px;background:rgba(0,0,0,0.28);max-width:480px;margin:0 auto;">';
-  html += '<div style="text-align:center;margin-bottom:6px;"><span style="color:#4ade80;font-weight:800;">+ PILA -</span> <span style="font-size:1.3rem;">🔋</span></div>';
+  html += '<div style="max-width:480px;margin:0 auto;padding:16px;border:2px solid #fde047;border-radius:18px;background:#071a14;">';
+  html += '<div style="text-align:center;font-size:13px;color:#4ade80;font-weight:800;margin-bottom:8px;">CIRCUITO EN PARALELO — varios caminos</div>';
+  html += '<div style="text-align:center;margin-bottom:6px;"><span style="color:#4ade80;font-weight:800;">+</span> 🔋 <span style="color:#fb923c;font-weight:800;">−</span></div>';
   // top rail
-  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:0 12px 8px;"></div>';
-  // three branches
-  html += '<div style="display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap;">';
+  html += '<div style="height:5px;background:#fde047;border-radius:3px;margin:0 8px 12px;"></div>';
+  html += '<div style="display:flex;justify-content:space-around;gap:10px;">';
   for(var i=0;i<3;i++){
     var on = paraSwitches[i];
-    html += '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;">';
-    html += '<div style="width:4px;height:14px;background:#fde047;"></div>';
-    html += '<div style="font-size:0.7rem;opacity:0.8;">RAMA '+(i+1)+'</div>';
-    html += sw(i);
-    html += '<div style="color:#fb923c;font-size:0.7rem;font-weight:700;">R 330</div>';
-    html += led(on, i+1);
-    html += '<div style="width:4px;height:14px;background:#fde047;"></div>';
+    html += '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;">';
+    html += '<div style="width:5px;height:16px;background:#fde047;"></div>';
+    html += '<div style="font-size:11px;opacity:0.85;">RAMA '+(i+1)+'</div>';
+    html += swBtn(i);
+    html += '<div style="color:#fb923c;font-weight:800;font-size:12px;">R</div>';
+    html += ledDot(on, i+1);
+    html += '<div style="width:5px;height:16px;background:#fde047;"></div>';
     html += '</div>';
   }
   html += '</div>';
   // bottom rail
-  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:8px 12px 0;"></div>';
-  html += '<p style="text-align:center;margin:10px 0 0;font-size:0.88rem;line-height:1.4;">'+goal+'</p>';
+  html += '<div style="height:5px;background:#fde047;border-radius:3px;margin:12px 8px 0;"></div>';
+  html += '<p style="text-align:center;margin:12px 0 0;font-size:14px;line-height:1.45;">'+goal+'</p>';
   html += '</div>';
   wrap.innerHTML = html;
 }
@@ -1565,8 +1565,18 @@ function toggleParalelo(i){
   renderParalelo();
 }
 
-renderSerie();
-renderParalelo();
+// dibujar cuando el DOM este listo
+function initSerieParalelo(){
+  renderSerie();
+  renderParalelo();
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initSerieParalelo);
+} else {
+  initSerieParalelo();
+}
+
+
 
 
 /* ============================================================
