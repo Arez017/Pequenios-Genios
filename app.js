@@ -3152,14 +3152,18 @@ function openTutorial(){
   if(!ov) return;
   tutStep = 0;
   renderTutorialStep();
+  ov.style.display = 'flex';
   ov.classList.add('show');
   ov.setAttribute('aria-hidden','false');
 }
 function closeTutorial(skip){
   const ov = document.getElementById('tutorialOverlay');
-  if(ov){ ov.classList.remove('show'); ov.setAttribute('aria-hidden','true'); }
+  if(ov){
+    ov.classList.remove('show');
+    ov.setAttribute('aria-hidden','true');
+    ov.style.display = 'none';
+  }
   try { localStorage.setItem('pg_tutorial_done', '1'); } catch(e){}
-  if(window.PG && PG.toast) PG.toast(skip ? 'Puedes explorar libremente ⚡' : '¡A aprender! ⚡');
 }
 function renderTutorialStep(){
   document.querySelectorAll('.tutorial-step').forEach(el=>{
@@ -3194,10 +3198,20 @@ function tutorialNext(){
   tutStep++;
   renderTutorialStep();
 }
-// Auto-open once
+// Tutorial solo manual (boton ruta) — no auto-abrir (bloqueaba toda la pagina)
+// document.addEventListener('DOMContentLoaded', ()=>{
+//   if(shouldShowTutorial()){ setTimeout(openTutorial, 600); }
+// });
+// Cerrar si quedo pegado de una sesion anterior
 document.addEventListener('DOMContentLoaded', ()=>{
-  if(shouldShowTutorial()){
-    setTimeout(openTutorial, 600);
+  try { closeTutorial(true); } catch(e) {}
+  var ov = document.getElementById('tutorialOverlay');
+  if(ov){
+    ov.classList.remove('show');
+    ov.setAttribute('aria-hidden','true');
+    ov.addEventListener('click', function(e){
+      if(e.target === ov) closeTutorial(true);
+    });
   }
 });
 // Botón opcional para volver a ver el tutorial (si existe)

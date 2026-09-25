@@ -515,7 +515,7 @@
       <div><span class="step-num">1</span> Agrega una <b>Pila</b> (botón 🔋)</div>
       <div><span class="step-num">2</span> Agrega una <b>Resistencia</b> (protege el LED)</div>
       <div><span class="step-num">3</span> Agrega un <b>LED</b></div>
-      <div><span class="step-num">4</span> Conecta: <b>Pila(+)</b> → Resistencia → LED(+) → LED(−) → <b>Pila(−)</b></div>
+      <div><span class="step-num">4</span> Conecta: <b>Pila(+)</b> → Resistencia → LED <b>pata larga (+)</b> → LED <b>pata corta (−)</b> → <b>Pila(−)</b></div>
       <div><span class="step-num">5</span> Pulsa <b>Simular</b> y mira los mA</div>
     </div>
     <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
@@ -524,7 +524,7 @@
     <div class="wire-board" style="margin-top:14px;">
       <svg id="labSvg" viewBox="0 0 700 380"></svg>
     </div>
-    <div class="lab-hint-bar" 
+    <div class="lab-hint-bar">
       <div class="lab-meter" id="labMeter" aria-live="polite">
         <div class="lab-meter-title">📟 Multímetro</div>
         <div class="lab-meter-row">
@@ -533,14 +533,13 @@
           <span>Estado <b id="meterStatus">En espera</b></span>
         </div>
       </div>
-
-      <div id="labHintBar">Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar</div>
+      <div id="labHintBar">LED: pata larga = + · pata corta = − · Toca un circulo y luego otro para cablear · Misma columna = conectados</div>
+    </div>
     <div class="cb-result" id="labResult"></div>
 
     <div class="lab-presets">
-      <h4><button type="button" class="btn" onclick="labDemoLED()" style="margin-bottom:10px;">▶️ Probar ahora: LED + resistencia</button>
-      <p style="opacity:.85;font-size:.9rem;margin:8px 0;">O elige otra receta:</p>
-      💡 Recetas listas:</h4>
+      <button type="button" class="btn" onclick="labDemoLED()" style="margin-bottom:10px;">▶️ Probar ahora: LED + resistencia</button>
+      <p style="opacity:.85;font-size:.9rem;margin:8px 0;">💡 O elige otra receta:</p>
       <div class="cta-row">
         <button class="btn ghost" onclick="loadPreset('simple')">LED simple</button>
         <button class="btn ghost" onclick="loadPreset('interruptor')">LED con interruptor</button>
@@ -582,7 +581,7 @@
 
   
 <!-- Tutorial de bienvenida -->
-<div class="tutorial-overlay" id="tutorialOverlay" aria-hidden="true">
+<div class="tutorial-overlay" id="tutorialOverlay" aria-hidden="true" style="display:none;">
   <div class="tutorial-card" role="dialog" aria-labelledby="tutTitle">
     <div class="tutorial-step" data-step="0">
       <div class="tut-emoji">⚡</div>
