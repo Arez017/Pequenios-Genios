@@ -1951,8 +1951,18 @@ function labDrawComponentArt(inst, diag){
       <rect x="${x+66}" y="${y+14}" width="6" height="28" fill="#d4af37"/>`;
   }
   if(inst.type==='led'){
-    // Solo marca; el dibujo real del LED se hace en renderLab con las posiciones de agujeros
-    return '';
+    let domeColor = ledDef.hex, op = 0.55;
+    if(active){
+      if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
+      else { domeColor = ledDef.lit; op = Math.max(0.4, diag.brightness||0.55); }
+    }
+    // a (izq)= + larga | b (der)= - corta
+    return `<g ${glow}>
+      <path d="M${x+30} ${y+38} V${y+18} A20 20 0 0 1 ${x+70} ${y+18} V${y+38} Z" fill="${domeColor}" stroke="#6b1f1f" stroke-width="1.5" opacity="${op}"/>
+      <rect x="${x+30}" y="${y+34}" width="40" height="8" rx="2" fill="#4a1520"/>
+      <line x1="${x+68}" y1="${y+16}" x2="${x+68}" y2="${y+38}" stroke="#ddd" stroke-width="2"/>
+      <text x="${x+50}" y="${y+32}" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" opacity="0.85">LED</text>
+      </g>`;
   }
   if(inst.type==='bateria'){
     return `<rect x="${x+12}" y="${y+12}" width="76" height="34" rx="3" fill="#2c2c2c" stroke="#111" stroke-width="1.5"/>
@@ -2073,64 +2083,46 @@ function renderLab(){
     const clsA = 'wire-terminal' + (labPendingTerminal===inst.id+'_a'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_a'||b===inst.id+'_a')?' connected':'');
     const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
 
+    html += '<g data-role="body" data-inst="'+inst.id+'">';
+    html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill="rgba(255,255,255,0.15)" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>';
+    html += labDrawComponentArt(inst, diag);
+    html += '<text class="wire-comp-label" x="'+(inst.x+50)+'" y="'+(inst.y+52)+'" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">'+labelText+(active?' ✓':'')+'</text>';
+
     if(inst.type==='led'){
-      // LED simple y claro: a = + LARGA (izq), b = - CORTA (der)
-      const ledDef = LED_COLORS[inst.color||'red'];
-      let col = (active && diag.status!=='danger') ? (ledDef.lit||'#ff5252') : (ledDef.hex||'#c62828');
-      if(diag.status==='danger') col = '#ffffff';
-      const ax = pa.x, ay = pa.y, bx = pb.x, by = pb.y;
-      const mx = (ax+bx)/2;
-      const top = Math.min(ay,by) - 50;
-
-      html += '<g data-role="body" data-inst="'+inst.id+'">';
-
-      // Cúpula (sin fondo feo)
-      html += '<path d="M '+(mx-16)+' '+(top+34)+' C '+(mx-16)+' '+(top+10)+' '+(mx+16)+' '+(top+10)+' '+(mx+16)+' '+(top+34)+' Z" fill="'+col+'" stroke="#4a1520" stroke-width="2"'+(active?' style="filter:drop-shadow(0 0 10px '+col+')"':'')+'/>';
-      html += '<rect x="'+(mx-16)+'" y="'+(top+32)+'" width="32" height="8" rx="1.5" fill="#2a1018"/>';
-      // lado plano del catodo (derecha = b)
-      html += '<line x1="'+(mx+15)+'" y1="'+(top+16)+'" x2="'+(mx+15)+'" y2="'+(top+34)+'" stroke="#eee" stroke-width="2.5"/>';
-
-      // Pata + LARGA (a) — verde, mas larga
-      html += '<line x1="'+ax+'" y1="'+(top+40)+'" x2="'+ax+'" y2="'+ay+'" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/>';
-      // Pata - CORTA (b) — naranja, mas corta
-      html += '<line x1="'+bx+'" y1="'+(top+48)+'" x2="'+bx+'" y2="'+by+'" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>';
-
-      // Etiquetas fuera del cuerpo
-      html += '<text x="'+ax+'" y="'+(top+8)+'" text-anchor="middle" fill="#166534" font-size="10" font-weight="800" style="pointer-events:none">+ LARGA</text>';
-      html += '<text x="'+bx+'" y="'+(top+8)+'" text-anchor="middle" fill="#c2410c" font-size="10" font-weight="800" style="pointer-events:none">- CORTA</text>';
-
-      // Terminales con style= para que el CSS no los pinte iguales
-      html += '<circle data-role="terminal" data-key="'+inst.id+'_a" cx="'+ax+'" cy="'+ay+'" r="8" style="fill:#052e16;stroke:#22c55e;stroke-width:3;cursor:pointer"></circle>';
-      html += '<circle data-role="terminal" data-key="'+inst.id+'_b" cx="'+bx+'" cy="'+by+'" r="8" style="fill:#431407;stroke:#f97316;stroke-width:3;cursor:pointer"></circle>';
-
-      // Borrar: esquina superior derecha, lejos de textos
-      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(mx+38)+'" cy="'+(top+4)+'" r="8" style="fill:#fecaca;stroke:#dc2626;stroke-width:2;cursor:pointer"></circle>';
-      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(mx+38)+'" y="'+(top+8)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:11px;font-weight:800;pointer-events:none">x</text>';
-
-      html += '</g>';
-    } else {
-      html += '<g data-role="body" data-inst="'+inst.id+'">';
-      html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill-opacity="0.03"/>';
-      html += labDrawComponentArt(inst, diag);
-      html += '<text class="wire-comp-label" x="'+(inst.x+50)+'" y="'+(inst.y+52)+'" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">'+labelText+(active?' ✓':'')+'</text>';
-      if(isSwitch){
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="'+(inst.closed?'#2f6b45':'#8a2e2e')+'" style="font-size:9px;font-family:monospace;pointer-events:none;">'+(inst.closed?'CERRADO (toca)':'ABIERTO (toca)')+'</text>';
-      } else if(inst.type==='bateria'){
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none;">toca: cambiar V</text>';
-      } else if(inst.type==='resistencia'){
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none;">toca: cambiar ohm</text>';
+      html += '<text x="'+(inst.x+22)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#166534" style="font-size:9px;font-weight:800;pointer-events:none">+ LARGA</text>';
+      html += '<text x="'+(inst.x+78)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#c2410c" style="font-size:9px;font-weight:800;pointer-events:none">- CORTA</text>';
+      if(diag.status==='danger'){
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#dc2626" style="font-size:9px;pointer-events:none">mucha corriente</text>';
+      } else if(active){
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#15803d" style="font-size:9px;pointer-events:none">encendido</text>';
+      } else {
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#92400e" style="font-size:8px;pointer-events:none">toca: color</text>';
       }
-      const bodyMidY = inst.y + 52;
-      const legA = inst.type==='bateria' ? '#4ade80' : '#6b7280';
-      const legB = inst.type==='bateria' ? '#fb923c' : '#6b7280';
-      html += '<line x1="'+pa.x+'" y1="'+bodyMidY+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="2.5" stroke-linecap="round"/>';
-      html += '<line x1="'+pb.x+'" y1="'+bodyMidY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="2.5" stroke-linecap="round"/>';
-      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" fill="#0b1f18" stroke="'+legA+'" stroke-width="2.5"></circle>';
-      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" fill="#0b1f18" stroke="'+legB+'" stroke-width="2.5"></circle>';
-      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+92)+'" cy="'+(inst.y+8)+'" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"></circle>';
-      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+92)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#7a1414" style="font-size:10px;pointer-events:none;">×</text>';
-      html += '</g>';
+    } else if(isSwitch){
+      html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="'+(inst.closed?'#2f6b45':'#8a2e2e')+'" style="font-size:9px;pointer-events:none">'+(inst.closed?'CERRADO (toca)':'ABIERTO (toca)')+'</text>';
+    } else if(inst.type==='bateria'){
+      html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none">toca: cambiar V</text>';
+    } else if(inst.type==='resistencia'){
+      html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none">toca: cambiar ohm</text>';
     }
+
+    const bodyMidY = inst.y + 48;
+    // LED: a=+ verde mas gruesa, b=- naranja mas fina
+    let legA = '#6b7280', legB = '#6b7280', wA = 2.5, wB = 2.5;
+    if(inst.type==='led' || inst.type==='bateria'){
+      legA = '#22c55e'; legB = '#f97316';
+      if(inst.type==='led'){ wA = 3.5; wB = 2.2; }
+    }
+    const startAY = inst.type==='led' ? (inst.y+42) : bodyMidY;
+    const startBY = inst.type==='led' ? (inst.y+48) : bodyMidY;
+    html += '<line x1="'+pa.x+'" y1="'+startAY+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="'+wA+'" stroke-linecap="round"/>';
+    html += '<line x1="'+pb.x+'" y1="'+startBY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="'+wB+'" stroke-linecap="round"/>';
+    html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" style="fill:#0b1f18;stroke:'+legA+';stroke-width:2.5;cursor:pointer"></circle>';
+    html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" style="fill:#0b1f18;stroke:'+legB+';stroke-width:2.5;cursor:pointer"></circle>';
+    html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+92)+'" cy="'+(inst.y+8)+'" r="8" style="fill:#fecaca;stroke:#dc2626;stroke-width:1.5;cursor:pointer"></circle>';
+    html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+92)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:11px;font-weight:800;pointer-events:none">x</text>';
+    html += '</g>';
+
   });
 
   svg.innerHTML = html;
