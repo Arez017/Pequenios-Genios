@@ -2105,18 +2105,19 @@ function renderLab(){
       html += '<line x1="'+anode.x+'" y1="'+(bodyY+46)+'" x2="'+anode.x+'" y2="'+anode.y+'" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>';
       // PATA CORTA (-) = catodo b — mas delgada y empieza mas abajo (se ve mas corta)
       html += '<line x1="'+cathode.x+'" y1="'+(bodyY+54)+'" x2="'+cathode.x+'" y2="'+cathode.y+'" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round"/>';
-      // etiquetas claras
-      html += '<text x="'+anode.x+'" y="'+(bodyY+8)+'" text-anchor="middle" fill="#14532d" font-size="11" font-weight="800">+ LARGA</text>';
-      html += '<text x="'+cathode.x+'" y="'+(bodyY+8)+'" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="800">- CORTA</text>';
+      // etiquetas claras (arriba de cada pata, sin tapar)
+      html += '<text x="'+anode.x+'" y="'+(bodyY+10)+'" text-anchor="middle" fill="#14532d" font-size="11" font-weight="800">+ LARGA</text>';
+      html += '<text x="'+cathode.x+'" y="'+(bodyY+10)+'" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="800">- CORTA</text>';
       if(diag.status==='danger'){
-        html += '<text x="'+midX+'" y="'+(bodyY-6)+'" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="800">🔥 mucha corriente</text>';
+        html += '<text x="'+midX+'" y="'+(bodyY-8)+'" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="800">mucha corriente</text>';
       } else if(active){
-        html += '<text x="'+midX+'" y="'+(bodyY-6)+'" text-anchor="middle" fill="#15803d" font-size="11">✓ encendido</text>';
+        html += '<text x="'+midX+'" y="'+(bodyY-8)+'" text-anchor="middle" fill="#15803d" font-size="11">encendido</text>';
       }
       html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+anode.x+'" cy="'+anode.y+'" r="9" fill="#052e16" stroke="#16a34a" stroke-width="3"></circle>';
       html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+cathode.x+'" cy="'+cathode.y+'" r="9" fill="#431407" stroke="#ea580c" stroke-width="3"></circle>';
-      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(midX+34)+'" cy="'+(bodyY+2)+'" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="2"></circle>';
-      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(midX+34)+'" y="'+(bodyY+6)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:12px;font-weight:800;pointer-events:none;">×</text>';
+      // boton borrar lejos de las etiquetas (arriba-centro)
+      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+midX+'" cy="'+(bodyY-18)+'" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="2"></circle>';
+      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+midX+'" y="'+(bodyY-14)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:12px;font-weight:800;pointer-events:none;">×</text>';
       html += '</g>';
     } else {
       html += '<g data-role="body" data-inst="'+inst.id+'">';
