@@ -1445,64 +1445,129 @@ function switchSVG(on){
     <line x1="8" y1="30" x2="${on?'50':'34'}" y2="${on?'30':'14'}" stroke="${on?'#4ade80':'#ff5c5c'}" stroke-width="4"/>
   </svg>`;
 }
-// SERIE: 1 chain, 3 switches, all leds share same "on" state = AND of switches
-let serieSwitches = [true,true,true];
+
+/* ============================================================
+   JUEGO: SERIE VS PARALELO (circuitos conectados + objetivo)
+   ============================================================ */
+let serieSwitches = [true, true, true];
+let paraSwitches = [true, true, true];
+let spGoalDone = { serie: false, paralelo: false };
+
 function renderSerie(){
-  const allOn = serieSwitches.every(s=>s);
   const wrap = document.getElementById('serieCircuit');
   if(!wrap) return;
-  const wire = (w=28)=>`<div style="width:${w}px;height:4px;background:#fde047;border-radius:2px;flex-shrink:0;"></div>`;
-  let html = `<div style="max-width:520px;margin:0 auto;">`;
-  html += `<div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;padding:12px;border:2px solid rgba(253,224,71,0.35);border-radius:16px;background:rgba(0,0,0,0.2);">`;
-  html += `<div style="text-align:center;"><div style="font-size:0.7rem;color:#4ade80;font-weight:700;">+ PILA −</div>${ICONS.bateria}</div>`;
-  serieSwitches.forEach((s,i)=>{
-    html += wire(20);
-    html += `<div style="text-align:center;cursor:pointer;" onclick="toggleSerie(${i})" title="Toca para abrir/cerrar">
-      <div style="font-size:0.65rem;opacity:0.7;">SW${i+1}</div>${switchSVG(s)}</div>`;
-    html += wire(16);
-    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.7;">R · 330Ω</div>${ICONS.resistencia}</div>`;
-    html += wire(16);
-    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.7;">LED${i+1}</div>${ledSVG(allOn)}</div>`;
-  });
-  html += `</div>`;
-  html += `<p style="text-align:center;margin:12px 0 0;font-size:0.85rem;opacity:0.85;">
-    Circuito <b>cerrado</b>: sale del <b style="color:#4ade80">+</b> y regresa al <b style="color:#fb923c">−</b>.
-    ${allOn ? '<span style="color:#4ade80;"> ✅ Todos encendidos</span>' : '<span style="color:#f87171;"> ⛔ Interruptor abierto → todo apagado</span>'}
-  </p></div>`;
+  const allOn = serieSwitches.every(function(s){ return s; });
+  const openCount = serieSwitches.filter(function(s){ return !s; }).length;
+
+  let goal = '';
+  if(allOn){
+    goal = 'Objetivo: toca UN interruptor para abrirlo. En serie, si falla uno, se apagan TODOS.';
+  } else {
+    goal = 'Correcto: se abrio el camino y se apagaron todos los LEDs. Eso es un circuito en serie.';
+    if(!spGoalDone.serie && window.PG){
+      spGoalDone.serie = true;
+      PG.sfxOk();
+      PG.toast('Entendiste la serie');
+    }
+  }
+
+  function sw(i){
+    const on = serieSwitches[i];
+    return '<button type="button" onclick="toggleSerie('+i+')" style="min-width:54px;padding:6px 8px;border-radius:10px;border:2px solid '+(on?'#4ade80':'#f87171')+';background:rgba(0,0,0,0.35);color:#fef8ec;cursor:pointer;font-weight:700;font-size:0.75rem;">SW'+(i+1)+'<br>'+(on?'ON':'OFF')+'</button>';
+  }
+  function led(on, n){
+    return '<div style="text-align:center;"><div style="width:28px;height:28px;margin:0 auto;border-radius:50% 50% 40% 40%;background:'+(on?'#f87171':'#333')+';box-shadow:'+(on?'0 0 12px #f87171':'none')+';border:2px solid '+(on?'#ffb4b4':'#555')+';"></div><div style="font-size:0.7rem;margin-top:4px;">LED'+n+'</div></div>';
+  }
+  function wire(){ return '<div style="flex:1;min-width:16px;height:4px;background:#fde047;border-radius:2px;"></div>'; }
+  function res(){ return '<div style="text-align:center;color:#fb923c;font-size:0.7rem;font-weight:700;">R<br>330</div>'; }
+
+  var html = '';
+  html += '<div style="padding:14px;border:2px solid rgba(253,224,71,0.4);border-radius:16px;background:rgba(0,0,0,0.28);max-width:560px;margin:0 auto;">';
+  // top row closed loop visual
+  html += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:8px 4px;">';
+  html += '<div style="text-align:center;flex-shrink:0;"><div style="color:#4ade80;font-weight:800;font-size:0.75rem;">+ PILA -</div><div style="font-size:1.4rem;">🔋</div></div>';
+  for(var i=0;i<3;i++){
+    html += wire();
+    html += sw(i);
+    html += wire();
+    html += res();
+    html += wire();
+    html += led(allOn, i+1);
+  }
+  html += '</div>';
+  // return path
+  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:10px 8px 0;"></div>';
+  html += '<p style="text-align:center;margin:10px 0 0;font-size:0.88rem;color:'+(allOn?'#4ade80':'#f87171')+';font-weight:700;">'+(allOn?'Lazo cerrado: hay corriente':'Lazo abierto: no hay corriente')+'</p>';
+  html += '<p style="text-align:center;margin:8px 0 0;font-size:0.88rem;line-height:1.4;">'+goal+'</p>';
+  html += '</div>';
   wrap.innerHTML = html;
 }
-function toggleSerie(i){ serieSwitches[i] = !serieSwitches[i]; renderSerie(); }
-renderSerie();
 
-// PARALELO: ramas conectadas al mismo + y −
-let paraSwitches = [true,true,true];
+function toggleSerie(i){
+  serieSwitches[i] = !serieSwitches[i];
+  renderSerie();
+}
+
 function renderParalelo(){
   const wrap = document.getElementById('paraleloCircuit');
   if(!wrap) return;
-  let html = `<div style="max-width:520px;margin:0 auto;padding:12px;border:2px solid rgba(253,224,71,0.35);border-radius:16px;background:rgba(0,0,0,0.2);">`;
-  html += `<div style="text-align:center;margin-bottom:8px;"><div style="font-size:0.7rem;color:#4ade80;font-weight:700;">+ PILA −</div>${ICONS.bateria}</div>`;
-  html += `<div style="height:4px;background:#fde047;border-radius:2px;margin:0 20px 12px;"></div>`;
-  html += `<div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">`;
-  paraSwitches.forEach((s,i)=>{
-    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;">
-      <div style="width:4px;height:14px;background:#fde047;"></div>
-      <div style="font-size:0.65rem;opacity:0.7;">RAMA ${i+1}</div>
-      <div style="cursor:pointer;" onclick="toggleParalelo(${i})">${switchSVG(s)}</div>
-      <div style="font-size:0.65rem;opacity:0.7;">R · 330Ω</div>
-      ${ICONS.resistencia}
-      ${ledSVG(s)}
-      <div style="width:4px;height:14px;background:#fde047;"></div>
-    </div>`;
-  });
-  html += `</div>`;
-  html += `<div style="height:4px;background:#fde047;border-radius:2px;margin:12px 20px 0;"></div>`;
-  html += `<p style="text-align:center;margin:12px 0 0;font-size:0.85rem;opacity:0.85;">
-    Cada rama sale del <b style="color:#4ade80">+</b> y regresa al <b style="color:#fb923c">−</b>. Apagar una <b>no apaga</b> las demás.
-  </p></div>`;
+
+  let goal = '';
+  if(paraSwitches[0] && paraSwitches[1] && paraSwitches[2]){
+    goal = 'Objetivo: apaga solo SW2 (rama del medio). LED1 y LED3 deben seguir encendidos.';
+  } else if(!paraSwitches[1] && paraSwitches[0] && paraSwitches[2]){
+    goal = 'Correcto: en paralelo, apagar una rama NO apaga las demas.';
+    if(!spGoalDone.paralelo && window.PG){
+      spGoalDone.paralelo = true;
+      PG.sfxOk();
+      PG.toast('Entendiste el paralelo');
+    }
+  } else {
+    goal = 'Cada rama va del + al -. Prueba apagar una y mira las otras.';
+  }
+
+  function sw(i){
+    const on = paraSwitches[i];
+    return '<button type="button" onclick="toggleParalelo('+i+')" style="min-width:54px;padding:6px 8px;border-radius:10px;border:2px solid '+(on?'#4ade80':'#f87171')+';background:rgba(0,0,0,0.35);color:#fef8ec;cursor:pointer;font-weight:700;font-size:0.75rem;">SW'+(i+1)+'<br>'+(on?'ON':'OFF')+'</button>';
+  }
+  function led(on, n){
+    return '<div style="text-align:center;"><div style="width:28px;height:28px;margin:0 auto;border-radius:50% 50% 40% 40%;background:'+(on?'#f87171':'#333')+';box-shadow:'+(on?'0 0 12px #f87171':'none')+';border:2px solid '+(on?'#ffb4b4':'#555')+';"></div><div style="font-size:0.7rem;margin-top:4px;">LED'+n+'</div></div>';
+  }
+
+  var html = '';
+  html += '<div style="padding:14px;border:2px solid rgba(253,224,71,0.4);border-radius:16px;background:rgba(0,0,0,0.28);max-width:480px;margin:0 auto;">';
+  html += '<div style="text-align:center;margin-bottom:6px;"><span style="color:#4ade80;font-weight:800;">+ PILA -</span> <span style="font-size:1.3rem;">🔋</span></div>';
+  // top rail
+  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:0 12px 8px;"></div>';
+  // three branches
+  html += '<div style="display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap;">';
+  for(var i=0;i<3;i++){
+    var on = paraSwitches[i];
+    html += '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;">';
+    html += '<div style="width:4px;height:14px;background:#fde047;"></div>';
+    html += '<div style="font-size:0.7rem;opacity:0.8;">RAMA '+(i+1)+'</div>';
+    html += sw(i);
+    html += '<div style="color:#fb923c;font-size:0.7rem;font-weight:700;">R 330</div>';
+    html += led(on, i+1);
+    html += '<div style="width:4px;height:14px;background:#fde047;"></div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  // bottom rail
+  html += '<div style="height:4px;background:#fde047;border-radius:2px;margin:8px 12px 0;"></div>';
+  html += '<p style="text-align:center;margin:10px 0 0;font-size:0.88rem;line-height:1.4;">'+goal+'</p>';
+  html += '</div>';
   wrap.innerHTML = html;
 }
-function toggleParalelo(i){ paraSwitches[i] = !paraSwitches[i]; renderParalelo(); }
+
+function toggleParalelo(i){
+  paraSwitches[i] = !paraSwitches[i];
+  renderParalelo();
+}
+
+renderSerie();
 renderParalelo();
+
 
 /* ============================================================
    JUEGO: QUIZ — un set de preguntas por nivel
