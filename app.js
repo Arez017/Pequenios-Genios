@@ -842,18 +842,27 @@ function wireTermLabel(id){
 }
 function wireErrorMessage(a, b){
   const A = wireTermLabel(a), B = wireTermLabel(b);
-  // Casos didácticos comunes
+  // RIESGOS / quemar componentes
   if((a==='batt_pos' && b==='batt_neg') || (b==='batt_pos' && a==='batt_neg'))
-    return '❌ No conectes el <b>(+)</b> de la pila directo con el <b>(−)</b>. Eso es un cortocircuito. La corriente debe pasar por los componentes.';
-  if((a.startsWith('led_') && b.startsWith('led_')) || (a.startsWith('sw_') && b.startsWith('sw_')) || (a.startsWith('res_') && b.startsWith('res_')))
-    return `❌ Estás uniendo las dos patitas del mismo componente (<b>${A}</b>). Une un componente con el <b>siguiente</b> del camino.`;
-  if((a==='batt_pos' && b==='led_neg') || (a==='led_neg' && b==='batt_pos') || (a==='batt_neg' && b==='led_pos') || (a==='led_pos' && b==='batt_neg'))
-    return '❌ Revisa la <b>polaridad del LED</b>: el <b>(+)</b> de la pila no va al <b>(−)</b> del LED. Orden: pila (+) → … → LED (+) → LED (−) → pila (−).';
+    return '🔥 <b>Cortocircuito</b>: no unes (+) con (−) de la pila. La pila se calienta y puede danarse.';
+  if((a==='batt_pos' && b==='led_pos') || (a==='led_pos' && b==='batt_pos') ||
+     (a==='batt_pos' && b==='led_neg') || (a==='led_neg' && b==='batt_pos'))
+    return '🔥 <b>Riesgo de quemar el LED</b>: falta la <b>resistencia</b>. Sin ella pasa demasiada corriente y el LED se quema.';
+  if((a==='batt_neg' && b==='led_pos') || (a==='led_pos' && b==='batt_neg'))
+    return '⚠️ <b>Polaridad al reves</b>: el (−) de la pila no va al (+) del LED. El LED no enciende y puede danarse.';
+  if((a==='led_pos' && b==='led_neg') || (a==='led_neg' && b==='led_pos'))
+    return '❌ No conectes las dos patitas del LED entre si. Cada una va a un lado del circuito.';
+  if((a.startsWith('led_') && b.startsWith('led_')))
+    return '❌ Ese cable en el LED no es correcto.';
+  if((a==='batt_pos' && (b.startsWith('sw_')||b.startsWith('res_'))) || (b==='batt_pos' && (a.startsWith('sw_')||a.startsWith('res_'))))
+    return '✅ Casi: el (+) de la pila si puede ir al interruptor, pero sigue el orden: pila (+) → interruptor → resistencia → LED (+)';
   if((a==='batt_neg' && (b.startsWith('sw_')||b.startsWith('res_'))) || (b==='batt_neg' && (a.startsWith('sw_')||a.startsWith('res_'))))
-    return '❌ El <b>(−)</b> de la pila se conecta al final, con el <b>LED (−)</b>, para cerrar el circuito.';
-  if((a==='batt_pos' && b==='led_pos') || (a==='led_pos' && b==='batt_pos'))
-    return '❌ Faltan el <b>interruptor</b> y la <b>resistencia</b> en el camino. No saltes del (+) de la pila directo al LED.';
-  return `❌ <b>${A}</b> con <b>${B}</b> no cierra bien el camino.<br><small>Recuerda: pila (+) → interruptor → resistencia → LED (+) → LED (−) → pila (−). Interruptor y resistencia no tienen polaridad.</small>`;
+    return '❌ El <b>(−)</b> de la pila se conecta al final con el <b>LED pata corta (−)</b>, no al interruptor ni a la resistencia.';
+  if((a.startsWith('res_') && b==='led_neg') || (b.startsWith('res_') && a==='led_neg'))
+    return '⚠️ La resistencia debe ir al <b>LED pata larga (+)</b>, no a la pata corta. Polaridad del LED importa.';
+  if((a.startsWith('sw_') && b.startsWith('led_')) || (b.startsWith('sw_') && a.startsWith('led_')))
+    return '🔥 Falta la <b>resistencia</b> entre el interruptor y el LED. Sin resistencia el LED puede quemarse.';
+  return '❌ <b>'+A+'</b> con <b>'+B+'</b> no es el camino seguro.<br><small>Orden: pila (+) → interruptor → resistencia → LED (+) larga → LED (−) corta → pila (−). Sin resistencia = LED quemado.</small>';
 }
 
 function initWireGame(){
@@ -880,7 +889,7 @@ function renderWireBoard(){
     var p1 = wireTermPos(a), p2 = wireTermPos(b);
     if(!p1||!p2) return;
     var mx = (p1.x+p2.x)/2;
-    parts += '<path class="wire-line done" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>';
+    parts += '<path class="wire-line done wire-draw" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>';
   });
 
   WIRE_COMPONENTS.forEach(function(c){
@@ -995,9 +1004,11 @@ function onWirePointerUp(e){
     } else if(wirePairMatches(wireDrag.fromId, best)){
       wireConnected.push([wireDrag.fromId, best]);
       document.getElementById('wireCount').textContent = wireConnected.length;
-      result.textContent = '';
+      result.innerHTML = '✅ Cable bien puesto ('+wireConnected.length+'/4). Sigue cerrando el camino.';
+      result.className = 'cb-result ok';
+      if(window.PG && PG.sfxOk) try{ PG.sfxOk(); }catch(e){}
       if((typeof wireCircuitLooksValid==='function' && wireCircuitLooksValid())){
-        result.innerHTML = '✅ ¡Circuito cerrado! La corriente ya puede fluir y el LED enciende.';
+        result.innerHTML = '✅ ¡Circuito cerrado! La resistencia protege al LED y la corriente fluye con seguridad.';
         if(window.PG){ PG.sfxWin(); PG.confetti(40); PG.toast('🔗 ¡Cables perfectos!'); PG.award('cables','Experto en Cables'); }
         result.className = 'cb-result ok';
       }
@@ -1017,12 +1028,27 @@ function cancelWireDrag(){
 }
 function flashBadWire(a,b){
   const svg = document.getElementById('wireSvg');
+  if(!svg) return;
   const p1 = wireTermPos(a), p2 = wireTermPos(b);
+  if(!p1||!p2) return;
   const bad = document.createElementNS('http://www.w3.org/2000/svg','path');
-  bad.setAttribute('class','wire-line bad');
-  bad.setAttribute('d', `M${p1.x},${p1.y} L${p2.x},${p2.y}`);
+  bad.setAttribute('class','wire-line bad wire-burn');
+  bad.setAttribute('d', 'M'+p1.x+','+p1.y+' L'+p2.x+','+p2.y);
+  bad.setAttribute('stroke', '#ff5c5c');
+  bad.setAttribute('stroke-width', '5');
+  bad.setAttribute('fill', 'none');
+  bad.setAttribute('stroke-linecap', 'round');
   svg.appendChild(bad);
-  setTimeout(()=>{ bad.remove(); }, 500);
+  // chispas de peligro
+  const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+  const boom = document.createElementNS('http://www.w3.org/2000/svg','text');
+  boom.setAttribute('x', mx);
+  boom.setAttribute('y', my);
+  boom.setAttribute('text-anchor', 'middle');
+  boom.setAttribute('font-size', '22');
+  boom.textContent = '🔥';
+  svg.appendChild(boom);
+  setTimeout(function(){ bad.remove(); boom.remove(); }, 900);
 }
 
 /* ============================================================

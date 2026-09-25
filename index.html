@@ -76,6 +76,31 @@
   100%{ opacity:0; transform: translate(var(--dx), var(--dy)) scale(.4); }
 }
 </style>
+
+<style id="wire-anim-css">
+.wire-draw{
+  stroke-dasharray: 8 6;
+  animation: wireFlow 0.8s linear infinite, wireAppear 0.45s ease-out;
+}
+@keyframes wireFlow{
+  to{ stroke-dashoffset: -28; }
+}
+@keyframes wireAppear{
+  from{ stroke-dasharray: 200; stroke-dashoffset: 200; opacity:0.3; }
+  to{ stroke-dasharray: 8 6; stroke-dashoffset: 0; opacity:1; }
+}
+.wire-burn{
+  animation: burnPulse 0.25s ease-in-out 3;
+}
+@keyframes burnPulse{
+  0%,100%{ opacity:1; stroke-width:5; }
+  50%{ opacity:0.35; stroke-width:8; }
+}
+.wire-line.temp{
+  stroke-dasharray: 6 6;
+  animation: wireFlow 0.5s linear infinite;
+}
+</style>
 </head>
 <body>
 
