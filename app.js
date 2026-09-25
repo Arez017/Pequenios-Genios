@@ -2075,32 +2075,50 @@ function renderLab(){
 
     if(inst.type==='led'){
       const ledDef = LED_COLORS[inst.color||'red'];
-      let domeColor = ledDef.hex, op = 0.75;
+      let domeColor = ledDef.hex || '#e53935';
       if(active){
-        if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
-        else { domeColor = ledDef.lit; op = Math.max(0.55, diag.brightness||0.65); }
+        if(diag.status==='danger') domeColor = '#ffffff';
+        else domeColor = ledDef.lit || domeColor;
       }
-      const midX = (pa.x + pb.x) / 2;
-      const topY = Math.min(pa.y, pb.y) - 52;
-      const glow = active ? ('filter:drop-shadow(0 0 12px '+domeColor+')') : '';
+      // Ordenar: izquierda = + larga (a), derecha = - corta (b)
+      var left = pa.x <= pb.x ? pa : pb;
+      var right = pa.x <= pb.x ? pb : pa;
+      var leftIsAnode = (pa.x <= pb.x); // a es anodo; si a esta a la izquierda, OK
+      // Forzar: siempre dibujar + en terminal a y - en terminal b
+      var anode = pa;   // +
+      var cathode = pb; // -
+      var midX = (anode.x + cathode.x) / 2;
+      var holeY = Math.min(anode.y, cathode.y);
+      var bodyY = holeY - 56;
+      var glow = active ? ('filter:drop-shadow(0 0 14px '+domeColor+')') : '';
+
       html += '<g data-role="body" data-inst="'+inst.id+'">';
-      html += '<ellipse cx="'+midX+'" cy="'+(topY+24)+'" rx="17" ry="15" fill="'+domeColor+'" stroke="#5a2030" stroke-width="1.5" opacity="'+op+'" style="'+glow+'"/>';
-      html += '<rect x="'+(midX-13)+'" y="'+(topY+32)+'" width="26" height="9" rx="2" fill="#2a1018"/>';
-      html += '<line x1="'+(midX+15)+'" y1="'+(topY+14)+'" x2="'+(midX+15)+'" y2="'+(topY+34)+'" stroke="#e8e8e8" stroke-width="2.5"/>';
-      html += '<line x1="'+pa.x+'" y1="'+(topY+40)+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>';
-      html += '<line x1="'+pb.x+'" y1="'+(topY+48)+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round"/>';
-      html += '<text x="'+pa.x+'" y="'+(topY+8)+'" text-anchor="middle" fill="#166534" font-size="10" font-weight="800">+ larga</text>';
-      html += '<text x="'+pb.x+'" y="'+(topY+8)+'" text-anchor="middle" fill="#c2410c" font-size="10" font-weight="800">- corta</text>';
-      if(diag.status){
-        const tag = diag.status==='danger' ? '🔥' : (diag.status==='dim' ? 'tenue' : '✓');
-        const col = diag.status==='danger' ? '#ff5c5c' : '#166534';
-        html += '<text x="'+midX+'" y="'+(topY-2)+'" text-anchor="middle" fill="'+col+'" font-size="10">'+tag+'</text>';
+      // fondo opaco para que no se vean agujeros atras
+      html += '<rect x="'+(midX-36)+'" y="'+(bodyY-4)+'" width="72" height="58" rx="12" fill="#d4c9a8" opacity="0.92"/>';
+      // cupula LED opaca
+      html += '<ellipse cx="'+midX+'" cy="'+(bodyY+26)+'" rx="20" ry="18" fill="'+domeColor+'" stroke="#4a1520" stroke-width="2" style="'+glow+'"/>';
+      html += '<rect x="'+(midX-16)+'" y="'+(bodyY+36)+'" width="32" height="10" rx="2" fill="#1a0a10" stroke="#4a1520"/>';
+      // lado plano = catodo (lado de pb / -)
+      var flatX = cathode.x > anode.x ? (midX+18) : (midX-18);
+      html += '<line x1="'+flatX+'" y1="'+(bodyY+14)+'" x2="'+flatX+'" y2="'+(bodyY+38)+'" stroke="#f5f5f5" stroke-width="3"/>';
+      // PATA LARGA (+) = anodo a — mas gruesa y empieza mas arriba
+      html += '<line x1="'+anode.x+'" y1="'+(bodyY+46)+'" x2="'+anode.x+'" y2="'+anode.y+'" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>';
+      // PATA CORTA (-) = catodo b — mas delgada y empieza mas abajo (se ve mas corta)
+      html += '<line x1="'+cathode.x+'" y1="'+(bodyY+54)+'" x2="'+cathode.x+'" y2="'+cathode.y+'" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round"/>';
+      // etiquetas claras
+      html += '<text x="'+anode.x+'" y="'+(bodyY+8)+'" text-anchor="middle" fill="#14532d" font-size="11" font-weight="800">+ LARGA</text>';
+      html += '<text x="'+cathode.x+'" y="'+(bodyY+8)+'" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="800">- CORTA</text>';
+      if(diag.status==='danger'){
+        html += '<text x="'+midX+'" y="'+(bodyY-6)+'" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="800">🔥 mucha corriente</text>';
+      } else if(active){
+        html += '<text x="'+midX+'" y="'+(bodyY-6)+'" text-anchor="middle" fill="#15803d" font-size="11">✓ encendido</text>';
       }
-      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" fill="#0b1f18" stroke="#4ade80" stroke-width="2.5"></circle>';
-      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" fill="#0b1f18" stroke="#fb923c" stroke-width="2.5"></circle>';
-      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(midX+30)+'" cy="'+(topY+6)+'" r="8" fill="rgba(255,92,92,0.35)" stroke="#ff5c5c" stroke-width="1.5"></circle>';
-      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(midX+30)+'" y="'+(topY+9)+'" text-anchor="middle" fill="#7a1414" style="font-size:10px;pointer-events:none;">×</text>';
+      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+anode.x+'" cy="'+anode.y+'" r="9" fill="#052e16" stroke="#16a34a" stroke-width="3"></circle>';
+      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+cathode.x+'" cy="'+cathode.y+'" r="9" fill="#431407" stroke="#ea580c" stroke-width="3"></circle>';
+      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(midX+34)+'" cy="'+(bodyY+2)+'" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="2"></circle>';
+      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(midX+34)+'" y="'+(bodyY+6)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:12px;font-weight:800;pointer-events:none;">×</text>';
       html += '</g>';
+    }
     } else {
       html += '<g data-role="body" data-inst="'+inst.id+'">';
       html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill-opacity="0.03"/>';
