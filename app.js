@@ -1956,12 +1956,12 @@ function labDrawComponentArt(inst, diag){
       if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
       else { domeColor = ledDef.lit; op = Math.max(0.4, diag.brightness||0.55); }
     }
-    // a (izq)= + larga | b (der)= - corta
+    // a (izq)= ánodo + pata LARGA | b (der)= cátodo − pata CORTA (borde plano real)
     return `<g ${glow}>
       <path d="M${x+30} ${y+38} V${y+18} A20 20 0 0 1 ${x+70} ${y+18} V${y+38} Z" fill="${domeColor}" stroke="#6b1f1f" stroke-width="1.5" opacity="${op}"/>
       <rect x="${x+30}" y="${y+34}" width="40" height="8" rx="2" fill="#4a1520"/>
-      <line x1="${x+68}" y1="${y+16}" x2="${x+68}" y2="${y+38}" stroke="#ddd" stroke-width="2"/>
-      <text x="${x+50}" y="${y+32}" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" opacity="0.85">LED</text>
+      <line x1="${x+68}" y1="${y+16}" x2="${x+68}" y2="${y+38}" stroke="#ddd" stroke-width="2.5"/>
+      <text x="${x+50}" y="${y+32}" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" opacity="0.9">LED</text>
       </g>`;
   }
   if(inst.type==='bateria'){
@@ -2089,14 +2089,15 @@ function renderLab(){
     html += '<text class="wire-comp-label" x="'+(inst.x+50)+'" y="'+(inst.y+52)+'" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">'+labelText+(active?' ✓':'')+'</text>';
 
     if(inst.type==='led'){
-      html += '<text x="'+(inst.x+22)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#166534" style="font-size:9px;font-weight:800;pointer-events:none">+ LARGA</text>';
-      html += '<text x="'+(inst.x+78)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#c2410c" style="font-size:9px;font-weight:800;pointer-events:none">- CORTA</text>';
+      // Etiquetas fuera del área del botón borrar (x+92) para que no se lea "×ORTA"
+      html += '<text x="'+(inst.x+18)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#166534" style="font-size:8px;font-weight:800;pointer-events:none">+ LARGA</text>';
+      html += '<text x="'+(inst.x+62)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#c2410c" style="font-size:8px;font-weight:800;pointer-events:none">− CORTA</text>';
       if(diag.status==='danger'){
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#dc2626" style="font-size:9px;pointer-events:none">mucha corriente</text>';
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-6)+'" text-anchor="middle" fill="#dc2626" style="font-size:9px;pointer-events:none">mucha corriente</text>';
       } else if(active){
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#15803d" style="font-size:9px;pointer-events:none">encendido</text>';
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-6)+'" text-anchor="middle" fill="#15803d" style="font-size:9px;pointer-events:none">encendido</text>';
       } else {
-        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#92400e" style="font-size:8px;pointer-events:none">toca: color</text>';
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-6)+'" text-anchor="middle" fill="#92400e" style="font-size:8px;pointer-events:none">toca: color</text>';
       }
     } else if(isSwitch){
       html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="'+(inst.closed?'#2f6b45':'#8a2e2e')+'" style="font-size:9px;pointer-events:none">'+(inst.closed?'CERRADO (toca)':'ABIERTO (toca)')+'</text>';
@@ -2119,8 +2120,8 @@ function renderLab(){
     html += '<line x1="'+pb.x+'" y1="'+startBY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="'+wB+'" stroke-linecap="round"/>';
     html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" style="fill:#0b1f18;stroke:'+legA+';stroke-width:2.5;cursor:pointer"></circle>';
     html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" style="fill:#0b1f18;stroke:'+legB+';stroke-width:2.5;cursor:pointer"></circle>';
-    html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+92)+'" cy="'+(inst.y+8)+'" r="8" style="fill:#fecaca;stroke:#dc2626;stroke-width:1.5;cursor:pointer"></circle>';
-    html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+92)+'" y="'+(inst.y+12)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:11px;font-weight:800;pointer-events:none">x</text>';
+    html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+98)+'" cy="'+(inst.y-2)+'" r="7" style="fill:#fecaca;stroke:#dc2626;stroke-width:1.5;cursor:pointer"></circle>';
+    html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+98)+'" y="'+(inst.y+2)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:10px;font-weight:800;pointer-events:none">×</text>';
     html += '</g>';
 
   });
@@ -2350,8 +2351,8 @@ function simulateLab(){
   }
   const V = battery.voltage || 9;
 
-  /* --- Conexiones por AGUJEROS de protoboard ---
-     Mismo nodo eléctrico si comparten tira (columna top/bot) o el mismo riel +/- .
+  /* --- Conexiones por AGUJEROS de protoboard (estilo Tinkercad) ---
+     Misma columna top/bot = mismo nodo. Riel + / − = un solo nodo cada uno.
      No hace falta cable entre dos patitas en la misma tira. */
   const columnPairs = [];
   const pins = [];
@@ -2368,7 +2369,7 @@ function simulateLab(){
     }
   }
 
-  // --- grafo base: cables + columnas compartidas + resistencias + interruptores cerrados ---
+  // --- grafo base: cables + columnas + pasivos conductores ---
   const parent = {};
   function makeSet(k){ if(!(k in parent)) parent[k]=k; }
   function find(k){ makeSet(k); return parent[k]===k ? k : (parent[k]=find(parent[k])); }
@@ -2376,64 +2377,92 @@ function simulateLab(){
 
   lab.instances.forEach(inst=>{
     makeSet(inst.id+'_a'); makeSet(inst.id+'_b');
-    // Pasivos conductores (en DC el capacitor se trata como abierto)
+    // Pasivos: siempre conducen (capacitor DC = abierto)
     if(inst.type==='resistencia') union(inst.id+'_a', inst.id+'_b');
     if(inst.type==='ldr') union(inst.id+'_a', inst.id+'_b');
     if(inst.type==='potenciometro') union(inst.id+'_a', inst.id+'_b');
     if(inst.type==='fusible' && inst.closed && !inst.blown) union(inst.id+'_a', inst.id+'_b');
     if(inst.type==='interruptor' && inst.closed) union(inst.id+'_a', inst.id+'_b');
     if(inst.type==='pulsador' && inst.closed) union(inst.id+'_a', inst.id+'_b');
-    // Diodo y LED conducen solo si el circuito los polariza bien (se resuelve en fases activas)
+    // LED / diodo / motor / buzzer: NO unir aquí — solo si la polaridad es correcta
   });
   lab.wires.forEach(([a,b])=>union(a,b));
   columnPairs.forEach(([a,b])=>union(a,b));
 
   const actives = lab.instances.filter(i=>['led','motor','buzzer','diodo'].includes(i.type));
+  // Polarizados: terminal _a = ánodo / + (pata larga en LED), _b = cátodo / − (pata corta)
+  const polarized = new Set(['led','diodo','motor','buzzer']);
 
-  // --- fase 1: activación directa/en cadena (mismo tipo en serie, ej. 2 LEDs) ---
+  /* --- Fase 1: activar solo con polaridad correcta ---
+     LED/diodo: ánodo (_a) debe llegar a pila+, cátodo (_b) a pila−.
+     Se itera para permitir varios en serie. */
   const litSet = new Set();
   let changed = true, iterations = 0;
-  while(changed && iterations < 10){
+  while(changed && iterations < 12){
     changed = false; iterations++;
     actives.forEach(dev=>{
       if(litSet.has(dev.id)) return;
       const a = dev.id+'_a', b = dev.id+'_b';
-      if(find(a)===find(battery.id+'_a') && find(b)===find(battery.id+'_b')){
-        litSet.add(dev.id);
-        union(a,b);
-        changed = true;
+      const posOk = find(a)===find(battery.id+'_a');
+      const negOk = find(b)===find(battery.id+'_b');
+      if(polarized.has(dev.type)){
+        // Polaridad correcta: corriente entra por a (+) y sale por b (−)
+        if(posOk && negOk){
+          litSet.add(dev.id);
+          union(a,b);
+          changed = true;
+        }
+      } else {
+        // Por si hubiera activos no polarizados
+        if((posOk && negOk) || (find(a)===find(battery.id+'_b') && find(b)===find(battery.id+'_a'))){
+          litSet.add(dev.id);
+          union(a,b);
+          changed = true;
+        }
       }
     });
   }
 
-  // --- fase 2: grafo "máximo" (asumiendo que TODOS los componentes activos conducen)
-  // para detectar cadenas mixtas (ej. motor + buzzer en serie) que la fase 1 no resuelve sola ---
-  const parent2 = {...parent};
-  function find2(k){ if(!(k in parent2)) parent2[k]=k; return parent2[k]===k ? k : (parent2[k]=find2(parent2[k])); }
-  function union2(a,b){ find2(a); find2(b); const ra=find2(a), rb=find2(b); if(ra!==rb) parent2[ra]=rb; }
-  actives.forEach(dev=>union2(dev.id+'_a', dev.id+'_b'));
-  const battSetMax = find2(battery.id+'_a');
-  const loopPossible = find2(battery.id+'_b') === battSetMax;
+  /* Detectar LED/diodo al revés (circuito cerrado pero polaridad invertida) */
+  let reversedPolarized = [];
+  actives.forEach(dev=>{
+    if(litSet.has(dev.id) || !polarized.has(dev.type)) return;
+    const a = dev.id+'_a', b = dev.id+'_b';
+    // Invertido: ánodo en el − y cátodo en el +
+    if(find(a)===find(battery.id+'_b') && find(b)===find(battery.id+'_a')){
+      reversedPolarized.push(dev);
+    }
+  });
 
-  if(loopPossible){
-    actives.forEach(dev=>{
-      if(litSet.has(dev.id)) return;
-      if(find2(dev.id+'_a')===battSetMax && find2(dev.id+'_b')===battSetMax){
-        litSet.add(dev.id);
-      }
-    });
-  }
+  /* Fase 2 eliminada: antes unía TODOS los activos y encendía LEDs al revés.
+     Eso rompía la lección de polaridad (patita larga = +). */
 
   const liveWires = new Set();
   if(litSet.size>0){
+    // Cables que tocan el lazo cerrado (pila+ … componentes lit … pila−)
+    const parentLive = {};
+    function findL(k){ if(!(k in parentLive)) parentLive[k]=k; return parentLive[k]===k ? k : (parentLive[k]=findL(parentLive[k])); }
+    function unionL(a,b){ const ra=findL(a), rb=findL(b); if(ra!==rb) parentLive[ra]=rb; }
+    // reconstruir grafo con solo lit
+    lab.instances.forEach(inst=>{
+      findL(inst.id+'_a'); findL(inst.id+'_b');
+      if(inst.type==='resistencia') unionL(inst.id+'_a', inst.id+'_b');
+      if(inst.type==='ldr') unionL(inst.id+'_a', inst.id+'_b');
+      if(inst.type==='potenciometro') unionL(inst.id+'_a', inst.id+'_b');
+      if(inst.type==='fusible' && inst.closed && !inst.blown) unionL(inst.id+'_a', inst.id+'_b');
+      if(inst.type==='interruptor' && inst.closed) unionL(inst.id+'_a', inst.id+'_b');
+      if(inst.type==='pulsador' && inst.closed) unionL(inst.id+'_a', inst.id+'_b');
+      if(litSet.has(inst.id)) unionL(inst.id+'_a', inst.id+'_b');
+    });
+    lab.wires.forEach(([a,b])=>unionL(a,b));
+    columnPairs.forEach(([a,b])=>unionL(a,b));
+    const battLive = findL(battery.id+'_a');
     lab.wires.forEach(([a,b],idx)=>{
-      if(find2(a)===battSetMax && find2(b)===battSetMax) liveWires.add(idx);
+      if(findL(a)===battLive && findL(b)===battLive) liveWires.add(idx);
     });
   }
 
-  // --- fase 3: Ley de Ohm real. Dijkstra desde (+) y desde (−) de la pila,
-  // sumando los ohmios de las resistencias que hay en el camino de cada LED
-  // (las columnas compartidas cuentan como cable, resistencia 0) ---
+  // --- Fase 3: Ley de Ohm. Dijkstra desde (+) y (−) sumando resistencias ---
   const adj = {};
   function addEdge(a,b,w){ (adj[a]=adj[a]||[]).push([b,w]); (adj[b]=adj[b]||[]).push([a,w]); }
   lab.wires.forEach(([a,b])=>addEdge(a,b,0));
@@ -2474,6 +2503,7 @@ function simulateLab(){
     const active = litSet.has(inst.id);
     if(!active){ details[inst.id] = {active:false}; return; }
     if(inst.type!=='led'){ details[inst.id] = {active:true}; return; }
+    // Camino correcto: pila+ → … → ánodo(_a) y cátodo(_b) → … → pila−
     const rUp = distPos[inst.id+'_a'], rDown = distNeg[inst.id+'_b'];
     const rTotal = (rUp!==undefined && rDown!==undefined) ? rUp+rDown : 0;
     const vf = (LED_COLORS[inst.color||'red']||LED_COLORS.red).vf;
@@ -2523,7 +2553,6 @@ function simulateLab(){
       if(d && d.current_mA) iEst += d.current_mA;
       if(d && d.status==='danger') danger = true;
     });
-    // fallback estimate from LEDs lit
     if(!iEst && litSet.size){
       const Ravg = 220;
       iEst = litSet.size * (V / Ravg) * 1000;
@@ -2542,8 +2571,22 @@ function simulateLab(){
     result.textContent = 'Agrega al menos un LED, motor o buzzer para ver si tu circuito funciona.';
     result.className='cb-result';
   } else if(litSet.size===0){
-    result.innerHTML = lab.instances.some(i=>i.type==='fusible'&&i.blown) ? '🧯 <b>Fusible fundido</b> por sobrecorriente. Clic en el fusible para resetearlo y agrega una resistencia.' : '❌ Nada se activa. Cierra el circuito (pila → componentes → pila), cierra interruptores/pulsadores y revisa el diodo (A→K).';
-    result.className='cb-result bad';
+    if(lab.instances.some(i=>i.type==='fusible'&&i.blown)){
+      result.innerHTML = '🧯 <b>Fusible fundido</b> por sobrecorriente. Clic en el fusible para resetearlo y agrega una resistencia.';
+      result.className='cb-result bad';
+    } else if(reversedPolarized.length){
+      const names = reversedPolarized.map(d=>{
+        if(d.type==='led') return 'LED (pata larga = + debe ir hacia el + de la pila)';
+        if(d.type==='diodo') return 'Diodo (ánodo → cátodo, A→K)';
+        return d.type.toUpperCase() + ' (revisa + y −)';
+      });
+      result.innerHTML = '❌ <b>Polaridad invertida</b>: ' + names.join(' · ') + '. En un LED la <b>patita larga es +</b> y la <b>corta es −</b>.';
+      result.className='cb-result bad';
+      if(window.PG) PG.sfxBad();
+    } else {
+      result.innerHTML = '❌ Nada se activa. Cierra el circuito (pila → componentes → pila), cierra interruptores/pulsadores y revisa polaridad del LED: <b>pata larga (+)</b> hacia el + de la pila, <b>pata corta (−)</b> hacia el −.';
+      result.className='cb-result bad';
+    }
   } else {
     const parts = [];
     if(leds.length) parts.push(`💡 ${[...litSet].filter(id=>leds.some(l=>l.id===id)).length}/${leds.length} LED(s)`);
@@ -2552,7 +2595,6 @@ function simulateLab(){
     let msg = `✅ ${parts.join(' · ')}. Pila a ${V}V.`;
     if(anyDanger) msg += missingResistor ? ' 🔥 ¡Corto circuito! Falta resistencia en el camino de un LED, se puede quemar.' : ' 🔥 Corriente demasiado alta en algún LED: sube el valor de la resistencia o baja el voltaje.';
     else if(anyDim) msg += ' 🔅 Algún LED recibe muy poca corriente y se verá tenue: baja el valor de la resistencia.';
-    // Ohm live formula for first lit LED
     let ohmHtml = '';
     const firstLed = leds.find(l => litSet.has(l.id));
     if(firstLed && details[firstLed.id] && details[firstLed.id].rTotal !== undefined){
@@ -2567,7 +2609,6 @@ function simulateLab(){
     if(window.PG && litSet.size > 0 && !anyDanger){
       PG.sfxOk();
       if(!PG.medals.lab){ PG.award('lab','Ingeniero de Laboratorio'); PG.confetti(35); }
-      // Buzzer sound if any buzzer is lit
       if(buzzers.some(bz => litSet.has(bz.id))){
         PG.tone(880, 0.35, 'square', 0.05);
         setTimeout(()=>PG.tone(880, 0.2, 'square', 0.04), 400);
@@ -2575,6 +2616,7 @@ function simulateLab(){
     } else if(window.PG && anyDanger){ PG.sfxBad(); }
   }
 }
+
 
 const LAB_PRESETS = {
   simple: {
