@@ -406,57 +406,30 @@ const THEORY_PRIMARIA = [
       <p>Los componentes van <b>uno detrás del otro</b>, como amigos tomados de la mano. La corriente sale del <b>+</b>, pasa por todos y <b>regresa al −</b>.</p>
       <p>Si un componente falla → se interrumpe el camino → todo se apaga.</p>
       <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>`,
-    diagram:`<svg viewBox="0 0 480 140">
-      <!-- Battery -->
-      <rect x="8" y="40" width="56" height="50" rx="6" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2"/>
-      <line x1="22" y1="55" x2="50" y2="55" stroke="#4ade80" stroke-width="3"/>
-      <line x1="22" y1="75" x2="50" y2="75" stroke="#ff8a3d" stroke-width="6"/>
-      <text x="38" y="32" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="800">+</text>
-      <text x="38" y="108" text-anchor="middle" fill="#ff8a3d" font-size="16" font-weight="800">−</text>
-      <text x="38" y="70" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
-
-      <!-- Wire from + (longer) -->
-      <line x1="64" y1="58" x2="110" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
-      <polygon points="108,52 120,58 108,64" fill="#ffd23f"/>
-
-      <!-- Resistor -->
-      <polyline points="120,58 130,58 136,44 145,72 154,44 163,72 170,58 180,58" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linejoin="round"/>
-      <text x="150" y="34" text-anchor="middle" fill="#ff8a3d" font-size="13" font-weight="700">R</text>
-
-      <!-- Wire -->
-      <line x1="180" y1="58" x2="220" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
-
-      <!-- LED 1 -->
-      <polygon points="220,42 220,74 255,58" fill="none" stroke="#ff4d5e" stroke-width="2.5"/>
-      <line x1="255" y1="42" x2="255" y2="74" stroke="#ff4d5e" stroke-width="3"/>
-      <g stroke="#ff4d5e" stroke-width="1.5" fill="none">
-        <line x1="262" y1="40" x2="274" y2="28"/>
-        <line x1="264" y1="52" x2="278" y2="46"/>
-      </g>
-      <text x="238" y="92" text-anchor="middle" fill="#fef8ec" font-size="12">LED 1</text>
-
-      <!-- Wire -->
-      <line x1="255" y1="58" x2="300" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
-
-      <!-- LED 2 -->
-      <polygon points="300,42 300,74 335,58" fill="none" stroke="#4dd8ff" stroke-width="2.5"/>
-      <line x1="335" y1="42" x2="335" y2="74" stroke="#4dd8ff" stroke-width="3"/>
-      <g stroke="#4dd8ff" stroke-width="1.5" fill="none">
-        <line x1="342" y1="40" x2="354" y2="28"/>
-        <line x1="344" y1="52" x2="358" y2="46"/>
-      </g>
-      <text x="318" y="92" text-anchor="middle" fill="#fef8ec" font-size="12">LED 2</text>
-
-      <!-- Return path (long) -->
-      <line x1="335" y1="58" x2="400" y2="58" stroke="#ffd23f" stroke-width="3.5"/>
-      <line x1="400" y1="58" x2="400" y2="110" stroke="#ffd23f" stroke-width="3.5"/>
-      <line x1="400" y1="110" x2="38" y2="110" stroke="#ffd23f" stroke-width="3.5"/>
-      <line x1="38" y1="110" x2="38" y2="90" stroke="#ffd23f" stroke-width="3.5"/>
-      <polygon points="44,108 38,118 32,108" fill="#ffd23f"/>
-
-      <!-- Labels -->
-      <text x="240" y="18" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">SALE DEL POSITIVO (+)</text>
-      <text x="240" y="132" text-anchor="middle" fill="#ff8a3d" font-size="13" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+    diagram:`<svg viewBox="0 0 400 115">
+      <line x1="15" y1="45" x2="35" y2="45" stroke="#fde047" stroke-width="3"/>
+      <line x1="35" y1="25" x2="35" y2="65" stroke="#4ade80" stroke-width="3"/>
+      <line x1="45" y1="33" x2="45" y2="57" stroke="#4ade80" stroke-width="6"/>
+      <text x="40" y="18" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
+      <line x1="45" y1="45" x2="60" y2="45" stroke="#fde047" stroke-width="3"/>
+      <line x1="60" y1="25" x2="60" y2="65" stroke="#fb923c" stroke-width="3"/>
+      <line x1="70" y1="33" x2="70" y2="57" stroke="#fb923c" stroke-width="6"/>
+      <text x="65" y="18" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
+      <text x="52" y="80" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
+      <line x1="70" y1="45" x2="105" y2="45" stroke="#fde047" stroke-width="3"/>
+      <polygon points="103,39 115,45 103,51" fill="#fde047"/>
+      <polyline points="115,45 123,45 129,33 137,57 145,33 153,57 159,45 170,45" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="142" y="26" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
+      <line x1="170" y1="45" x2="210" y2="45" stroke="#fde047" stroke-width="3"/>
+      <polyline points="210,45 218,45 224,33 232,57 240,33 248,57 254,45 265,45" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="237" y="26" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
+      <line x1="265" y1="45" x2="310" y2="45" stroke="#fde047" stroke-width="3"/>
+      <line x1="310" y1="45" x2="310" y2="90" stroke="#fde047" stroke-width="3"/>
+      <line x1="310" y1="90" x2="52" y2="90" stroke="#fde047" stroke-width="3"/>
+      <line x1="52" y1="90" x2="52" y2="65" stroke="#fde047" stroke-width="3"/>
+      <polygon points="58,88 52,98 46,88" fill="#fde047"/>
+      <text x="180" y="12" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">SALE DEL POSITIVO (+)</text>
+      <text x="180" y="108" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">REGRESA AL NEGATIVO (−)</text>
     </svg>`
   },
   {
@@ -465,61 +438,32 @@ const THEORY_PRIMARIA = [
       <p>Cada componente tiene <b>su propia rama</b>. Todos salen del <b>+</b> y todos regresan al <b>−</b>, pero por caminos separados.</p>
       <p>Si una rama falla → las otras siguen funcionando.</p>
       <p>💡 Ejemplo: las luces de tu casa. Apagas una y las demás siguen encendidas.</p>`,
-    diagram:`<svg viewBox="0 0 500 290">
-      <!-- Battery -->
-      <rect x="14" y="90" width="58" height="52" rx="6" fill="#0a2a1a" stroke="#5eead4" stroke-width="2.5"/>
-      <line x1="30" y1="108" x2="56" y2="108" stroke="#4ade80" stroke-width="4"/>
-      <line x1="30" y1="128" x2="56" y2="128" stroke="#fb923c" stroke-width="7"/>
-      <text x="44" y="82" text-anchor="middle" fill="#4ade80" font-size="18" font-weight="800">+</text>
-      <text x="44" y="165" text-anchor="middle" fill="#fb923c" font-size="18" font-weight="800">−</text>
-      <text x="44" y="123" text-anchor="middle" fill="#fef8ec" font-size="12" font-weight="700">PILA</text>
-
-      <!-- Top rail -->
-      <line x1="72" y1="108" x2="470" y2="108" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
-      <polygon points="150,100 165,108 150,116" fill="#fde047"/>
-
-      <!-- Bottom rail - low enough -->
-      <line x1="72" y1="250" x2="470" y2="250" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
-      <line x1="44" y1="250" x2="44" y2="154" stroke="#fde047" stroke-width="4"/>
-
-      <!-- Right close -->
-      <line x1="470" y1="108" x2="470" y2="250" stroke="#fde047" stroke-width="5" stroke-linecap="round"/>
-
-      <!-- ===== RAMA 1 ===== -->
-      <line x1="190" y1="108" x2="190" y2="140" stroke="#fde047" stroke-width="4"/>
-      <!-- R -->
-      <polyline points="190,140 190,150 174,160 206,170 174,180 190,190" fill="none" stroke="#fb923c" stroke-width="3.5" stroke-linejoin="round"/>
-      <text x="158" y="168" fill="#fb923c" font-size="16" font-weight="800">R</text>
-      <!-- cable R -> LED -->
-      <line x1="190" y1="190" x2="190" y2="200" stroke="#fde047" stroke-width="4"/>
-      <!-- LED completely above bottom rail -->
-      <polygon points="172,200 172,230 208,215" fill="none" stroke="#f87171" stroke-width="3"/>
-      <line x1="208" y1="200" x2="208" y2="230" stroke="#f87171" stroke-width="3.5"/>
-      <g stroke="#f87171" stroke-width="2" fill="none">
-        <line x1="214" y1="198" x2="228" y2="184"/>
-        <line x1="216" y1="212" x2="232" y2="204"/>
-      </g>
-      <!-- short wire from LED down to bottom rail -->
-      <line x1="190" y1="230" x2="190" y2="250" stroke="#fde047" stroke-width="4"/>
-      <text x="190" y="275" text-anchor="middle" fill="#fef8ec" font-size="15" font-weight="700">LED 1</text>
-
-      <!-- ===== RAMA 2 ===== -->
-      <line x1="360" y1="108" x2="360" y2="140" stroke="#fde047" stroke-width="4"/>
-      <polyline points="360,140 360,150 344,160 376,170 344,180 360,190" fill="none" stroke="#fb923c" stroke-width="3.5" stroke-linejoin="round"/>
-      <text x="328" y="168" fill="#fb923c" font-size="16" font-weight="800">R</text>
-      <line x1="360" y1="190" x2="360" y2="200" stroke="#fde047" stroke-width="4"/>
-      <polygon points="342,200 342,230 378,215" fill="none" stroke="#38bdf8" stroke-width="3"/>
-      <line x1="378" y1="200" x2="378" y2="230" stroke="#38bdf8" stroke-width="3.5"/>
-      <g stroke="#38bdf8" stroke-width="2" fill="none">
-        <line x1="384" y1="198" x2="398" y2="184"/>
-        <line x1="386" y1="212" x2="402" y2="204"/>
-      </g>
-      <line x1="360" y1="230" x2="360" y2="250" stroke="#fde047" stroke-width="4"/>
-      <text x="360" y="275" text-anchor="middle" fill="#fef8ec" font-size="15" font-weight="700">LED 2</text>
-
-      <!-- Labels -->
-      <text x="270" y="40" text-anchor="middle" fill="#4ade80" font-size="15" font-weight="800">SALE DEL POSITIVO (+)</text>
-      <text x="270" y="288" text-anchor="middle" fill="#fb923c" font-size="15" font-weight="800">REGRESA AL NEGATIVO (−)</text>
+    diagram:`<svg viewBox="0 0 400 175">
+      <line x1="15" y1="55" x2="35" y2="55" stroke="#fde047" stroke-width="3"/>
+      <line x1="35" y1="35" x2="35" y2="75" stroke="#4ade80" stroke-width="3"/>
+      <line x1="45" y1="43" x2="45" y2="67" stroke="#4ade80" stroke-width="6"/>
+      <text x="40" y="28" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
+      <line x1="45" y1="55" x2="60" y2="55" stroke="#fde047" stroke-width="3"/>
+      <line x1="60" y1="35" x2="60" y2="75" stroke="#fb923c" stroke-width="3"/>
+      <line x1="70" y1="43" x2="70" y2="67" stroke="#fb923c" stroke-width="6"/>
+      <text x="65" y="28" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
+      <text x="52" y="90" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
+      <line x1="35" y1="35" x2="35" y2="18" stroke="#fde047" stroke-width="3"/>
+      <line x1="35" y1="18" x2="360" y2="18" stroke="#fde047" stroke-width="3.5"/>
+      <polygon points="100,12 112,18 100,24" fill="#fde047"/>
+      <line x1="70" y1="75" x2="70" y2="130" stroke="#fde047" stroke-width="3"/>
+      <line x1="70" y1="130" x2="360" y2="130" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="360" y1="18" x2="360" y2="130" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="160" y1="18" x2="160" y2="45" stroke="#fde047" stroke-width="3"/>
+      <polyline points="160,45 160,55 148,65 172,75 148,85 160,95" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="138" y="72" fill="#fb923c" font-size="13" font-weight="700">R1</text>
+      <line x1="160" y1="95" x2="160" y2="130" stroke="#fde047" stroke-width="3"/>
+      <line x1="270" y1="18" x2="270" y2="45" stroke="#fde047" stroke-width="3"/>
+      <polyline points="270,45 270,55 258,65 282,75 258,85 270,95" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="248" y="72" fill="#fb923c" font-size="13" font-weight="700">R2</text>
+      <line x1="270" y1="95" x2="270" y2="130" stroke="#fde047" stroke-width="3"/>
+      <text x="200" y="10" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">SALE DEL POSITIVO (+)</text>
+      <text x="200" y="155" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">REGRESA AL NEGATIVO (−)</text>
     </svg>`
   }
 ];
