@@ -1951,23 +1951,20 @@ function labDrawComponentArt(inst, diag){
       <rect x="${x+66}" y="${y+14}" width="6" height="28" fill="#d4af37"/>`;
   }
   if(inst.type==='led'){
-    let domeColor = ledDef.hex, op = 0.5;
+    let domeColor = ledDef.hex, op = 0.55;
     if(active){
       if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
-      else { domeColor = ledDef.lit; op = Math.max(0.35, diag.brightness||0.5); }
+      else { domeColor = ledDef.lit; op = Math.max(0.4, diag.brightness||0.55); }
     }
-    // Cúpula + patita larga (+) y corta (−) + lado plano
+    // LED realista: cúpula, base, lado plano en cátodo (derecha = b = -)
+    // Izquierda a = + pata LARGA | Derecha b = - pata CORTA
     return `<g ${glow}>
-      <path d="M${x+32} ${y+40} V${y+20} A18 18 0 0 1 ${x+68} ${y+20} V${y+40} Z" fill="${domeColor}" stroke="#8a2e2e" stroke-width="1.5" opacity="${op}"/>
-      <rect x="${x+32}" y="${y+36}" width="36" height="6" fill="#8a2e2e" opacity="0.55"/>
-      <!-- lado plano = cátodo (−) -->
-      <line x1="${x+32}" y1="${y+20}" x2="${x+32}" y2="${y+40}" stroke="#aaa" stroke-width="2"/>
-      <!-- patita LARGA = ánodo (+) -->
-      <line x1="${x+62}" y1="${y+42}" x2="${x+62}" y2="${y+58}" stroke="#4ade80" stroke-width="2.5"/>
-      <text x="${x+62}" y="${y+66}" text-anchor="middle" font-size="8" fill="#4ade80" font-weight="700">+</text>
-      <!-- patita CORTA = cátodo (−) -->
-      <line x1="${x+38}" y1="${y+42}" x2="${x+38}" y2="${y+52}" stroke="#f87171" stroke-width="2.5"/>
-      <text x="${x+38}" y="${y+60}" text-anchor="middle" font-size="8" fill="#f87171" font-weight="700">−</text>
+      <ellipse cx="${x+50}" cy="${y+28}" rx="20" ry="18" fill="${domeColor}" stroke="#5a2030" stroke-width="1.5" opacity="${op}"/>
+      <path d="M${x+30} ${y+28} Q${x+50} ${y+8} ${x+70} ${y+28}" fill="${domeColor}" opacity="${op*0.85}"/>
+      <rect x="${x+32}" y="${y+36}" width="36" height="10" rx="2" fill="#3d1520" stroke="#5a2030" stroke-width="1"/>
+      <!-- lado plano del cátodo (derecha) -->
+      <line x1="${x+68}" y1="${y+18}" x2="${x+68}" y2="${y+38}" stroke="#ccc" stroke-width="2.5"/>
+      <text x="${x+50}" y="${y+34}" text-anchor="middle" fill="#fff" font-size="9" font-weight="800" opacity="0.9">LED</text>
       </g>`;
   }
   if(inst.type==='bateria'){
@@ -2149,13 +2146,15 @@ function renderLab(){
       html += `<text x="${inst.x+20}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">+</text><text x="${inst.x+78}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">−</text>
       <text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar V</text>`;
     } else if(inst.type==='led'){
-      html += `<text x="${inst.x+8}" y="${inst.y+52}" fill="#4ade80" style="font-size:8px;pointer-events:none;font-weight:700;">+ larga</text><text x="${inst.x+70}" y="${inst.y+52}" fill="#fb923c" style="font-size:8px;pointer-events:none;font-weight:700;">− corta</text>`;
+      // a = izquierda = anodo + pata LARGA | b = derecha = catodo - pata CORTA
+      html += `<text x="${inst.x+22}" y="${inst.y+12}" text-anchor="middle" fill="#4ade80" style="font-size:9px;pointer-events:none;font-weight:800;">+ larga</text>`;
+      html += `<text x="${inst.x+78}" y="${inst.y+12}" text-anchor="middle" fill="#fb923c" style="font-size:9px;pointer-events:none;font-weight:800;">− corta</text>`;
       if(diag.status){
         const tag = diag.status==='danger' ? '🔥 ¡mucha corriente!' : diag.status==='dim' ? `🔅 tenue ${diag.mA}mA` : `✓ ${diag.mA}mA`;
         const col = diag.status==='danger' ? '#ff5c5c' : diag.status==='dim' ? '#e8c700' : '#4ade80';
-        html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="${col}" style="font-size:9px;font-family:monospace;pointer-events:none;">${tag}</text>`;
+        html += `<text x="${inst.x+50}" y="${inst.y-2}" text-anchor="middle" fill="${col}" style="font-size:9px;font-family:monospace;pointer-events:none;">${tag}</text>`;
       } else {
-        html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar color</text>`;
+        html += `<text x="${inst.x+50}" y="${inst.y-2}" text-anchor="middle" fill="#94a3b8" style="font-size:8px;pointer-events:none;">toca: color</text>`;
       }
     } else if(inst.type==='resistencia'){
       html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar Ω</text>`;
@@ -2164,12 +2163,19 @@ function renderLab(){
     const pb = labTermPos(inst.id,'b') || {x:inst.x+100, y:inst.y+28};
     const clsA = 'wire-terminal' + (labPendingTerminal===inst.id+'_a'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_a'||b===inst.id+'_a')?' connected':'');
     const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
-    // Patitas (alambre) desde el cuerpo hasta el agujero
+    // Patitas: LED a=+ larga (verde), b=- corta (naranja); pila a=+, b=-
     const bodyMidY = inst.y + 52;
-    html += `<line x1="${pa.x}" y1="${bodyMidY}" x2="${pa.x}" y2="${pa.y}" stroke="#9e9e9e" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="${pb.x}" y1="${bodyMidY}" x2="${pb.x}" y2="${pb.y}" stroke="#9e9e9e" stroke-width="2.5" stroke-linecap="round"/>
-      <circle class="${clsA}" data-role="terminal" data-key="${inst.id}_a" cx="${pa.x}" cy="${pa.y}" r="7"></circle>
-      <circle class="${clsB}" data-role="terminal" data-key="${inst.id}_b" cx="${pb.x}" cy="${pb.y}" r="7"></circle>
+    const legA = (inst.type==='led' || inst.type==='bateria') ? '#4ade80' : '#9e9e9e';
+    const legB = (inst.type==='led' || inst.type==='bateria') ? '#fb923c' : '#9e9e9e';
+    const legAW = inst.type==='led' ? 3.8 : 2.5;
+    const legBW = inst.type==='led' ? 2.2 : 2.5;
+    // LED: pata A (+) se ve mas larga (empieza mas arriba)
+    const startAY = inst.type==='led' ? (inst.y + 44) : bodyMidY;
+    const startBY = inst.type==='led' ? (inst.y + 48) : bodyMidY;
+    html += `<line x1="${pa.x}" y1="${startAY}" x2="${pa.x}" y2="${pa.y}" stroke="${legA}" stroke-width="${legAW}" stroke-linecap="round"/>
+      <line x1="${pb.x}" y1="${startBY}" x2="${pb.x}" y2="${pb.y}" stroke="${legB}" stroke-width="${legBW}" stroke-linecap="round"/>
+      <circle class="${clsA}" data-role="terminal" data-key="${inst.id}_a" cx="${pa.x}" cy="${pa.y}" r="8" fill="#0b1f18" stroke="${legA}" stroke-width="2.5"></circle>
+      <circle class="${clsB}" data-role="terminal" data-key="${inst.id}_b" cx="${pb.x}" cy="${pb.y}" r="8" fill="#0b1f18" stroke="${legB}" stroke-width="2.5"></circle>
       <circle data-role="delete" data-inst="${inst.id}" cx="${inst.x+92}" cy="${inst.y+8}" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"/>
       <text data-role="delete" data-inst="${inst.id}" x="${inst.x+92}" y="${inst.y+11}" text-anchor="middle" fill="#7a1414" style="font-size:10px;cursor:pointer;pointer-events:none;">×</text>
     </g>`;
@@ -2196,7 +2202,7 @@ function renderLab(){
 
 function labSetHint(msg){
   const el = document.getElementById('labHintBar');
-  if(el) el.textContent = msg || 'Toca un conector (círculo) y luego otro para unir el cable · También puedes arrastrar';
+  if(el) el.textContent = msg || 'LED: pata larga (+) / pata corta (-) · Toca circulo y luego otro · Misma columna = conectados';
 }
 function labConnectWire(fromKey, toKey){
   if(!fromKey || !toKey || fromKey===toKey) return false;
