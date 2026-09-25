@@ -11,6 +11,71 @@
 <title>Pequeños Genios · Electrónica básica jugando</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b3d2e' stroke='%23ffd23f' stroke-width='8'/><text y='.9em' x='50%' text-anchor='middle' font-size='55'>⚡</text></svg>">
   <link rel="stylesheet" href="style.css">
+
+<style id="hero-play-css">
+.hero-play{
+  position:relative; display:flex; flex-direction:column; align-items:center;
+  margin:18px auto 8px; min-height:160px;
+}
+.mascot-btn{
+  background:none; border:none; cursor:pointer; padding:8px;
+  border-radius:50%; transition: transform .2s;
+}
+.mascot-btn:active{ transform: scale(0.92); }
+.mascot-btn:hover .mascot, .mascot-btn:focus .mascot{
+  filter: drop-shadow(0 0 16px #ffd23f);
+}
+.mascot-bounce{
+  width:120px; height:120px;
+  animation: mascotFloat 2.4s ease-in-out infinite;
+}
+@keyframes mascotFloat{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-12px); }
+}
+.mascot-btn.zap .mascot-bounce{
+  animation: mascotZap .45s ease;
+}
+@keyframes mascotZap{
+  0%{ transform: scale(1) rotate(0); }
+  30%{ transform: scale(1.2) rotate(-8deg); }
+  60%{ transform: scale(1.15) rotate(8deg); }
+  100%{ transform: scale(1) rotate(0); }
+}
+.hero-orbit{
+  position:absolute; inset:0; pointer-events:none;
+}
+.hero-electron{
+  position:absolute; font-size:1.1rem;
+  animation: orbitSpin 4s linear infinite;
+  left:50%; top:50%;
+}
+.hero-electron.e1{ --r:70px; animation-duration:3.2s; }
+.hero-electron.e2{ --r:70px; animation-duration:3.2s; animation-delay:-1.6s; }
+.hero-electron.e3{ --r:88px; animation-duration:5s; animation-delay:-0.8s; font-size:.95rem; }
+.hero-electron.e4{ --r:88px; animation-duration:5s; animation-delay:-3.3s; font-size:.9rem; }
+@keyframes orbitSpin{
+  from{ transform: rotate(0deg) translateX(var(--r,70px)) rotate(0deg); }
+  to{ transform: rotate(360deg) translateX(var(--r,70px)) rotate(-360deg); }
+}
+.hero-tap-hint{
+  margin:6px 0 0; font-weight:800; color:#ffd23f;
+  font-size:1rem; letter-spacing:.02em;
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{ opacity:.7; transform: scale(1); }
+  50%{ opacity:1; transform: scale(1.06); }
+}
+.hero-spark{
+  position:fixed; pointer-events:none; z-index:9999;
+  font-size:1.2rem; animation: sparkFly .8s ease-out forwards;
+}
+@keyframes sparkFly{
+  0%{ opacity:1; transform: translate(0,0) scale(1); }
+  100%{ opacity:0; transform: translate(var(--dx), var(--dy)) scale(.4); }
+}
+</style>
 </head>
 <body>
 
@@ -37,10 +102,27 @@
   <h1>Pequeños Genios<br><span>electrónica básica jugando</span></h1>
   <p class="hero-sub">Aprende circuitos, polaridad y la Ley de Ohm jugando. Hecho para primaria.</p>
 
-  <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
-    <circle cx="60" cy="60" r="52" fill="#124e3b" stroke="#ff8a3d" stroke-width="3"/>
-    <polygon points="66,20 40,62 58,62 52,100 84,52 64,52" fill="#ffd23f"/>
-  </svg>
+  <div class="hero-play" id="heroPlay">
+    <div class="hero-orbit" aria-hidden="true">
+      <span class="hero-electron e1">⚡</span>
+      <span class="hero-electron e2">⚡</span>
+      <span class="hero-electron e3">⚡</span>
+      <span class="hero-electron e4">✨</span>
+    </div>
+    <button type="button" class="mascot-btn" id="mascotBtn" aria-label="Toca el rayo mágico">
+      <svg class="mascot mascot-bounce" viewBox="0 0 120 120">
+        <defs>
+          <filter id="mascotGlow">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="60" cy="60" r="52" fill="#124e3b" stroke="#ff8a3d" stroke-width="3"/>
+        <polygon points="66,20 40,62 58,62 52,100 84,52 64,52" fill="#ffd23f" filter="url(#mascotGlow)"/>
+      </svg>
+    </button>
+    <p class="hero-tap-hint" id="heroHint">👆 ¡Toca el rayo!</p>
+  </div>
 
   <!-- Teoría unificada en Inicio -->
   <div class="home-theory" id="teoria">
@@ -434,6 +516,43 @@
   </div>
 </div>
 
-  <script src="app.js"></script>
+  
+<script>
+(function(){
+  function boomMascot(){
+    var btn = document.getElementById('mascotBtn');
+    var hint = document.getElementById('heroHint');
+    if(!btn) return;
+    btn.classList.remove('zap');
+    void btn.offsetWidth;
+    btn.classList.add('zap');
+    if(window.PG){ try{ PG.sfxWin(); PG.confetti(35); }catch(e){} }
+    else {
+      // mini sparks without PG
+      for(var i=0;i<12;i++){
+        var s=document.createElement('span');
+        s.className='hero-spark';
+        s.textContent=['⚡','✨','★','💛'][i%4];
+        s.style.left=(btn.getBoundingClientRect().left+60)+'px';
+        s.style.top=(btn.getBoundingClientRect().top+60)+'px';
+        s.style.setProperty('--dx',((Math.random()-0.5)*160)+'px');
+        s.style.setProperty('--dy',(-40-Math.random()*120)+'px');
+        document.body.appendChild(s);
+        setTimeout((function(el){return function(){el.remove();};})(s),850);
+      }
+    }
+    if(hint){
+      var msgs=['⚡ ¡Bzzzt! Energía activada','🌟 ¡Eres un genio!','🔋 ¡Cargando conocimiento!','💡 ¡La corriente fluye!'];
+      hint.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    }
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('mascotBtn');
+    if(btn) btn.addEventListener('click', boomMascot);
+  });
+})();
+</script>
+
+<script src="app.js"></script>
 </body>
 </html>
