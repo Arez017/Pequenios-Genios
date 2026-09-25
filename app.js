@@ -2118,7 +2118,6 @@ function renderLab(){
       html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(midX+34)+'" cy="'+(bodyY+2)+'" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="2"></circle>';
       html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(midX+34)+'" y="'+(bodyY+6)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:12px;font-weight:800;pointer-events:none;">×</text>';
       html += '</g>';
-    }
     } else {
       html += '<g data-role="body" data-inst="'+inst.id+'">';
       html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill-opacity="0.03"/>';
