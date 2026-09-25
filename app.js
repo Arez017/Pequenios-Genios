@@ -762,6 +762,11 @@ function switchGame(name){
   if(name==='polaridad' && typeof initPolarity==='function') initPolarity();
   if(name==='armado' && typeof initCircuitBuilder==='function') initCircuitBuilder();
   if(name==='memorama' && typeof initMemory==='function') initMemory();
+  if(name==='serieparalelo'){
+    if(typeof renderSerie==='function') renderSerie();
+    if(typeof renderParalelo==='function') renderParalelo();
+  }
+  if(name==='quiz' && typeof initQuiz==='function') initQuiz();
 }
 
 /* ============================================================

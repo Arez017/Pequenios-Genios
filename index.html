@@ -339,7 +339,80 @@
     </div>
 
 
-    <!-- JUEGO: LABERINTO DE LA CORRIENTE -->
+    
+    <div class="game-view" id="game-puzzle">
+      <div class="game-view-head">
+        <h3>🧩 Puzzle de Componentes</h3>
+        <p>Arrastra cada componente a su nombre correcto. ¡Aprende a reconocerlos!</p>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
+        <button class="btn ghost puz-level-btn active" data-level="facil" onclick="setPuzLevel('facil')">Fácil (4)</button>
+        <button class="btn ghost puz-level-btn" data-level="normal" onclick="setPuzLevel('normal')">Normal (6)</button>
+        <button class="btn ghost puz-level-btn" data-level="dificil" onclick="setPuzLevel('dificil')">Difícil (8)</button>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Correctos: <b id="puzScore">0</b>/<span id="puzTotal">4</span></div>
+        <button class="btn ghost" onclick="initPuzzle()">🔄 Reiniciar</button>
+      </div>
+      <div id="puzBoard" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; align-items:flex-start; margin-top:12px;"></div>
+      <div class="cb-result" id="puzResult" style="margin-top:16px; text-align:center;"></div>
+    </div>
+
+    <!-- JUEGO 4: SERIE / PARALELO -->
+
+<div class="game-view" id="game-serieparalelo">
+      <div class="game-view-head">
+        <h3>💡 Simulador: Serie vs Paralelo</h3>
+        <p>Apaga y enciende los interruptores. Observa los LEDs: patita larga = + (ánodo), patita corta = − (cátodo).</p>
+      </div>
+      <div class="sp-tabs">
+        <button class="sp-tab active" data-view="serie" onclick="switchSP('serie')">Circuito en Serie</button>
+        <button class="sp-tab" data-view="paralelo" onclick="switchSP('paralelo')">Circuito en Paralelo</button>
+      </div>
+
+      <div class="sp-view active" id="view-serie">
+        <div class="sp-circuit" id="serieCircuit"></div>
+        <p class="sp-note">Circuito <b>conectado</b> en serie: un solo camino del <b>+</b> al <b>−</b>. Si abres un interruptor, <b>todo</b> se apaga.</p>
+      </div>
+
+      <div class="sp-view" id="view-paralelo">
+        <div class="sp-circuit" id="paraleloCircuit"></div>
+        <p class="sp-note">Circuito <b>conectado</b> en paralelo: cada rama va del <b>+</b> al <b>−</b>. Apagar una <b>no apaga</b> las demás.</p>
+      </div>
+    </div>
+
+    <!-- JUEGO 5: CONECTA LOS CABLES -->
+
+<div class="game-view" id="game-cables">
+      <div class="game-view-head">
+        <h3>🔗 Conecta los cables</h3>
+        <p>Toca una terminal y arrastra hasta otra. Circuito cerrado: pila (+) → interruptor → resistencia → LED (+) → pila (−). Interruptor y resistencia NO tienen polaridad (cualquier lado vale).</p>
+      </div>
+      <div class="panel-top">
+        <div class="stat">Cables tendidos: <b id="wireCount">0</b>/4</div>
+        <button class="btn ghost" onclick="toggleWireHint()">💡 Pista</button>
+        <button class="btn ghost" onclick="initWireGame()">🔄 Reiniciar</button>
+      </div>
+      <div class="wire-board">
+        <svg id="wireSvg" viewBox="0 0 640 320"></svg>
+      </div>
+      <div class="cb-result" id="wireResult"></div>
+      <div class="wire-hint" id="wireHint">
+        Cada componente tiene dos terminales (los círculos). Necesitas 4 cables para cerrar el circuito:<br>
+        1) Pila (+) → Interruptor · 2) Interruptor → Resistencia · 3) Resistencia → LED (+) · 4) LED (−) → Pila (−)
+      </div>
+    </div>
+
+    <!-- JUEGO: QUIZ -->
+
+<div class="game-view" id="game-quiz">
+      <div class="game-view-head">
+        <h3>🏆 Quiz de electrónica básica</h3>
+        <p>6 preguntas sobre componentes y circuitos de primaria.</p>
+      </div>
+      <div id="quizPanel"></div>
+    </div>
+
     <div class="game-view" id="game-ohm">
       <div class="game-view-head">
         <h3>📐 Ley de Ohm</h3>
