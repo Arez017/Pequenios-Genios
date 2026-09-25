@@ -774,14 +774,14 @@ function switchGame(name){
    ============================================================ */
 let wireInitDone = false;
 const WIRE_COMPONENTS = [
-  {id:'bateria', label:'PILA', x:20, y:30, w:130, h:60,
-    terms:[{id:'batt_neg', tag:'−', dx:0, dy:30},{id:'batt_pos', tag:'+', dx:130, dy:30}]},
-  {id:'interruptor', label:'INTERRUPTOR (sin polaridad)', x:460, y:20, w:160, h:60,
-    terms:[{id:'sw_l', tag:'·', dx:0, dy:30},{id:'sw_r', tag:'·', dx:160, dy:30}]},
-  {id:'resistencia', label:'RESISTENCIA (sin polaridad)', x:460, y:230, w:160, h:60,
-    terms:[{id:'res_l', tag:'·', dx:0, dy:30},{id:'res_r', tag:'·', dx:160, dy:30}]},
-  {id:'led', label:'LED  + larga / − corta', x:20, y:230, w:150, h:60,
-    terms:[{id:'led_neg', tag:'−', dx:0, dy:30},{id:'led_pos', tag:'+', dx:150, dy:30}]}
+  {id:'bateria', label:'PILA', x:40, y:40, w:120, h:70,
+    terms:[{id:'batt_neg', tag:'-', dx:0, dy:35},{id:'batt_pos', tag:'+', dx:120, dy:35}]},
+  {id:'interruptor', label:'INTERRUPTOR', x:460, y:30, w:140, h:70,
+    terms:[{id:'sw_l', tag:'', dx:0, dy:35},{id:'sw_r', tag:'', dx:140, dy:35}]},
+  {id:'resistencia', label:'RESISTENCIA', x:460, y:220, w:140, h:70,
+    terms:[{id:'res_l', tag:'', dx:0, dy:35},{id:'res_r', tag:'', dx:140, dy:35}]},
+  {id:'led', label:'LED', x:40, y:210, w:130, h:90,
+    terms:[{id:'led_neg', tag:'-', dx:30, dy:90},{id:'led_pos', tag:'+', dx:100, dy:90}]}
 ];
 const WIRE_PAIRS = [
   ['batt_pos','sw_l'],
@@ -870,41 +870,74 @@ function toggleWireHint(){
 
 function renderWireBoard(){
   const svg = document.getElementById('wireSvg');
+  if(!svg) return;
   const complete = (typeof wireCircuitLooksValid==='function' ? wireCircuitLooksValid() : wireConnected.length === 4);
   let parts = '';
 
-  // permanent wires
-  wireConnected.forEach(([a,b])=>{
-    const p1 = wireTermPos(a), p2 = wireTermPos(b);
-    parts += `<path class="wire-line done" d="M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}"/>`;
+  // cables hechos
+  wireConnected.forEach(function(pair){
+    var a = pair[0], b = pair[1];
+    var p1 = wireTermPos(a), p2 = wireTermPos(b);
+    if(!p1||!p2) return;
+    var mx = (p1.x+p2.x)/2;
+    parts += '<path class="wire-line done" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>';
   });
 
-  // components
-  WIRE_COMPONENTS.forEach(c=>{
-    const isLed = c.id === 'led';
-    const glow = isLed && complete;
-    parts += `<rect class="wire-comp-box" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="10" style="${glow?'fill:rgba(255,77,94,0.28);stroke:#ff4d5e;':''}"/>`;
-    if(glow){
-      parts += `<text x="${c.x+c.w/2}" y="${c.y-8}" text-anchor="middle" font-size="20">✨</text>`;
+  WIRE_COMPONENTS.forEach(function(c){
+    if(c.id==='bateria'){
+      // pila realista
+      parts += '<rect x="'+c.x+'" y="'+(c.y+8)+'" width="'+c.w+'" height="54" rx="8" fill="#f4a13c" stroke="#a5651a" stroke-width="2"/>';
+      parts += '<rect x="'+(c.x+c.w/2-12)+'" y="'+c.y+'" width="24" height="12" rx="3" fill="#6b6b6b"/>';
+      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+40)+'" text-anchor="middle" fill="#3d2405" font-size="14" font-weight="800">PILA</text>';
+      parts += '<text x="'+(c.x+18)+'" y="'+(c.y+28)+'" fill="#3d2405" font-size="16" font-weight="800">-</text>';
+      parts += '<text x="'+(c.x+c.w-18)+'" y="'+(c.y+28)+'" text-anchor="middle" fill="#3d2405" font-size="16" font-weight="800">+</text>';
+    } else if(c.id==='interruptor'){
+      parts += '<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" rx="12" fill="#1a3d32" stroke="#5eead4" stroke-width="2"/>';
+      parts += '<rect x="'+(c.x+30)+'" y="'+(c.y+22)+'" width="80" height="26" rx="13" fill="#2f6b45" stroke="#4ade80" stroke-width="2"/>';
+      parts += '<circle cx="'+(c.x+90)+'" cy="'+(c.y+35)+'" r="10" fill="#fef8ec"/>';
+      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+16)+'" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">INTERRUPTOR</text>';
+      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+c.h-6)+'" text-anchor="middle" fill="#94a3b8" font-size="9">sin polaridad</text>';
+    } else if(c.id==='resistencia'){
+      parts += '<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" rx="12" fill="#1a3d32" stroke="#fb923c" stroke-width="2"/>';
+      // cuerpo resistencia
+      parts += '<rect x="'+(c.x+35)+'" y="'+(c.y+22)+'" width="70" height="28" rx="6" fill="#d4a574" stroke="#8a6a3a" stroke-width="1.5"/>';
+      parts += '<rect x="'+(c.x+45)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#1a1a1a"/>';
+      parts += '<rect x="'+(c.x+58)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#b45309"/>';
+      parts += '<rect x="'+(c.x+71)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#dc2626"/>';
+      parts += '<rect x="'+(c.x+90)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#ca8a04"/>';
+      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+16)+'" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">RESISTENCIA</text>';
+      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+c.h-6)+'" text-anchor="middle" fill="#94a3b8" font-size="9">sin polaridad</text>';
+    } else if(c.id==='led'){
+      var glow = complete;
+      // cuerpo LED (domo)
+      parts += '<path d="M'+(c.x+35)+' '+(c.y+55)+' V'+(c.y+28)+' A30 30 0 0 1 '+(c.x+95)+' '+(c.y+28)+' V'+(c.y+55)+' Z" fill="'+(glow?'#ff4d5e':'#5a2030')+'" stroke="#ff8a9a" stroke-width="2" style="'+(glow?'filter:drop-shadow(0 0 12px #ff4d5e)':'')+'"/>';
+      parts += '<rect x="'+(c.x+35)+'" y="'+(c.y+52)+'" width="60" height="10" fill="#3d1520"/>';
+      // patita LARGA = + (derecha)
+      parts += '<line x1="'+(c.x+100)+'" y1="'+(c.y+62)+'" x2="'+(c.x+100)+'" y2="'+(c.y+90)+'" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>';
+      parts += '<text x="'+(c.x+100)+'" y="'+(c.y+18)+'" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ larga</text>';
+      // patita CORTA = - (izquierda)
+      parts += '<line x1="'+(c.x+30)+'" y1="'+(c.y+62)+'" x2="'+(c.x+30)+'" y2="'+(c.y+82)+'" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>';
+      parts += '<text x="'+(c.x+30)+'" y="'+(c.y+18)+'" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">- corta</text>';
+      parts += '<text x="'+(c.x+65)+'" y="'+(c.y+48)+'" text-anchor="middle" fill="#fef8ec" font-size="12" font-weight="800">LED</text>';
+      if(glow) parts += '<text x="'+(c.x+65)+'" y="'+(c.y+8)+'" text-anchor="middle" font-size="16">✨</text>';
     }
-    parts += `<text class="wire-comp-label" x="${c.x+c.w/2}" y="${c.y+c.h/2+4}" text-anchor="middle" style="${glow?'fill:#ffd23f;':''}">${c.label}${glow?' 💡':''}</text>`;
-    c.terms.forEach(t=>{
-      const isConn = wireConnected.some(p=>p.includes(t.id));
-      const tx = c.x+t.dx, ty = c.y+t.dy;
-      if(t.tag) parts += `<text class="wire-comp-sub" x="${tx + (t.dx===0?14:-14)}" y="${ty-10}" text-anchor="${t.dx===0?'start':'end'}">${t.tag}</text>`;
-      parts += `<circle class="wire-terminal ${isConn?'connected':''}" data-term="${t.id}" cx="${tx}" cy="${ty}" r="10"></circle>`;
+
+    // terminales (circulos para conectar)
+    c.terms.forEach(function(t){
+      var isConn = wireConnected.some(function(p){ return p.indexOf(t.id)>=0; });
+      var tx = c.x+t.dx, ty = c.y+t.dy;
+      var col = isConn ? '#4ade80' : '#fde047';
+      parts += '<circle class="wire-terminal '+(isConn?'connected':'')+'" data-term="'+t.id+'" cx="'+tx+'" cy="'+ty+'" r="11" fill="'+(isConn?'#4ade80':'#0b1f18')+'" stroke="'+col+'" stroke-width="3" style="cursor:pointer"/>';
+      if(t.tag){
+        parts += '<text x="'+tx+'" y="'+(ty-16)+'" text-anchor="middle" fill="'+col+'" font-size="13" font-weight="800" style="pointer-events:none">'+t.tag+'</text>';
+      }
     });
   });
 
   svg.innerHTML = parts;
-
-  // attach pointer handlers to terminals
-  svg.querySelectorAll('.wire-terminal').forEach(circle=>{
+  svg.querySelectorAll('.wire-terminal').forEach(function(circle){
     circle.addEventListener('pointerdown', onWirePointerDown);
   });
-  svg.onpointermove = onWirePointerMove;
-  svg.onpointerup = onWirePointerUp;
-  svg.onpointerleave = ()=>{ if(wireDrag){ cancelWireDrag(); } };
 }
 
 function svgPoint(svg, clientX, clientY){
