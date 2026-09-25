@@ -1951,21 +1951,8 @@ function labDrawComponentArt(inst, diag){
       <rect x="${x+66}" y="${y+14}" width="6" height="28" fill="#d4af37"/>`;
   }
   if(inst.type==='led'){
-    let domeColor = ledDef.hex, op = 0.55;
-    if(active){
-      if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
-      else { domeColor = ledDef.lit; op = Math.max(0.4, diag.brightness||0.55); }
-    }
-    // LED realista: cúpula, base, lado plano en cátodo (derecha = b = -)
-    // Izquierda a = + pata LARGA | Derecha b = - pata CORTA
-    return `<g ${glow}>
-      <ellipse cx="${x+50}" cy="${y+28}" rx="20" ry="18" fill="${domeColor}" stroke="#5a2030" stroke-width="1.5" opacity="${op}"/>
-      <path d="M${x+30} ${y+28} Q${x+50} ${y+8} ${x+70} ${y+28}" fill="${domeColor}" opacity="${op*0.85}"/>
-      <rect x="${x+32}" y="${y+36}" width="36" height="10" rx="2" fill="#3d1520" stroke="#5a2030" stroke-width="1"/>
-      <!-- lado plano del cátodo (derecha) -->
-      <line x1="${x+68}" y1="${y+18}" x2="${x+68}" y2="${y+38}" stroke="#ccc" stroke-width="2.5"/>
-      <text x="${x+50}" y="${y+34}" text-anchor="middle" fill="#fff" font-size="9" font-weight="800" opacity="0.9">LED</text>
-      </g>`;
+    // Solo marca; el dibujo real del LED se hace en renderLab con las posiciones de agujeros
+    return '';
   }
   if(inst.type==='bateria'){
     return `<rect x="${x+12}" y="${y+12}" width="76" height="34" rx="3" fill="#2c2c2c" stroke="#111" stroke-width="1.5"/>
@@ -2070,61 +2057,6 @@ function renderLab(){
   // --- Agujeros reales clicables ---
   const occupied = new Set();
   lab.instances.forEach(inst=>{
-    if(inst.holeA) occupied.add(inst.holeA);
-    if(inst.holeB) occupied.add(inst.holeB);
-  });
-  for(let c=0;c<BB.cols;c++){
-    for(let r=0;r<BB.rowsTop;r++){
-      const id = bbHoleId('top',c,r);
-      const p = bbHoleXY(c,r,'top');
-      const used = occupied.has(id);
-      html += `<circle class="bb-hole" data-role="hole" data-hole="${id}" cx="${p.x}" cy="${p.y}" r="${used?4:3}" fill="${used?'#ffd23f':(labPendingHole===id?'#4dd8ff':'#2a2520')}" stroke="#5a5348" stroke-width="0.7"/>`;
-    }
-    for(let r=0;r<BB.rowsBot;r++){
-      const id = bbHoleId('bot',c,r);
-      const p = bbHoleXY(c,r,'bot');
-      const used = occupied.has(id);
-      html += `<circle class="bb-hole" data-role="hole" data-hole="${id}" cx="${p.x}" cy="${p.y}" r="${used?4:3}" fill="${used?'#ffd23f':(labPendingHole===id?'#4dd8ff':'#2a2520')}" stroke="#5a5348" stroke-width="0.7"/>`;
-    }
-    const rp = bbHoleXY(c,0,'rail+');
-    const rn = bbHoleXY(c,0,'rail-');
-    const up = occupied.has(bbHoleId('rail+',c,0));
-    const un = occupied.has(bbHoleId('rail-',c,0));
-    html += `<circle class="bb-hole" data-role="hole" data-hole="${bbHoleId('rail+',c,0)}" cx="${rp.x}" cy="${rp.y}" r="${up?3.5:2.6}" fill="${up?'#ff8a80':'#8b3a3a'}" stroke="#c62828" stroke-width="0.6"/>`;
-    html += `<circle class="bb-hole" data-role="hole" data-hole="${bbHoleId('rail-',c,0)}" cx="${rn.x}" cy="${rn.y}" r="${un?3.5:2.6}" fill="${un?'#82b1ff':'#1a3a6b'}" stroke="#1565c0" stroke-width="0.6"/>`;
-  }
-
-  const liveWires = (lab.lastResult && lab.lastResult.liveWires) || new Set();
-  lab.wires.forEach(([a,b],idx)=>{
-    const pa = labParseKey(a), pb = labParseKey(b);
-    const p1 = labTermPos(pa.id,pa.suffix), p2 = labTermPos(pb.id,pb.suffix);
-    if(!p1||!p2) return;
-    const d = `M${p1.x},${p1.y} C${(p1.x+p2.x)/2},${p1.y} ${(p1.x+p2.x)/2},${p2.y} ${p2.x},${p2.y}`;
-    const isLive = liveWires.has(idx);
-    // Colores realistas de jumpers: rojo cerca de +, negro cerca de −, resto verdes/amarillos
-    let wcolor = '#2e7d32'; // verde por defecto
-    const keys = [a,b].join(' ');
-    if(keys.includes('bateria') && (keys.includes('_a') || a.endsWith('_a') || b.endsWith('_a'))){
-      // terminal a de pila suele ser + en este lab - check
-    }
-    const instA = lab.instances.find(i=>i.id===pa.id);
-    const instB = lab.instances.find(i=>i.id===pb.id);
-    if((instA&&instA.type==='bateria'&&pa.suffix==='a')||(instB&&instB.type==='bateria'&&pb.suffix==='a'))
-      wcolor = '#c62828'; // rojo = positivo
-    else if((instA&&instA.type==='bateria'&&pa.suffix==='b')||(instB&&instB.type==='bateria'&&pb.suffix==='b'))
-      wcolor = '#212121'; // negro = negativo
-    else if((instA&&instA.type==='led')||(instB&&instB.type==='led'))
-      wcolor = '#f9a825'; // amarillo hacia LED
-    else
-      wcolor = ['#2e7d32','#1565c0','#6a1b9a','#00838f'][idx % 4];
-    const strokeW = isLive ? 4.5 : 3.2;
-    html += `<path class="wire-line done clickable" data-role="wire" data-idx="${idx}" d="${d}" stroke="${wcolor}" stroke-width="${strokeW}" fill="none" stroke-linecap="round" style="filter:${isLive?'url(#wireGlow)':'none'};opacity:${isLive?1:0.92}"/>`;
-    if(isLive){
-      html += `<circle r="5" fill="#fff59d" stroke="${wcolor}" stroke-width="1" style="pointer-events:none"><animateMotion dur="0.9s" repeatCount="indefinite" path="${d}"/></circle>`;
-    }
-  });
-
-  lab.instances.forEach(inst=>{
     const diag = (lab.lastResult && lab.lastResult.details[inst.id]) || {active:false};
     const active = diag.active;
     const isSwitch = inst.type==='interruptor';
@@ -2136,50 +2068,64 @@ function renderLab(){
     if(inst.type==='potenciometro') labelText = 'POT ' + (inst.value||5000) + 'Ω';
     if(inst.type==='fusible') labelText = inst.blown ? 'FUSIBLE ✕' : 'FUSIBLE';
     if(inst.type==='pulsador') labelText = inst.closed ? 'PULSADO' : 'PULSADOR';
-    html += `<g data-role="body" data-inst="${inst.id}">
-      <rect class="${boxClass}" x="${inst.x}" y="${inst.y}" width="100" height="56" rx="10" fill-opacity="0.03"/>
-      ${labDrawComponentArt(inst, diag)}
-      <text class="wire-comp-label" x="${inst.x+50}" y="${inst.y+52}" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">${labelText}${active?' ✓':''}</text>`;
-    if(isSwitch){
-      html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="${inst.closed?'#2f6b45':'#8a2e2e'}" style="font-size:9px;font-family:monospace;pointer-events:none;">${inst.closed?'CERRADO (toca)':'ABIERTO (toca)'}</text>`;
-    } else if(inst.type==='bateria'){
-      html += `<text x="${inst.x+20}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">+</text><text x="${inst.x+78}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">−</text>
-      <text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar V</text>`;
-    } else if(inst.type==='led'){
-      // a = izquierda = anodo + pata LARGA | b = derecha = catodo - pata CORTA
-      html += `<text x="${inst.x+22}" y="${inst.y+12}" text-anchor="middle" fill="#4ade80" style="font-size:9px;pointer-events:none;font-weight:800;">+ larga</text>`;
-      html += `<text x="${inst.x+78}" y="${inst.y+12}" text-anchor="middle" fill="#fb923c" style="font-size:9px;pointer-events:none;font-weight:800;">− corta</text>`;
-      if(diag.status){
-        const tag = diag.status==='danger' ? '🔥 ¡mucha corriente!' : diag.status==='dim' ? `🔅 tenue ${diag.mA}mA` : `✓ ${diag.mA}mA`;
-        const col = diag.status==='danger' ? '#ff5c5c' : diag.status==='dim' ? '#e8c700' : '#4ade80';
-        html += `<text x="${inst.x+50}" y="${inst.y-2}" text-anchor="middle" fill="${col}" style="font-size:9px;font-family:monospace;pointer-events:none;">${tag}</text>`;
-      } else {
-        html += `<text x="${inst.x+50}" y="${inst.y-2}" text-anchor="middle" fill="#94a3b8" style="font-size:8px;pointer-events:none;">toca: color</text>`;
-      }
-    } else if(inst.type==='resistencia'){
-      html += `<text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar Ω</text>`;
-    }
     const pa = labTermPos(inst.id,'a') || {x:inst.x, y:inst.y+28};
     const pb = labTermPos(inst.id,'b') || {x:inst.x+100, y:inst.y+28};
     const clsA = 'wire-terminal' + (labPendingTerminal===inst.id+'_a'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_a'||b===inst.id+'_a')?' connected':'');
     const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
-    // Patitas: LED a=+ larga (verde), b=- corta (naranja); pila a=+, b=-
-    const bodyMidY = inst.y + 52;
-    const legA = (inst.type==='led' || inst.type==='bateria') ? '#4ade80' : '#9e9e9e';
-    const legB = (inst.type==='led' || inst.type==='bateria') ? '#fb923c' : '#9e9e9e';
-    const legAW = inst.type==='led' ? 3.8 : 2.5;
-    const legBW = inst.type==='led' ? 2.2 : 2.5;
-    // LED: pata A (+) se ve mas larga (empieza mas arriba)
-    const startAY = inst.type==='led' ? (inst.y + 44) : bodyMidY;
-    const startBY = inst.type==='led' ? (inst.y + 48) : bodyMidY;
-    html += `<line x1="${pa.x}" y1="${startAY}" x2="${pa.x}" y2="${pa.y}" stroke="${legA}" stroke-width="${legAW}" stroke-linecap="round"/>
-      <line x1="${pb.x}" y1="${startBY}" x2="${pb.x}" y2="${pb.y}" stroke="${legB}" stroke-width="${legBW}" stroke-linecap="round"/>
-      <circle class="${clsA}" data-role="terminal" data-key="${inst.id}_a" cx="${pa.x}" cy="${pa.y}" r="8" fill="#0b1f18" stroke="${legA}" stroke-width="2.5"></circle>
-      <circle class="${clsB}" data-role="terminal" data-key="${inst.id}_b" cx="${pb.x}" cy="${pb.y}" r="8" fill="#0b1f18" stroke="${legB}" stroke-width="2.5"></circle>
-      <circle data-role="delete" data-inst="${inst.id}" cx="${inst.x+92}" cy="${inst.y+8}" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"/>
-      <text data-role="delete" data-inst="${inst.id}" x="${inst.x+92}" y="${inst.y+11}" text-anchor="middle" fill="#7a1414" style="font-size:10px;cursor:pointer;pointer-events:none;">×</text>
-    </g>`;
+
+    if(inst.type==='led'){
+      const ledDef = LED_COLORS[inst.color||'red'];
+      let domeColor = ledDef.hex, op = 0.75;
+      if(active){
+        if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
+        else { domeColor = ledDef.lit; op = Math.max(0.55, diag.brightness||0.65); }
+      }
+      const midX = (pa.x + pb.x) / 2;
+      const topY = Math.min(pa.y, pb.y) - 52;
+      const glow = active ? ('filter:drop-shadow(0 0 12px '+domeColor+')') : '';
+      html += '<g data-role="body" data-inst="'+inst.id+'">';
+      html += '<ellipse cx="'+midX+'" cy="'+(topY+24)+'" rx="17" ry="15" fill="'+domeColor+'" stroke="#5a2030" stroke-width="1.5" opacity="'+op+'" style="'+glow+'"/>';
+      html += '<rect x="'+(midX-13)+'" y="'+(topY+32)+'" width="26" height="9" rx="2" fill="#2a1018"/>';
+      html += '<line x1="'+(midX+15)+'" y1="'+(topY+14)+'" x2="'+(midX+15)+'" y2="'+(topY+34)+'" stroke="#e8e8e8" stroke-width="2.5"/>';
+      html += '<line x1="'+pa.x+'" y1="'+(topY+40)+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round"/>';
+      html += '<line x1="'+pb.x+'" y1="'+(topY+48)+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round"/>';
+      html += '<text x="'+pa.x+'" y="'+(topY+8)+'" text-anchor="middle" fill="#166534" font-size="10" font-weight="800">+ larga</text>';
+      html += '<text x="'+pb.x+'" y="'+(topY+8)+'" text-anchor="middle" fill="#c2410c" font-size="10" font-weight="800">- corta</text>';
+      if(diag.status){
+        const tag = diag.status==='danger' ? '🔥' : (diag.status==='dim' ? 'tenue' : '✓');
+        const col = diag.status==='danger' ? '#ff5c5c' : '#166534';
+        html += '<text x="'+midX+'" y="'+(topY-2)+'" text-anchor="middle" fill="'+col+'" font-size="10">'+tag+'</text>';
+      }
+      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" fill="#0b1f18" stroke="#4ade80" stroke-width="2.5"></circle>';
+      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" fill="#0b1f18" stroke="#fb923c" stroke-width="2.5"></circle>';
+      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(midX+30)+'" cy="'+(topY+6)+'" r="8" fill="rgba(255,92,92,0.35)" stroke="#ff5c5c" stroke-width="1.5"></circle>';
+      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(midX+30)+'" y="'+(topY+9)+'" text-anchor="middle" fill="#7a1414" style="font-size:10px;pointer-events:none;">×</text>';
+      html += '</g>';
+    } else {
+      html += '<g data-role="body" data-inst="'+inst.id+'">';
+      html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill-opacity="0.03"/>';
+      html += labDrawComponentArt(inst, diag);
+      html += '<text class="wire-comp-label" x="'+(inst.x+50)+'" y="'+(inst.y+52)+'" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">'+labelText+(active?' ✓':'')+'</text>';
+      if(isSwitch){
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="'+(inst.closed?'#2f6b45':'#8a2e2e')+'" style="font-size:9px;font-family:monospace;pointer-events:none;">'+(inst.closed?'CERRADO (toca)':'ABIERTO (toca)')+'</text>';
+      } else if(inst.type==='bateria'){
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none;">toca: cambiar V</text>';
+      } else if(inst.type==='resistencia'){
+        html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none;">toca: cambiar ohm</text>';
+      }
+      const bodyMidY = inst.y + 52;
+      const legA = inst.type==='bateria' ? '#4ade80' : '#6b7280';
+      const legB = inst.type==='bateria' ? '#fb923c' : '#6b7280';
+      html += '<line x1="'+pa.x+'" y1="'+bodyMidY+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="2.5" stroke-linecap="round"/>';
+      html += '<line x1="'+pb.x+'" y1="'+bodyMidY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="2.5" stroke-linecap="round"/>';
+      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" fill="#0b1f18" stroke="'+legA+'" stroke-width="2.5"></circle>';
+      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" fill="#0b1f18" stroke="'+legB+'" stroke-width="2.5"></circle>';
+      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+92)+'" cy="'+(inst.y+8)+'" r="8" fill="rgba(255,92,92,0.3)" stroke="#ff5c5c" stroke-width="1.5"></circle>';
+      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+92)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#7a1414" style="font-size:10px;pointer-events:none;">×</text>';
+      html += '</g>';
+    }
   });
+
   svg.innerHTML = html;
 
   svg.querySelectorAll('[data-role="hole"]').forEach(el=>el.addEventListener('pointerdown', labHoleDown));
