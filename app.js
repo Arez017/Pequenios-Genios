@@ -758,7 +758,6 @@ function switchGame(name){
   document.querySelectorAll('.game-view').forEach(v=>v.classList.toggle('active', v.id === 'game-'+name));
   if(name==='cables' && !wireInitDone){ initWireGame(); wireInitDone = true; }
   if(name==='ohm' && typeof updateOhmLive==='function') updateOhmLive();
-  if(name==='laberinto' && typeof initLaberinto==='function') initLaberinto();
   if(name==='puzzle' && typeof initPuzzle==='function') initPuzzle();
   if(name==='polaridad' && typeof initPolarity==='function') initPolarity();
   if(name==='armado' && typeof initCircuitBuilder==='function') initCircuitBuilder();
@@ -1446,39 +1445,55 @@ let serieSwitches = [true,true,true];
 function renderSerie(){
   const allOn = serieSwitches.every(s=>s);
   const wrap = document.getElementById('serieCircuit');
-  let html = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;">`;
-  html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">PILA</div>${ICONS.bateria}</div>`;
+  if(!wrap) return;
+  const wire = (w=28)=>`<div style="width:${w}px;height:4px;background:#fde047;border-radius:2px;flex-shrink:0;"></div>`;
+  let html = `<div style="max-width:520px;margin:0 auto;">`;
+  html += `<div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;padding:12px;border:2px solid rgba(253,224,71,0.35);border-radius:16px;background:rgba(0,0,0,0.2);">`;
+  html += `<div style="text-align:center;"><div style="font-size:0.7rem;color:#4ade80;font-weight:700;">+ PILA −</div>${ICONS.bateria}</div>`;
   serieSwitches.forEach((s,i)=>{
-    html += `<div class="cb-wire"></div>`;
-    html += `<div style="text-align:center;cursor:pointer;" onclick="toggleSerie(${i})">
-      <div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">SW${i+1}</div>${switchSVG(s)}</div>`;
-    html += `<div class="cb-wire"></div>`;
-    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">R${i+1} · 330 Ω</div>${ICONS.resistencia}</div>`;
-    html += `<div class="cb-wire"></div>`;
-    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">LED${i+1}</div>${ledSVG(allOn)}</div>`;
+    html += wire(20);
+    html += `<div style="text-align:center;cursor:pointer;" onclick="toggleSerie(${i})" title="Toca para abrir/cerrar">
+      <div style="font-size:0.65rem;opacity:0.7;">SW${i+1}</div>${switchSVG(s)}</div>`;
+    html += wire(16);
+    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.7;">R · 330Ω</div>${ICONS.resistencia}</div>`;
+    html += wire(16);
+    html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.7;">LED${i+1}</div>${ledSVG(allOn)}</div>`;
   });
   html += `</div>`;
+  html += `<p style="text-align:center;margin:12px 0 0;font-size:0.85rem;opacity:0.85;">
+    Circuito <b>cerrado</b>: sale del <b style="color:#4ade80">+</b> y regresa al <b style="color:#fb923c">−</b>.
+    ${allOn ? '<span style="color:#4ade80;"> ✅ Todos encendidos</span>' : '<span style="color:#f87171;"> ⛔ Interruptor abierto → todo apagado</span>'}
+  </p></div>`;
   wrap.innerHTML = html;
 }
 function toggleSerie(i){ serieSwitches[i] = !serieSwitches[i]; renderSerie(); }
 renderSerie();
 
-// PARALELO: 3 independent branches, each with its own switch + led
+// PARALELO: ramas conectadas al mismo + y −
 let paraSwitches = [true,true,true];
 function renderParalelo(){
   const wrap = document.getElementById('paraleloCircuit');
-  let html = `<div style="display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;">`;
-  html += `<div style="text-align:center;"><div style="font-size:0.65rem;opacity:0.6;margin-bottom:4px;">PILA</div>${ICONS.bateria}</div>`;
+  if(!wrap) return;
+  let html = `<div style="max-width:520px;margin:0 auto;padding:12px;border:2px solid rgba(253,224,71,0.35);border-radius:16px;background:rgba(0,0,0,0.2);">`;
+  html += `<div style="text-align:center;margin-bottom:8px;"><div style="font-size:0.7rem;color:#4ade80;font-weight:700;">+ PILA −</div>${ICONS.bateria}</div>`;
+  html += `<div style="height:4px;background:#fde047;border-radius:2px;margin:0 20px 12px;"></div>`;
+  html += `<div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">`;
   paraSwitches.forEach((s,i)=>{
-    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-      <div style="font-size:0.65rem;opacity:0.6;">RAMA ${i+1}</div>
+    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;">
+      <div style="width:4px;height:14px;background:#fde047;"></div>
+      <div style="font-size:0.65rem;opacity:0.7;">RAMA ${i+1}</div>
       <div style="cursor:pointer;" onclick="toggleParalelo(${i})">${switchSVG(s)}</div>
-      <div style="font-size:0.65rem;opacity:0.6;">R${i+1} · 330 Ω</div>
+      <div style="font-size:0.65rem;opacity:0.7;">R · 330Ω</div>
       ${ICONS.resistencia}
       ${ledSVG(s)}
+      <div style="width:4px;height:14px;background:#fde047;"></div>
     </div>`;
   });
   html += `</div>`;
+  html += `<div style="height:4px;background:#fde047;border-radius:2px;margin:12px 20px 0;"></div>`;
+  html += `<p style="text-align:center;margin:12px 0 0;font-size:0.85rem;opacity:0.85;">
+    Cada rama sale del <b style="color:#4ade80">+</b> y regresa al <b style="color:#fb923c">−</b>. Apagar una <b>no apaga</b> las demás.
+  </p></div>`;
   wrap.innerHTML = html;
 }
 function toggleParalelo(i){ paraSwitches[i] = !paraSwitches[i]; renderParalelo(); }
@@ -1939,7 +1954,7 @@ function renderLab(){
       html += `<text x="${inst.x+20}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">+</text><text x="${inst.x+78}" y="${inst.y+30}" fill="#3d2405" style="font-size:11px;pointer-events:none;font-weight:700;">−</text>
       <text x="${inst.x+50}" y="${inst.y-4}" text-anchor="middle" fill="#ffd23f" style="font-size:9px;font-family:monospace;pointer-events:none;">toca: cambiar V</text>`;
     } else if(inst.type==='led'){
-      html += `<text x="${inst.x+12}" y="${inst.y+52}" fill="#fef8ec" style="font-size:8px;pointer-events:none;">A</text><text x="${inst.x+84}" y="${inst.y+52}" fill="#fef8ec" style="font-size:8px;pointer-events:none;">K</text>`;
+      html += `<text x="${inst.x+8}" y="${inst.y+52}" fill="#4ade80" style="font-size:8px;pointer-events:none;font-weight:700;">+ larga</text><text x="${inst.x+70}" y="${inst.y+52}" fill="#fb923c" style="font-size:8px;pointer-events:none;font-weight:700;">− corta</text>`;
       if(diag.status){
         const tag = diag.status==='danger' ? '🔥 ¡mucha corriente!' : diag.status==='dim' ? `🔅 tenue ${diag.mA}mA` : `✓ ${diag.mA}mA`;
         const col = diag.status==='danger' ? '#ff5c5c' : diag.status==='dim' ? '#e8c700' : '#4ade80';
