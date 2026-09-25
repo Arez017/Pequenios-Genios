@@ -2074,50 +2074,39 @@ function renderLab(){
     const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
 
     if(inst.type==='led'){
+      // LED simple y claro: a = + LARGA (izq), b = - CORTA (der)
       const ledDef = LED_COLORS[inst.color||'red'];
-      let domeColor = ledDef.hex || '#e53935';
-      if(active){
-        if(diag.status==='danger') domeColor = '#ffffff';
-        else domeColor = ledDef.lit || domeColor;
-      }
-      // Ordenar: izquierda = + larga (a), derecha = - corta (b)
-      var left = pa.x <= pb.x ? pa : pb;
-      var right = pa.x <= pb.x ? pb : pa;
-      var leftIsAnode = (pa.x <= pb.x); // a es anodo; si a esta a la izquierda, OK
-      // Forzar: siempre dibujar + en terminal a y - en terminal b
-      var anode = pa;   // +
-      var cathode = pb; // -
-      var midX = (anode.x + cathode.x) / 2;
-      var holeY = Math.min(anode.y, cathode.y);
-      var bodyY = holeY - 56;
-      var glow = active ? ('filter:drop-shadow(0 0 14px '+domeColor+')') : '';
+      let col = (active && diag.status!=='danger') ? (ledDef.lit||'#ff5252') : (ledDef.hex||'#c62828');
+      if(diag.status==='danger') col = '#ffffff';
+      const ax = pa.x, ay = pa.y, bx = pb.x, by = pb.y;
+      const mx = (ax+bx)/2;
+      const top = Math.min(ay,by) - 50;
 
       html += '<g data-role="body" data-inst="'+inst.id+'">';
-      // fondo opaco para que no se vean agujeros atras
-      html += '<rect x="'+(midX-36)+'" y="'+(bodyY-4)+'" width="72" height="58" rx="12" fill="#d4c9a8" opacity="0.92"/>';
-      // cupula LED opaca
-      html += '<ellipse cx="'+midX+'" cy="'+(bodyY+26)+'" rx="20" ry="18" fill="'+domeColor+'" stroke="#4a1520" stroke-width="2" style="'+glow+'"/>';
-      html += '<rect x="'+(midX-16)+'" y="'+(bodyY+36)+'" width="32" height="10" rx="2" fill="#1a0a10" stroke="#4a1520"/>';
-      // lado plano = catodo (lado de pb / -)
-      var flatX = cathode.x > anode.x ? (midX+18) : (midX-18);
-      html += '<line x1="'+flatX+'" y1="'+(bodyY+14)+'" x2="'+flatX+'" y2="'+(bodyY+38)+'" stroke="#f5f5f5" stroke-width="3"/>';
-      // PATA LARGA (+) = anodo a — mas gruesa y empieza mas arriba
-      html += '<line x1="'+anode.x+'" y1="'+(bodyY+46)+'" x2="'+anode.x+'" y2="'+anode.y+'" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>';
-      // PATA CORTA (-) = catodo b — mas delgada y empieza mas abajo (se ve mas corta)
-      html += '<line x1="'+cathode.x+'" y1="'+(bodyY+54)+'" x2="'+cathode.x+'" y2="'+cathode.y+'" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round"/>';
-      // etiquetas claras (arriba de cada pata, sin tapar)
-      html += '<text x="'+anode.x+'" y="'+(bodyY+10)+'" text-anchor="middle" fill="#14532d" font-size="11" font-weight="800">+ LARGA</text>';
-      html += '<text x="'+cathode.x+'" y="'+(bodyY+10)+'" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="800">- CORTA</text>';
-      if(diag.status==='danger'){
-        html += '<text x="'+midX+'" y="'+(bodyY-8)+'" text-anchor="middle" fill="#dc2626" font-size="11" font-weight="800">mucha corriente</text>';
-      } else if(active){
-        html += '<text x="'+midX+'" y="'+(bodyY-8)+'" text-anchor="middle" fill="#15803d" font-size="11">encendido</text>';
-      }
-      html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+anode.x+'" cy="'+anode.y+'" r="9" fill="#052e16" stroke="#16a34a" stroke-width="3"></circle>';
-      html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+cathode.x+'" cy="'+cathode.y+'" r="9" fill="#431407" stroke="#ea580c" stroke-width="3"></circle>';
-      // boton borrar lejos de las etiquetas (arriba-centro)
-      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+midX+'" cy="'+(bodyY-18)+'" r="9" fill="#fecaca" stroke="#dc2626" stroke-width="2"></circle>';
-      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+midX+'" y="'+(bodyY-14)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:12px;font-weight:800;pointer-events:none;">×</text>';
+
+      // Cúpula (sin fondo feo)
+      html += '<path d="M '+(mx-16)+' '+(top+34)+' C '+(mx-16)+' '+(top+10)+' '+(mx+16)+' '+(top+10)+' '+(mx+16)+' '+(top+34)+' Z" fill="'+col+'" stroke="#4a1520" stroke-width="2"'+(active?' style="filter:drop-shadow(0 0 10px '+col+')"':'')+'/>';
+      html += '<rect x="'+(mx-16)+'" y="'+(top+32)+'" width="32" height="8" rx="1.5" fill="#2a1018"/>';
+      // lado plano del catodo (derecha = b)
+      html += '<line x1="'+(mx+15)+'" y1="'+(top+16)+'" x2="'+(mx+15)+'" y2="'+(top+34)+'" stroke="#eee" stroke-width="2.5"/>';
+
+      // Pata + LARGA (a) — verde, mas larga
+      html += '<line x1="'+ax+'" y1="'+(top+40)+'" x2="'+ax+'" y2="'+ay+'" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/>';
+      // Pata - CORTA (b) — naranja, mas corta
+      html += '<line x1="'+bx+'" y1="'+(top+48)+'" x2="'+bx+'" y2="'+by+'" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/>';
+
+      // Etiquetas fuera del cuerpo
+      html += '<text x="'+ax+'" y="'+(top+8)+'" text-anchor="middle" fill="#166534" font-size="10" font-weight="800" style="pointer-events:none">+ LARGA</text>';
+      html += '<text x="'+bx+'" y="'+(top+8)+'" text-anchor="middle" fill="#c2410c" font-size="10" font-weight="800" style="pointer-events:none">- CORTA</text>';
+
+      // Terminales con style= para que el CSS no los pinte iguales
+      html += '<circle data-role="terminal" data-key="'+inst.id+'_a" cx="'+ax+'" cy="'+ay+'" r="8" style="fill:#052e16;stroke:#22c55e;stroke-width:3;cursor:pointer"></circle>';
+      html += '<circle data-role="terminal" data-key="'+inst.id+'_b" cx="'+bx+'" cy="'+by+'" r="8" style="fill:#431407;stroke:#f97316;stroke-width:3;cursor:pointer"></circle>';
+
+      // Borrar: esquina superior derecha, lejos de textos
+      html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(mx+38)+'" cy="'+(top+4)+'" r="8" style="fill:#fecaca;stroke:#dc2626;stroke-width:2;cursor:pointer"></circle>';
+      html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(mx+38)+'" y="'+(top+8)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:11px;font-weight:800;pointer-events:none">x</text>';
+
       html += '</g>';
     } else {
       html += '<g data-role="body" data-inst="'+inst.id+'">';
