@@ -889,7 +889,7 @@ function renderWireBoard(){
     var p1 = wireTermPos(a), p2 = wireTermPos(b);
     if(!p1||!p2) return;
     var mx = (p1.x+p2.x)/2;
-    parts += '<path class="wire-line done wire-draw" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>';
+    parts += '<path class="wire-line done" data-wire="1" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 8"/>';
   });
 
   WIRE_COMPONENTS.forEach(function(c){
@@ -943,7 +943,42 @@ function renderWireBoard(){
     });
   });
 
-  svg.innerHTML = parts;
+  // estilo de animacion DENTRO del SVG (no depende de CSS externo)
+  var styleAnim = '<defs><style type="text/css">'
+    + '@keyframes wireDash { to { stroke-dashoffset: -40; } }'
+    + '@keyframes wireDrawIn { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }'
+    + 'path.wire-line.done { animation: wireDrawIn 0.5s ease-out forwards, wireDash 0.7s linear infinite; }'
+    + 'path.wire-line.temp { stroke: #fde047; stroke-width: 4; stroke-dasharray: 8 6; animation: wireDash 0.45s linear infinite; }'
+    + '</style></defs>';
+  svg.innerHTML = styleAnim + parts;
+
+  // forzar animacion por JS por si el CSS del SVG falla en algunos navegadores
+  svg.querySelectorAll('path.wire-line.done').forEach(function(path, idx){
+    try {
+      var len = path.getTotalLength ? path.getTotalLength() : 200;
+      path.style.strokeDasharray = '12 8';
+      path.style.strokeDashoffset = '0';
+      path.animate(
+        [
+          { strokeDashoffset: len },
+          { strokeDashoffset: 0 }
+        ],
+        { duration: 450, easing: 'ease-out', fill: 'forwards' }
+      );
+      // flujo continuo despues
+      setTimeout(function(){
+        path.style.strokeDasharray = '12 8';
+        path.animate(
+          [
+            { strokeDashoffset: 0 },
+            { strokeDashoffset: -40 }
+          ],
+          { duration: 700, iterations: Infinity }
+        );
+      }, 460);
+    } catch(e) {}
+  });
+
   svg.querySelectorAll('.wire-terminal').forEach(function(circle){
     circle.addEventListener('pointerdown', onWirePointerDown);
   });
@@ -974,13 +1009,25 @@ function onWirePointerMove(e){
 }
 function drawTempWire(x2,y2){
   const svg = document.getElementById('wireSvg');
+  if(!svg || !wireDrag) return;
   let temp = svg.querySelector('.wire-line.temp');
   if(!temp){
     temp = document.createElementNS('http://www.w3.org/2000/svg','path');
     temp.setAttribute('class','wire-line temp');
+    temp.setAttribute('fill','none');
+    temp.setAttribute('stroke','#fde047');
+    temp.setAttribute('stroke-width','4');
+    temp.setAttribute('stroke-linecap','round');
+    temp.setAttribute('stroke-dasharray','8 6');
     svg.appendChild(temp);
+    try {
+      temp.animate(
+        [{ strokeDashoffset: 0 }, { strokeDashoffset: -28 }],
+        { duration: 400, iterations: Infinity }
+      );
+    } catch(e) {}
   }
-  temp.setAttribute('d', `M${wireDrag.x},${wireDrag.y} L${x2},${y2}`);
+  temp.setAttribute('d', 'M'+wireDrag.x+','+wireDrag.y+' L'+x2+','+y2);
 }
 function onWirePointerUp(e){
   if(!wireDrag) return;
@@ -1026,6 +1073,15 @@ function cancelWireDrag(){
   wireDrag = null;
   renderWireBoard();
 }
+
+// listeners globales para arrastrar cables (animacion incluida)
+if(typeof window.wireGlobalListeners === 'undefined'){
+  window.wireGlobalListeners = true;
+  window.addEventListener('pointermove', function(e){ if(typeof onWirePointerMove==='function') onWirePointerMove(e); });
+  window.addEventListener('pointerup', function(e){ if(typeof onWirePointerUp==='function') onWirePointerUp(e); });
+  window.addEventListener('pointercancel', function(e){ if(typeof onWirePointerUp==='function') onWirePointerUp(e); });
+}
+
 function flashBadWire(a,b){
   const svg = document.getElementById('wireSvg');
   if(!svg) return;
