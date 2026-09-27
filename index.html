@@ -387,23 +387,17 @@
 
 <div class="game-view" id="game-serieparalelo">
       <div class="game-view-head">
-        <h3>💡 Simulador: Serie vs Paralelo</h3>
-        <p>Toca los interruptores (SW). Completa el <b>objetivo</b> de cada modo y descubre la diferencia entre serie y paralelo.</p>
+        <h3>💡 Serie vs Paralelo · Misiones</h3>
+        <p>Completá <b>6 misiones</b> tocando los interruptores (SW). ¡Descubrí la diferencia jugando!</p>
       </div>
-      <div class="sp-tabs">
-        <button class="sp-tab active" data-view="serie" onclick="switchSP('serie')">Circuito en Serie</button>
-        <button class="sp-tab" data-view="paralelo" onclick="switchSP('paralelo')">Circuito en Paralelo</button>
+      <div id="spGameRoot" class="sp-game-root"></div>
+      <!-- vistas legacy ocultas; el JS pinta spGameRoot -->
+      <div class="sp-tabs" style="display:none" aria-hidden="true">
+        <button class="sp-tab active" data-view="serie" onclick="switchSP('serie')">Serie</button>
+        <button class="sp-tab" data-view="paralelo" onclick="switchSP('paralelo')">Paralelo</button>
       </div>
-
-      <div class="sp-view active" id="view-serie">
-        <div class="sp-circuit" id="serieCircuit"></div>
-        <p class="sp-note">Circuito <b>conectado</b> en serie: un solo camino del <b>+</b> al <b>−</b>. Si abres un interruptor, <b>todo</b> se apaga.</p>
-      </div>
-
-      <div class="sp-view" id="view-paralelo">
-        <div class="sp-circuit" id="paraleloCircuit"></div>
-        <p class="sp-note">Circuito <b>conectado</b> en paralelo: cada rama va del <b>+</b> al <b>−</b>. Apagar una <b>no apaga</b> las demás.</p>
-      </div>
+      <div class="sp-view" id="view-serie" style="display:none"><div class="sp-circuit" id="serieCircuit"></div></div>
+      <div class="sp-view" id="view-paralelo" style="display:none"><div class="sp-circuit" id="paraleloCircuit"></div></div>
     </div>
 
     <!-- JUEGO 5: CONECTA LOS CABLES -->

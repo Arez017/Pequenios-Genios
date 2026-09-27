@@ -71,6 +71,7 @@ const PG = {
       {id:'cables', label:'Cables', emoji:'🔗'},
       {id:'quiz', label:'Quiz', emoji:'🏆'},
       {id:'lab', label:'Laboratorio', emoji:'⚡'},
+      {id:'seriepara', label:'Serie/Para', emoji:'💡'},
       {id:'ohm', label:'Ohm', emoji:'📐'}
     ];
     bar.innerHTML = defs.map(d => 
@@ -1531,167 +1532,253 @@ function answerPolarity(choice){
 }
 initPolarity();
 
+
+
 /* ============================================================
-   JUEGO 4: SERIE VS PARALELO
+   JUEGO 4: SERIE VS PARALELO — misiones
    ============================================================ */
-function switchSP(view){
-  document.querySelectorAll('.sp-tab').forEach(t=>t.classList.toggle('active', t.dataset.view===view));
-  var vs = document.getElementById('view-serie');
-  var vp = document.getElementById('view-paralelo');
-  if(vs) vs.classList.toggle('active', view==='serie');
-  if(vp) vp.classList.toggle('active', view==='paralelo');
-  if(view==='serie' && typeof renderSerie==='function') renderSerie();
-  if(view==='paralelo' && typeof renderParalelo==='function') renderParalelo();
-}
-function ledSVG(on){
-  // Patita larga = ánodo (+), patita corta = cátodo (−)
-  return `<svg class="led-visual" viewBox="0 0 90 95">
-    <path d="M28 52 V30 A16 16 0 0 1 60 30 V52 Z" fill="${on?'#ff4d5e':'#2a2a2a'}" stroke="${on?'#ffb454':'#666'}" stroke-width="2.5" style="filter:${on?'drop-shadow(0 0 12px #ff4d5e)':'none'}"/>
-    <rect x="28" y="50" width="32" height="6" fill="#5a3030"/>
-    <!-- lado plano del cátodo -->
-    <line x1="28" y1="30" x2="28" y2="52" stroke="#888" stroke-width="2"/>
-    <!-- patita LARGA = + (ánodo) derecha -->
-    <line x1="58" y1="56" x2="58" y2="88" stroke="${on?'#4ade80':'#888'}" stroke-width="3"/>
-    <text x="58" y="94" text-anchor="middle" font-size="9" fill="#4ade80" font-weight="700">+</text>
-    <!-- patita CORTA = − (cátodo) izquierda -->
-    <line x1="32" y1="56" x2="32" y2="78" stroke="${on?'#f87171':'#888'}" stroke-width="3"/>
-    <text x="32" y="90" text-anchor="middle" font-size="9" fill="#f87171" font-weight="700">−</text>
-  </svg>`;
+function switchSP(view){ if(typeof spStartMission==="function") spStartMission(0); }
+
+function ledSVG(on, label){
+  label = label || "";
+  var fill = on ? "#ff4d5e" : "#2a2a2a";
+  var stroke = on ? "#ffb454" : "#666";
+  var filt = on ? "drop-shadow(0 0 12px #ff4d5e)" : "none";
+  var legP = on ? "#4ade80" : "#888";
+  var legN = on ? "#f87171" : "#888";
+  var lab = label ? ('<text x="45" y="16" text-anchor="middle" font-size="11" fill="#ffd23f" font-weight="800">'+label+'</text>') : "";
+  return '<svg class="led-visual" viewBox="0 0 90 100"><path d="M28 48 V28 A16 16 0 0 1 60 28 V48 Z" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2.5" style="filter:'+filt+'"/><rect x="28" y="46" width="32" height="6" fill="#5a3030"/><line x1="28" y1="28" x2="28" y2="48" stroke="#888" stroke-width="2"/><line x1="58" y1="52" x2="58" y2="82" stroke="'+legP+'" stroke-width="3"/><text x="58" y="92" text-anchor="middle" font-size="9" fill="#4ade80" font-weight="700">+</text><line x1="32" y1="52" x2="32" y2="74" stroke="'+legN+'" stroke-width="3"/><text x="32" y="88" text-anchor="middle" font-size="9" fill="#f87171" font-weight="700">-</text>'+lab+'</svg>';
 }
 function switchSVG(on){
-  return `<svg viewBox="0 0 60 40" style="width:50px;height:34px;">
-    <circle cx="8" cy="30" r="4" fill="#ffd23f"/><circle cx="52" cy="30" r="4" fill="#ffd23f"/>
-    <line x1="8" y1="30" x2="${on?'50':'34'}" y2="${on?'30':'14'}" stroke="${on?'#4ade80':'#ff5c5c'}" stroke-width="4"/>
-  </svg>`;
+  return '<svg viewBox="0 0 60 40" style="width:48px;height:32px;"><circle cx="8" cy="30" r="4" fill="#ffd23f"/><circle cx="52" cy="30" r="4" fill="#ffd23f"/><line x1="8" y1="30" x2="'+(on?"50":"34")+'" y2="'+(on?"30":"14")+'" stroke="'+(on?"#4ade80":"#ff5c5c")+'" stroke-width="4"/></svg>';
 }
 
+var SP_MISSIONS = [
+  {id:"s1",mode:"serie",title:"Mision 1 · Camino unico",brief:"Hay UN solo camino. Abri UN interruptor.",goal:"Apaga TODOS los LEDs (al menos un SW abierto).",hint:"En serie, un corte apaga todo.",check:function(sw,leds){return leds.every(function(x){return !x;})&&sw.some(function(x){return !x;});},stars:1},
+  {id:"p1",mode:"paralelo",title:"Mision 2 · Tres caminos",brief:"Cada LED tiene su rama.",goal:"Deja 1 LED apagado y 2 encendidos.",hint:"Cada SW controla su LED.",check:function(sw,leds){var o=0,n=0;for(var i=0;i<3;i++){if(leds[i])n++;else o++;}return o===1&&n===2;},stars:1},
+  {id:"s2",mode:"serie",title:"Mision 3 · Solo el medio?",brief:"Intenta apagar solo L2.",goal:"Abre un SW: se apagan los 3.",hint:"Serie = no se apaga solo uno.",check:function(sw,leds){return leds.every(function(x){return !x;});},stars:1},
+  {id:"p2",mode:"paralelo",title:"Mision 4 · Casa a medias",brief:"Se fundo L2. Las otras siguen.",goal:"Solo L2 apagado; L1 y L3 prendidos.",hint:"Abre solo SW del medio.",check:function(sw,leds){return !leds[1]&&leds[0]&&leds[2];},stars:1},
+  {id:"mix1",mode:"mystery",mysteryMode:"serie",title:"Mision 5 · Misterio",brief:"Tipo oculto.",goal:"Apaga los 3 LEDs.",hint:"Si un SW apaga todo, era serie.",check:function(sw,leds){return leds.every(function(x){return !x;})&&sw.some(function(x){return !x;});},stars:2},
+  {id:"mix2",mode:"mystery",mysteryMode:"paralelo",title:"Mision 6 · Final",brief:"Ultimo reto.",goal:"L1 ON, L2 OFF, L3 ON",hint:"Si apagas solo el medio, es paralelo.",check:function(sw,leds){return leds[0]&&!leds[1]&&leds[2];},stars:2}
+];
 
-/* ============================================================
-   JUEGO: SERIE VS PARALELO (SVG conectado + objetivo)
-   ============================================================ */
-var serieSwitches = [true, true, true];
-var paraSwitches = [true, true, true];
-var spGoalDone = { serie: false, paralelo: false };
+var spState = {mission:0,switches:[true,true,true],lives:3,score:0,stars:0,attempts:0,completed:{},feedback:""};
 
-function renderSerie(){
-  var wrap = document.getElementById('serieCircuit');
-  if(!wrap) return;
-  var allOn = serieSwitches[0] && serieSwitches[1] && serieSwitches[2];
-  var goal;
-  if(allOn){
-    goal = '🎯 Objetivo: toca <b>un</b> interruptor (SW) y ábrelo. En serie, si se abre uno, se apagan <b>todos</b> los LEDs.';
+function spMode(){ var m=SP_MISSIONS[spState.mission]; if(!m) return "serie"; return m.mode==="mystery" ? m.mysteryMode : m.mode; }
+function spComputeLeds(){ var mode=spMode(), sw=spState.switches; if(mode==="serie"){ var all=sw[0]&&sw[1]&&sw[2]; return [all,all,all]; } return [!!sw[0],!!sw[1],!!sw[2]]; }
+function spToggle(i){ spState.switches[i]=!spState.switches[i]; spState.feedback=""; spRender(); }
+function spResetSwitches(allOn){ spState.switches = allOn ? [true,true,true] : [false,false,false]; }
+function spStartMission(idx){ if(idx<0) idx=0; if(idx>=SP_MISSIONS.length) idx=SP_MISSIONS.length-1; spState.mission=idx; spState.attempts=0; spState.feedback=""; spResetSwitches(true); spRender(); }
+
+function spCheckGoal(){
+  var m=SP_MISSIONS[spState.mission]; if(!m) return;
+  spState.attempts++;
+  var leds=spComputeLeds();
+  if(m.check(spState.switches.slice(), leds.slice())){
+    var first=!spState.completed[m.id];
+    spState.completed[m.id]=true;
+    if(first){ spState.score += (m.stars||1)*10 + Math.max(0,5-spState.attempts); spState.stars += (m.stars||1); }
+    spState.feedback="ok";
+    if(window.PG){ try{ PG.sfxWin(); PG.confetti(28); PG.toast("OK "+m.title); }catch(e){} }
+    var allDone=true; for(var k=0;k<SP_MISSIONS.length;k++){ if(!spState.completed[SP_MISSIONS[k].id]) allDone=false; }
+    if(allDone && window.PG){ try{ PG.award("seriepara","Serie vs Paralelo"); }catch(e){} }
   } else {
-    goal = '✅ ¡Bien! El camino se cortó y se apagaron <b>todos</b>. Así funciona la serie.';
-    if(!spGoalDone.serie && window.PG){ spGoalDone.serie = true; PG.sfxOk(); PG.toast('💡 Serie entendida'); }
+    spState.feedback="bad";
+    if(spState.attempts>=4) spState.lives=Math.max(0,spState.lives-1);
+    if(window.PG){ try{ PG.sfxBad(); }catch(e){} }
+  }
+  spRender();
+}
+
+function spNext(){ if(spState.mission < SP_MISSIONS.length-1) spStartMission(spState.mission+1); else { spState.feedback="done"; spRender(); } }
+
+function spRender(){
+  var root=document.getElementById("spGameRoot");
+  var view=document.getElementById("game-serieparalelo");
+  if(!root && view){
+    var oldTabs=view.querySelector(".sp-tabs"), vs=document.getElementById("view-serie"), vp=document.getElementById("view-paralelo");
+    if(oldTabs) oldTabs.style.display="none"; if(vs) vs.style.display="none"; if(vp) vp.style.display="none";
+    root=document.createElement("div"); root.id="spGameRoot"; root.className="sp-game-root"; view.appendChild(root);
+  }
+  if(!root) return;
+  var m=SP_MISSIONS[spState.mission], leds=spComputeLeds(), mode=spMode();
+  var modeLabel = m.mode==="mystery" ? "Tipo oculto — mirá cómo se conectan los cables" : (mode==="serie" ? "Modo SERIE · un solo camino de cables" : "Modo PARALELO · tres ramas de cables");
+  var livesHtml=""; for(var li=0;li<3;li++) livesHtml += (li<spState.lives?"❤️":"🖤");
+  var dots=""; for(var di=0;di<SP_MISSIONS.length;di++){ var cls="sp-dot"; if(spState.completed[SP_MISSIONS[di].id]) cls+=" done"; if(di===spState.mission) cls+=" current"; dots += '<button type="button" class="'+cls+'" onclick="spStartMission('+di+')"></button>'; }
+  var fb="";
+  if(spState.feedback==="ok"){
+    var rev = m.mode==="mystery" ? (" Era <b>"+(mode==="serie"?"SERIE":"PARALELO")+"</b>.") : "";
+    fb = '<div class="sp-fb ok">Mision cumplida.'+rev+' <button type="button" class="btn" onclick="spNext()">Siguiente</button></div>';
+  } else if(spState.feedback==="bad"){
+    fb = '<div class="sp-fb bad">Aun no. Pista: <i>'+m.hint+'</i> · Intentos '+spState.attempts+' <button type="button" class="btn ghost" onclick="spResetSwitches(true);spState.feedback=\'\';spRender();">Reset SW</button></div>';
+  } else if(spState.feedback==="done"){
+    var nDone=0; for(var key in spState.completed) if(spState.completed[key]) nDone++;
+    fb = '<div class="sp-fb ok">Listo · '+nDone+'/'+SP_MISSIONS.length+' · pts <b>'+spState.score+'</b> · ⭐ <b>'+spState.stars+'</b> <button type="button" class="btn ghost" onclick="spState.score=0;spState.stars=0;spState.lives=3;spState.completed={};spStartMission(0);">Otra vez</button></div>';
   }
 
-  function swBtn(i){
-    var on = serieSwitches[i];
-    var col = on ? '#4ade80' : '#f87171';
-    return '<button type="button" onclick="toggleSerie('+i+')" style="margin:0 2px;padding:8px 10px;border-radius:12px;border:2px solid '+col+';background:#0a1f18;color:#fef8ec;font-weight:800;cursor:pointer;">SW'+(i+1)+' '+(on?'ON':'OFF')+'</button>';
-  }
-  function ledDot(on, n){
-    var bg = on ? '#ff4d5e' : '#333';
-    var sh = on ? '0 0 14px #ff4d5e' : 'none';
-    return '<div style="display:inline-flex;flex-direction:column;align-items:center;margin:0 4px;"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';box-shadow:'+sh+';border:2px solid #888;"></div><span style="font-size:11px;margin-top:3px;">LED'+n+'</span></div>';
-  }
+  var circuit = (mode === "serie") ? spDrawProtoSerie(leds) : spDrawProtoParalelo(leds);
 
-  var html = '';
-  html += '<div style="max-width:540px;margin:0 auto;padding:16px;border:2px solid #fde047;border-radius:18px;background:#071a14;">';
-  html += '<div style="text-align:center;font-size:13px;color:#4ade80;font-weight:800;margin-bottom:8px;">CIRCUITO EN SERIE — un solo camino</div>';
-  // closed loop box
-  html += '<div style="border:3px solid #fde047;border-radius:14px;padding:14px 10px;position:relative;">';
-  html += '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;">';
-  html += '<div style="text-align:center;"><div style="color:#4ade80;font-weight:800;">+</div><div style="font-size:28px;">🔋</div><div style="color:#fb923c;font-weight:800;">−</div></div>';
-  html += '<span style="color:#fde047;font-size:20px;">━</span>';
+  root.innerHTML = '<div class="sp-hud"><div>'+livesHtml+'</div><div>⭐ '+spState.stars+' · pts '+spState.score+'</div><div>Mision '+(spState.mission+1)+'/'+SP_MISSIONS.length+'</div></div>'+
+    '<div class="sp-dots">'+dots+'</div>'+
+    '<div class="sp-mission-card"><h4>'+m.title+'</h4><p class="sp-brief">'+m.brief+'</p><p class="sp-goal"><b>Objetivo:</b> '+m.goal+'</p><p class="sp-mode-tag">'+modeLabel+'</p></div>'+
+    '<div class="sp-proto-wrap">'+circuit+'</div>'+
+    '<div class="sp-actions"><button type="button" class="btn" onclick="spCheckGoal()">Comprobar objetivo</button><button type="button" class="btn ghost" onclick="spResetSwitches(true);spState.feedback=\'\';spRender();">Reiniciar SW</button></div>'+fb;
+}
+
+/** Agujeros decorativos del protoboard */
+function spHoleGrid(x0, y0, cols, rows, pitch){
+  var h = "";
+  for(var r=0;r<rows;r++){
+    for(var c=0;c<cols;c++){
+      var x = x0 + c*pitch, y = y0 + r*pitch;
+      h += '<circle cx="'+x+'" cy="'+y+'" r="2.2" fill="#4a463c"/>';
+    }
+  }
+  return h;
+}
+
+/** Protoboard SERIE: un solo camino + → SW1 → L1 → SW2 → L2 → SW3 → L3 → − */
+function spDrawProtoSerie(leds){
+  var W=340, H=280;
+  var svg = '<svg class="sp-proto-svg" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  // cuerpo protoboard
+  svg += '<rect x="8" y="8" width="324" height="264" rx="12" fill="#d4c9a8" stroke="#a89878" stroke-width="2"/>';
+  // riel +
+  svg += '<rect x="16" y="16" width="308" height="18" rx="4" fill="#e8c8c8"/>';
+  svg += '<text x="24" y="29" fill="#b71c1c" font-size="11" font-weight="800">+ riel</text>';
+  // riel −
+  svg += '<rect x="16" y="246" width="308" height="18" rx="4" fill="#c5d0e0"/>';
+  svg += '<text x="24" y="259" fill="#0d47a1" font-size="11" font-weight="800">− riel</text>';
+  // zona central + agujeros
+  svg += '<rect x="16" y="40" width="308" height="200" fill="#cfc4a4"/>';
+  svg += spHoleGrid(28, 52, 18, 10, 16);
+
+  // pila a la izquierda
+  svg += '<rect x="22" y="100" width="44" height="56" rx="6" fill="#2c2c2c" stroke="#111"/>';
+  svg += '<rect x="22" y="100" width="16" height="56" rx="6" fill="#c62828"/>';
+  svg += '<text x="44" y="125" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">9V</text>';
+  svg += '<text x="30" y="148" fill="#fff" font-size="9">+</text>';
+  svg += '<text x="52" y="148" fill="#eee" font-size="9">−</text>';
+
+  // cable rojo pila+ → riel+
+  svg += '<path d="M44 100 C44 70, 80 25, 120 25" fill="none" stroke="#e53935" stroke-width="3" stroke-linecap="round"/>';
+  // cable negro pila− → riel−
+  svg += '<path d="M52 156 C52 200, 80 255, 120 255" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>';
+
+  // posiciones de 3 nodos SW+LED en serie a lo largo
+  var nodes = [
+    {sx:100, sy:90, lx:100, ly:150},
+    {sx:180, sy:90, lx:180, ly:150},
+    {sx:260, sy:90, lx:260, ly:150}
+  ];
+
+  // cable amarillo del riel+ al primer SW
+  svg += '<path d="M120 25 L100 25 L100 70" fill="none" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>';
+
   for(var i=0;i<3;i++){
-    html += swBtn(i);
-    html += '<span style="color:#fb923c;font-weight:800;">R</span>';
-    html += ledDot(allOn, i+1);
-    if(i<2) html += '<span style="color:#fde047;font-size:20px;">━</span>';
+    var n = nodes[i];
+    var swOn = spState.switches[i];
+    var ledOn = leds[i];
+    // SW body
+    svg += '<g class="sp-hit" data-sw="'+i+'" style="cursor:pointer">';
+    svg += '<rect x="'+(n.sx-22)+'" y="'+(n.sy-18)+'" width="44" height="36" rx="8" fill="'+(swOn?"#1b4332":"#3d1f1f")+'" stroke="'+(swOn?"#4ade80":"#ff5c5c")+'" stroke-width="2"/>';
+    svg += '<text x="'+n.sx+'" y="'+(n.sy-4)+'" text-anchor="middle" fill="#ffd23f" font-size="9" font-weight="800">SW'+(i+1)+'</text>';
+    svg += '<text x="'+n.sx+'" y="'+(n.sy+12)+'" text-anchor="middle" fill="#fff" font-size="8">'+(swOn?"CERRADO":"ABIERTO")+'</text>';
+    svg += '</g>';
+    // LED
+    var dome = ledOn ? "#ff4d5e" : "#3a3a3a";
+    svg += '<ellipse cx="'+n.lx+'" cy="'+n.ly+'" rx="16" ry="12" fill="'+dome+'" stroke="#5a3030" stroke-width="1.5"'+(ledOn?' filter="url(#spGlow)"':'')+'/>';
+    svg += '<text x="'+n.lx+'" y="'+(n.ly+28)+'" text-anchor="middle" fill="#ffd23f" font-size="10" font-weight="800">L'+(i+1)+'</text>';
+    // pata larga verde / corta naranja
+    svg += '<line x1="'+(n.lx+8)+'" y1="'+(n.ly+12)+'" x2="'+(n.lx+8)+'" y2="'+(n.ly+22)+'" stroke="#4ade80" stroke-width="2.5"/>';
+    svg += '<line x1="'+(n.lx-8)+'" y1="'+(n.ly+12)+'" x2="'+(n.lx-8)+'" y2="'+(n.ly+18)+'" stroke="#f97316" stroke-width="2"/>';
+    // cable SW → LED (azul)
+    var wireCol = swOn && ledOn ? "#4ade80" : "#5c6bc0";
+    svg += '<path d="M'+n.sx+' '+(n.sy+18)+' L'+n.sx+' '+(n.ly-14)+' L'+n.lx+' '+(n.ly-14)+'" fill="none" stroke="'+wireCol+'" stroke-width="2.5" stroke-linecap="round"/>';
+    // conexión entre etapas
+    if(i<2){
+      var n2 = nodes[i+1];
+      svg += '<path d="M'+(n.lx)+' '+(n.ly+22)+' C'+(n.lx)+' 200, '+(n2.sx)+' 200, '+(n2.sx)+' '+(n2.sy+18)+'" fill="none" stroke="#7c4dff" stroke-width="2.5" stroke-linecap="round"/>';
+    }
   }
-  html += '</div>';
-  html += '<div style="text-align:center;margin-top:10px;font-size:12px;color:#fde047;">↺ cable de retorno al negativo de la pila</div>';
-  html += '</div>';
-  html += '<p style="text-align:center;margin:12px 0 0;font-size:14px;line-height:1.45;">'+goal+'</p>';
-  html += '<p style="text-align:center;margin:6px 0 0;font-weight:800;color:'+(allOn?'#4ade80':'#f87171')+';">'+(allOn?'⚡ Hay corriente':'⛔ No hay corriente')+'</p>';
-  html += '</div>';
-  wrap.innerHTML = html;
+  // último LED → riel −
+  svg += '<path d="M260 172 L260 220 L200 255" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>';
+
+  // leyenda
+  svg += '<text x="170" y="238" text-anchor="middle" fill="#5a5348" font-size="9" font-weight="600">SERIE: un solo cable en cadena · si cortás uno, se apaga todo</text>';
+  svg += '<defs><filter id="spGlow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+  svg += '</svg>';
+
+  // overlay clickable buttons positioned over SW (HTML)
+  var html = '<div class="sp-proto-board">'+svg;
+  html += '<div class="sp-sw-overlay serie">';
+  for(var k=0;k<3;k++){
+    html += '<button type="button" class="sp-sw-btn" onclick="spToggle('+k+')" aria-label="Interruptor '+(k+1)+'"></button>';
+  }
+  html += '</div></div>';
+  return html;
 }
 
-function toggleSerie(i){
-  serieSwitches[i] = !serieSwitches[i];
-  renderSerie();
-}
+/** Protoboard PARALELO: tres ramas independientes desde riel+ a riel− */
+function spDrawProtoParalelo(leds){
+  var W=340, H=300;
+  var svg = '<svg class="sp-proto-svg" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<rect x="8" y="8" width="324" height="284" rx="12" fill="#d4c9a8" stroke="#a89878" stroke-width="2"/>';
+  svg += '<rect x="16" y="16" width="308" height="18" rx="4" fill="#e8c8c8"/>';
+  svg += '<text x="24" y="29" fill="#b71c1c" font-size="11" font-weight="800">+ riel</text>';
+  svg += '<rect x="16" y="266" width="308" height="18" rx="4" fill="#c5d0e0"/>';
+  svg += '<text x="24" y="279" fill="#0d47a1" font-size="11" font-weight="800">− riel</text>';
+  svg += '<rect x="16" y="40" width="308" height="220" fill="#cfc4a4"/>';
+  svg += spHoleGrid(28, 52, 18, 12, 16);
 
-function renderParalelo(){
-  var wrap = document.getElementById('paraleloCircuit');
-  if(!wrap) return;
+  // pila
+  svg += '<rect x="22" y="110" width="44" height="56" rx="6" fill="#2c2c2c" stroke="#111"/>';
+  svg += '<rect x="22" y="110" width="16" height="56" rx="6" fill="#c62828"/>';
+  svg += '<text x="44" y="135" text-anchor="middle" fill="#fff" font-size="10" font-weight="800">9V</text>';
+  svg += '<path d="M44 110 C44 70, 80 25, 160 25" fill="none" stroke="#e53935" stroke-width="3" stroke-linecap="round"/>';
+  svg += '<path d="M52 166 C52 220, 80 275, 160 275" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>';
 
-  var goal;
-  if(paraSwitches[0] && paraSwitches[1] && paraSwitches[2]){
-    goal = '🎯 Objetivo: apaga <b>solo SW2</b>. LED1 y LED3 deben seguir encendidos.';
-  } else if(!paraSwitches[1] && paraSwitches[0] && paraSwitches[2]){
-    goal = '✅ ¡Exacto! En paralelo, una rama apagada <b>no apaga</b> las otras.';
-    if(!spGoalDone.paralelo && window.PG){ spGoalDone.paralelo = true; PG.sfxOk(); PG.toast('💡 Paralelo entendido'); }
-  } else {
-    goal = 'Cada rama tiene su propio camino del <b style="color:#4ade80">+</b> al <b style="color:#fb923c">−</b>.';
-  }
-
-  function swBtn(i){
-    var on = paraSwitches[i];
-    var col = on ? '#4ade80' : '#f87171';
-    return '<button type="button" onclick="toggleParalelo('+i+')" style="padding:8px 10px;border-radius:12px;border:2px solid '+col+';background:#0a1f18;color:#fef8ec;font-weight:800;cursor:pointer;">SW'+(i+1)+' '+(on?'ON':'OFF')+'</button>';
-  }
-  function ledDot(on, n){
-    var bg = on ? '#ff4d5e' : '#333';
-    var sh = on ? '0 0 14px #ff4d5e' : 'none';
-    return '<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:26px;height:26px;border-radius:50%;background:'+bg+';box-shadow:'+sh+';border:2px solid #888;"></div><span style="font-size:11px;margin-top:3px;">LED'+n+'</span></div>';
-  }
-
-  var html = '';
-  html += '<div style="max-width:480px;margin:0 auto;padding:16px;border:2px solid #fde047;border-radius:18px;background:#071a14;">';
-  html += '<div style="text-align:center;font-size:13px;color:#4ade80;font-weight:800;margin-bottom:8px;">CIRCUITO EN PARALELO — varios caminos</div>';
-  html += '<div style="text-align:center;margin-bottom:6px;"><span style="color:#4ade80;font-weight:800;">+</span> 🔋 <span style="color:#fb923c;font-weight:800;">−</span></div>';
-  // top rail
-  html += '<div style="height:5px;background:#fde047;border-radius:3px;margin:0 8px 12px;"></div>';
-  html += '<div style="display:flex;justify-content:space-around;gap:10px;">';
+  var xs = [110, 190, 270];
   for(var i=0;i<3;i++){
-    var on = paraSwitches[i];
-    html += '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;">';
-    html += '<div style="width:5px;height:16px;background:#fde047;"></div>';
-    html += '<div style="font-size:11px;opacity:0.85;">RAMA '+(i+1)+'</div>';
-    html += swBtn(i);
-    html += '<div style="color:#fb923c;font-weight:800;font-size:12px;">R</div>';
-    html += ledDot(on, i+1);
-    html += '<div style="width:5px;height:16px;background:#fde047;"></div>';
-    html += '</div>';
+    var x = xs[i];
+    var swOn = spState.switches[i];
+    var ledOn = leds[i];
+    // cable desde riel + hacia SW (rojo/amarillo)
+    svg += '<path d="M'+x+' 25 L'+x+' 70" fill="none" stroke="#e53935" stroke-width="2.5" stroke-linecap="round"/>';
+    // SW
+    svg += '<rect x="'+(x-22)+'" y="70" width="44" height="36" rx="8" fill="'+(swOn?"#1b4332":"#3d1f1f")+'" stroke="'+(swOn?"#4ade80":"#ff5c5c")+'" stroke-width="2"/>';
+    svg += '<text x="'+x+'" y="86" text-anchor="middle" fill="#ffd23f" font-size="9" font-weight="800">SW'+(i+1)+'</text>';
+    svg += '<text x="'+x+'" y="100" text-anchor="middle" fill="#fff" font-size="8">'+(swOn?"ON":"OFF")+'</text>';
+    // cable SW → LED
+    var wc = swOn ? "#4ade80" : "#5c6bc0";
+    svg += '<path d="M'+x+' 106 L'+x+' 140" fill="none" stroke="'+wc+'" stroke-width="2.5" stroke-linecap="round"/>';
+    // LED
+    var dome = ledOn ? "#ff4d5e" : "#3a3a3a";
+    svg += '<ellipse cx="'+x+'" cy="158" rx="16" ry="12" fill="'+dome+'" stroke="#5a3030" stroke-width="1.5"/>';
+    svg += '<line x1="'+(x+8)+'" y1="170" x2="'+(x+8)+'" y2="180" stroke="#4ade80" stroke-width="2.5"/>';
+    svg += '<line x1="'+(x-8)+'" y1="170" x2="'+(x-8)+'" y2="176" stroke="#f97316" stroke-width="2"/>';
+    svg += '<text x="'+x+'" y="198" text-anchor="middle" fill="#ffd23f" font-size="10" font-weight="800">L'+(i+1)+'</text>';
+    // cable LED → riel −
+    svg += '<path d="M'+x+' 180 L'+x+' 275" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>';
   }
-  html += '</div>';
-  // bottom rail
-  html += '<div style="height:5px;background:#fde047;border-radius:3px;margin:12px 8px 0;"></div>';
-  html += '<p style="text-align:center;margin:12px 0 0;font-size:14px;line-height:1.45;">'+goal+'</p>';
-  html += '</div>';
-  wrap.innerHTML = html;
+
+  svg += '<text x="170" y="258" text-anchor="middle" fill="#5a5348" font-size="9" font-weight="600">PARALELO: 3 caminos · apagar una rama no apaga las otras</text>';
+  svg += '</svg>';
+
+  var html = '<div class="sp-proto-board">'+svg;
+  html += '<div class="sp-sw-overlay paralelo">';
+  for(var k=0;k<3;k++){
+    html += '<button type="button" class="sp-sw-btn" onclick="spToggle('+k+')" aria-label="Interruptor '+(k+1)+'"></button>';
+  }
+  html += '</div></div>';
+  return html;
 }
 
-function toggleParalelo(i){
-  paraSwitches[i] = !paraSwitches[i];
-  renderParalelo();
-}
-
-// dibujar cuando el DOM este listo
-function initSerieParalelo(){
-  renderSerie();
-  renderParalelo();
-}
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initSerieParalelo);
-} else {
-  initSerieParalelo();
-}
-
-
+function renderSerie(){ spRender(); }
+function renderParalelo(){ spRender(); }
+function initSerieParalelo(){ spStartMission(0); }
+if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", initSerieParalelo); }
+else { initSerieParalelo(); }
 
 
 /* ============================================================
