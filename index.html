@@ -479,16 +479,16 @@
   <div class="section-head">
     <div class="eyebrow">Sin registro, sin instalar nada</div>
     <h2>Laboratorio de circuitos</h2>
-    <p>Protoboard virtual realista: rieles <b>+ / −</b>, agujeros, jumpers de colores y polaridad del LED (<b>patita larga = +</b>, <b>patita corta = −</b>). Arrastra piezas, cablea y pulsa <b>Simular</b>. Copia el mismo circuito con tu kit real.</p>
+    <p>Protoboard virtual realista: rieles <b>+ / −</b>, agujeros, jumpers de colores y polaridad del LED (patita larga = +). Arrastra piezas, cablea y pulsa <b>Simular</b>. Copia el mismo circuito con tu kit real.</p>
   </div>
   <div class="panel">
     
       <div id="labHowTo" class="lab-howto">
         <b>Cómo usar el laboratorio</b>
         <ol>
-          <li>Pulsa <b>▶️ Probar ahora</b> para ver un circuito que sí enciende.</li>
-          <li>La <b>pila</b> va a rieles <b>+</b> y <b>−</b>. El resto: patita → agujero. Misma columna = conectados.</li>
-          <li>Pulsa <b>⚡ Simular</b> para ver corriente, LED y el multímetro.</li>
+          <li>Usa una <b>receta lista</b> abajo, o agrega piezas con los botones.</li>
+          <li>Cablear: <b>clic</b> en un círculo → <b>clic</b> en el otro (no hace falta jalar).</li>
+          <li>Misma columna = ya conectados. Luego pulsa <b>Simular</b>.</li>
         </ol>
       </div>
 
@@ -518,8 +518,8 @@
       <div><span class="step-num">4</span> Conecta: <b>Pila(+)</b> → Resistencia → LED <b>pata larga (+)</b> → LED <b>pata corta (−)</b> → <b>Pila(−)</b></div>
       <div><span class="step-num">5</span> Pulsa <b>Simular</b> y mira los mA</div>
     </div>
-    <p style="text-align:center; font-size:0.78rem; opacity:0.6; margin:10px 0 0;">
-      <b>Estilo Tinkercad / protoboard real:</b> la <b>pila</b> se clava en el riel <b>rojo (+)</b> y el riel <b>azul (−)</b>. Luego conectas jumpers desde los rieles a los componentes. Misma columna = mismo nodo. Toca patita → toca agujero para clavar.
+    <p style="text-align:center; font-size:0.8rem; opacity:0.75; margin:10px 0 0;">
+      <b>Tip:</b> círculo amarillo parpadeando = ya elegiste el 1º punto. Segundo clic = cable listo.
     </p>
     <div class="wire-board" style="margin-top:14px;">
       <svg id="labSvg" viewBox="0 0 700 380"></svg>
@@ -533,7 +533,7 @@
           <span>Estado <b id="meterStatus">En espera</b></span>
         </div>
       </div>
-      <div id="labHintBar">LED Bolivia: pata LARGA = + · pata CORTA = − · Toca un círculo y luego otro para cablear · Misma columna = conectados</div>
+      <div id="labHintBar">LED: pata larga = + · pata corta = − · Toca un circulo y luego otro para cablear · Misma columna = conectados</div>
     </div>
     <div class="cb-result" id="labResult"></div>
 

@@ -1770,7 +1770,7 @@ function answerQuiz(i){
    siguiendo cables + resistencias (siempre conducen) + interruptores
    cerrados. Se itera para permitir LEDs en serie.
    ============================================================ */
-let lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+let lab = { instances: [], wires: [], bridges: [], nextId: 1, lastResult: null };
 const LAB_LIMITS = {bateria:1, resistencia:4, led:4, interruptor:2, motor:2, buzzer:2, pulsador:2, diodo:2, capacitor:2, ldr:2, potenciometro:2, fusible:1};
 const LAB_LABELS = {bateria:'PILA', resistencia:'RESISTENCIA', led:'LED', interruptor:'INTERRUPTOR', motor:'MOTOR', buzzer:'BUZZER', pulsador:'PULSADOR', diodo:'DIODO', capacitor:'CAPACITOR', ldr:'LDR', potenciometro:'POT', fusible:'FUSIBLE'};
 
@@ -1799,17 +1799,17 @@ LAB_GRID = 20;
 
 /* ===== Protoboard real: agujeros con nodos eléctricos ===== */
 const BB = {
-  ox: 30, oy: 52,
-  pitch: 15,
-  cols: 42,
+  // Protoboard llena el marco (700x380)
+  ox: 50, oy: 42,
+  pitch: 22,
+  cols: 28,
   rowsTop: 5,
   rowsBot: 5,
   railTopY: 22,
   railBotY: 358,
-  railOx: 30,
-  // canal visual entre top y bot
-  get channelY(){ return this.oy + this.rowsTop * this.pitch + 6; },
-  get botOy(){ return this.oy + this.rowsTop * this.pitch + 18; }
+  railOx: 50,
+  get channelY(){ return this.oy + this.rowsTop * this.pitch + 16; },
+  get botOy(){ return this.oy + this.rowsTop * this.pitch + 36; }
 };
 function bbHoleXY(col, row, zone){
   col = Math.max(0, Math.min(BB.cols-1, col|0));
@@ -1843,20 +1843,37 @@ function labAddComponent(type){
   const count = lab.instances.filter(i=>i.type===type).length;
   if(count >= (LAB_LIMITS[type]||4)) return;
   const id = type+'_'+(lab.nextId++);
-  const idx = lab.instances.length;
-  const col = idx % 4, row = Math.floor(idx/4);
-  const inst = {id, type, x: 20+col*165, y: 55+row*100, closed:true};
+  const inst = {id, type, x: 80, y: 100, closed:true};
   if(type==='resistencia') inst.value = 220;
   if(type==='bateria') inst.voltage = 9;
   if(type==='led') inst.color = 'red';
-  if(type==='pulsador') inst.closed = false; // se mantiene pulsado al hacer clic
+  if(type==='pulsador') inst.closed = false;
   if(type==='diodo') inst.closed = true;
-  if(type==='capacitor') inst.value = 100; // µF (simbólico en DC)
-  if(type==='ldr'){ inst.value = 5000; inst.light = true; } // ohms: luz=bajo, oscuro=alto
+  if(type==='capacitor') inst.value = 100;
+  if(type==='ldr'){ inst.value = 5000; inst.light = true; }
   if(type==='potenciometro') inst.value = 5000;
   if(type==='fusible'){ inst.closed = true; inst.blown = false; }
   lab.instances.push(inst);
+  // Colocar en protoboard estilo Tinkercad
+  if(type==='bateria'){
+    // Pila clavada en rieles, columna izquierda
+    let col = 1;
+    while(lab.instances.some(o=>o.id!==id && (o.holeA==='rail+:'+col || o.holeB==='rail-:'+col))){
+      col += 1; if(col>BB.cols-2) break;
+    }
+    inst.holeA = 'rail+:'+col;  // +
+    inst.holeB = 'rail-:'+col;  // -
+    inst.voltage = 9;
+    labLayoutFromHoles(inst);
+  } else {
+    labAssignDefaultHoles(inst);
+  }
   lab.lastResult = null;
+  if(window.PG && PG.toast){
+    if(type==='bateria') PG.toast('Pila en rieles + / −');
+    else if(type==='led') PG.toast('LED: pata larga = + · pata corta = −');
+    else PG.toast('Componente en la protoboard');
+  }
   renderLab();
 }
 function labRemoveInstance(id){
@@ -1868,13 +1885,18 @@ function labRemoveInstance(id){
 function labTermPos(id, suffix){
   const inst = lab.instances.find(i=>i.id===id);
   if(!inst) return null;
+  // Mientras se arrastra ESTE componente, las patitas van con el cuerpo
+  // (los cables se mueven juntos y no se "desconectan" visualmente)
+  if(labDragMode==='move' && labDragData && labDragData.id===id){
+    return {x: inst.x + (suffix==='a'?18:82), y: inst.y+52};
+  }
   const hid = suffix==='a' ? inst.holeA : inst.holeB;
   if(hid){
     const h = bbParseHole(hid);
     if(h) return bbHoleXY(h.col, h.row, h.zone);
   }
   // fallback cuerpo libre
-  return {x: inst.x + (suffix==='a'?0:100), y: inst.y+28};
+  return {x: inst.x + (suffix==='a'?18:82), y: inst.y+52};
 }
 function labAssignDefaultHoles(inst){
   // Cada componente nuevo ocupa 2 columnas libres en la zona TOP (arriba del canal)
@@ -1903,12 +1925,12 @@ function labLayoutFromHoles(inst){
   if(!pa || !pb) return;
   const ha = bbParseHole(inst.holeA);
   const hb = bbParseHole(inst.holeB);
-  // Pila en rieles: cuerpo a la izquierda entre riel + y −
+  // Pila en rieles: cuerpo a la IZQUIERDA del tablero (estilo Tinkercad), sin cruzar el area
   if(inst.type==='bateria' && ha && hb &&
      ((ha.zone==='rail+' && hb.zone==='rail-') || (ha.zone==='rail-' && hb.zone==='rail+'))){
-    const x = Math.min(pa.x, pb.x) + 36;
-    inst.x = Math.max(8, x - 50);
-    inst.y = 160;
+    // Colocar la pila fuera/borde izquierdo, centrada en altura
+    inst.x = 8;
+    inst.y = 150;
     return;
   }
   const midX = (pa.x + pb.x) / 2;
@@ -1956,7 +1978,7 @@ function labDrawComponentArt(inst, diag){
     </g>`;
   }
 
-  /* ===== LED (mejorado – aspecto realista) ===== */
+  /* ===== LED: + LARGA (a izq) / - CORTA (b der) ===== */
   if(inst.type === 'led'){
     let domeColor = ledDef.hex;
     let baseColor = '#3a1520';
@@ -1977,31 +1999,34 @@ function labDrawComponentArt(inst, diag){
       }
     }
 
-    // a = ánodo (+) pata LARGA (derecha)
-    // b = cátodo (−) pata CORTA + lado plano (izquierda)
+    // a (izquierda) = anodo + pata LARGA
+    // b (derecha)   = catodo - pata CORTA + lado plano
     return `
     <g style="${glowStyle}">
-      <rect x="${x+32}" y="${y+28}" width="36" height="16" rx="3"
+      <rect x="${x+30}" y="${y+30}" width="40" height="14" rx="3"
             fill="${baseColor}" stroke="#1a0a0c" stroke-width="1.2"/>
-      <path d="M${x+32} ${y+30}
-               Q${x+32} ${y+10} ${x+50} ${y+10}
-               Q${x+68} ${y+10} ${x+68} ${y+30} Z"
+      <path d="M${x+30} ${y+32}
+               Q${x+30} ${y+10} ${x+50} ${y+10}
+               Q${x+70} ${y+10} ${x+70} ${y+32} Z"
             fill="${domeColor}" opacity="${op}"
             stroke="#1a0a0c" stroke-width="1.3"/>
-      <line x1="${x+32}" y1="${y+12}" x2="${x+32}" y2="${y+44}"
-            stroke="#ddd" stroke-width="2.8" stroke-linecap="round"/>
+      <!-- lado plano del CATODO a la derecha (-) -->
+      <line x1="${x+68}" y1="${y+14}" x2="${x+68}" y2="${y+42}"
+            stroke="#eee" stroke-width="2.6" stroke-linecap="round"/>
       <ellipse cx="${x+42}" cy="${y+18}" rx="7" ry="4"
                fill="#fff" opacity="${active ? 0.35 : 0.15}"/>
       <text x="${x+50}" y="${y+40}" text-anchor="middle"
             fill="#fff" font-size="8" font-weight="800" opacity="0.9">LED</text>
-      <line x1="${x+62}" y1="${y+44}" x2="${x+62}" y2="${y+62}"
-            stroke="#4ade80" stroke-width="3.2" stroke-linecap="round"/>
-      <text x="${x+62}" y="${y+12}" text-anchor="middle"
-            fill="#4ade80" font-size="9" font-weight="800">+</text>
-      <line x1="${x+38}" y1="${y+44}" x2="${x+38}" y2="${y+56}"
-            stroke="#fb923c" stroke-width="3.2" stroke-linecap="round"/>
+      <!-- pata LARGA + izquierda -->
+      <line x1="${x+38}" y1="${y+44}" x2="${x+38}" y2="${y+60}"
+            stroke="#22c55e" stroke-width="3.8" stroke-linecap="round"/>
       <text x="${x+38}" y="${y+12}" text-anchor="middle"
-            fill="#fb923c" font-size="9" font-weight="800">−</text>
+            fill="#22c55e" font-size="10" font-weight="800">+</text>
+      <!-- pata CORTA - derecha -->
+      <line x1="${x+62}" y1="${y+44}" x2="${x+62}" y2="${y+54}"
+            stroke="#f97316" stroke-width="2.4" stroke-linecap="round"/>
+      <text x="${x+62}" y="${y+12}" text-anchor="middle"
+            fill="#f97316" font-size="10" font-weight="800">−</text>
     </g>`;
   }
 
@@ -2170,32 +2195,147 @@ function renderLab(){
   const svg = document.getElementById('labSvg');
   if(!svg) return;
   let html = `<defs>
-    <pattern id="breadboardHoles" width="20" height="20" patternUnits="userSpaceOnUse">
-      <circle cx="10" cy="10" r="1.6" fill="#8a8070"/>
-      <circle cx="10" cy="10" r="0.9" fill="#3d3830"/>
-    </pattern>
-    <filter id="wireGlow"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="wireGlow"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="bbPlastic" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e0cc"/>
+      <stop offset="100%" stop-color="#d0c4a6"/>
+    </linearGradient>
   </defs>
-  <!-- Cuerpo protoboard -->
-  <rect x="0" y="0" width="700" height="380" rx="12" fill="#d4c9a8"/>
-  <rect x="4" y="4" width="692" height="372" rx="10" fill="none" stroke="#a89878" stroke-width="2"/>
-  <!-- Riel positivo (rojo) -->
-  <rect x="10" y="8" width="680" height="28" rx="4" fill="#e8c8c8"/>
-  <rect x="14" y="12" width="4" height="20" rx="1" fill="#c62828"/>
-  <text x="28" y="27" fill="#b71c1c" style="font-size:12px;font-weight:700;font-family:monospace;">+  Riel positivo (rojo)</text>
-  <!-- Riel negativo (azul/negro) -->
-  <rect x="10" y="344" width="680" height="28" rx="4" fill="#c5d0e0"/>
-  <rect x="14" y="348" width="4" height="20" rx="1" fill="#1565c0"/>
-  <text x="28" y="363" fill="#0d47a1" style="font-size:12px;font-weight:700;font-family:monospace;">−  Riel negativo (azul)</text>
-  <!-- Zona central con agujeros -->
-  <rect x="10" y="42" width="680" height="296" fill="#cfc4a4"/>`;
-  // Canal entre zona top y bot (calculado)
+  <!-- Marco protoboard -->
+  <rect x="0" y="0" width="700" height="380" rx="10" fill="url(#bbPlastic)" stroke="#a89878" stroke-width="2"/>
+  <!-- Riel + (solo linea roja + agujeros, sin texto grande encima) -->
+  <rect x="36" y="10" width="640" height="24" rx="3" fill="#f0dede"/>
+  <line x1="40" y1="22" x2="670" y2="22" stroke="#c62828" stroke-width="2.5"/>
+  <text x="22" y="26" fill="#c62828" style="font-size:11px;font-weight:800;font-family:monospace">+</text>
+  <!-- Riel - -->
+  <rect x="36" y="346" width="640" height="24" rx="3" fill="#d4dde8"/>
+  <line x1="40" y1="358" x2="670" y2="358" stroke="#1565c0" stroke-width="2.5"/>
+  <text x="22" y="362" fill="#1565c0" style="font-size:11px;font-weight:800;font-family:monospace">−</text>
+  <!-- Zona de trabajo -->
+  <rect x="36" y="38" width="640" height="304" rx="2" fill="#d9ceb2"/>`;
+  // Canal central
   const cy = BB.channelY;
-  html += `<rect x="10" y="${cy}" width="680" height="12" fill="#b8ad8e" opacity="0.95"/>
-  <text x="350" y="${cy+10}" text-anchor="middle" fill="#5a5348" style="font-size:9px;font-family:monospace;">canal · misma columna = conectados</text>`;
+  html += `<rect x="36" y="${cy}" width="640" height="14" fill="#c4b898"/>`;
 
-  // --- Agujeros reales clicables ---
+  // Etiquetas de FILA (letras) a la IZQUIERDA — no estorban el area
+  const lettersTop = ['a','b','c','d','e'];
+  const lettersBot = ['f','g','h','i','j'];
+  for(let r=0;r<BB.rowsTop;r++){
+    const p = bbHoleXY(0, r, 'top');
+    html += '<text x="28" y="'+(p.y+3)+'" text-anchor="middle" fill="#6b6355" style="font-size:8px;font-family:monospace;pointer-events:none">'+lettersTop[r]+'</text>';
+  }
+  for(let r=0;r<BB.rowsBot;r++){
+    const p = bbHoleXY(0, r, 'bot');
+    html += '<text x="28" y="'+(p.y+3)+'" text-anchor="middle" fill="#6b6355" style="font-size:8px;font-family:monospace;pointer-events:none">'+lettersBot[r]+'</text>';
+  }
+  // Numeros de columna cada 5, ARRIBA del canal (margen superior de zona)
+  for(let c=0;c<BB.cols;c+=5){
+    const p = bbHoleXY(c, 0, 'top');
+    html += '<text x="'+p.x+'" y="44" text-anchor="middle" fill="#6b6355" style="font-size:7px;font-family:monospace;pointer-events:none">'+(c+1)+'</text>';
+  }
+
+  // --- Agujeros reales clicables (estilo Tinkercad) ---
   const occupied = new Set();
+  lab.instances.forEach(inst=>{
+    if(inst.holeA) occupied.add(inst.holeA);
+    if(inst.holeB) occupied.add(inst.holeB);
+  });
+
+  // Riel + (rojo): fila de agujeros
+  for(let c=0;c<BB.cols;c++){
+    const id = bbHoleId('rail+', c, 0);
+    const p = bbHoleXY(c, 0, 'rail+');
+    const used = occupied.has(id);
+    const pending = labPendingHole===id;
+    html += '<circle class="bb-hole" data-role="hole" data-hole="'+id+'" cx="'+p.x+'" cy="'+p.y+'" r="'+(used?7:5.8)+'" fill="'+(pending?'#4dd8ff':(used?'#ffd23f':'#8b1e1e'))+'" stroke="'+(pending?'#fff':(used?'#f59e0b':'#c62828'))+'" stroke-width="1.2" style="cursor:pointer"/>';
+  }
+  // Riel - (azul)
+  for(let c=0;c<BB.cols;c++){
+    const id = bbHoleId('rail-', c, 0);
+    const p = bbHoleXY(c, 0, 'rail-');
+    const used = occupied.has(id);
+    const pending = labPendingHole===id;
+    html += '<circle class="bb-hole" data-role="hole" data-hole="'+id+'" cx="'+p.x+'" cy="'+p.y+'" r="'+(used?7:5.8)+'" fill="'+(pending?'#4dd8ff':(used?'#ffd23f':'#1a3a6b'))+'" stroke="'+(pending?'#fff':(used?'#f59e0b':'#1565c0'))+'" stroke-width="1.2" style="cursor:pointer"/>';
+  }
+  // Zona TOP (arriba del canal)
+  for(let c=0;c<BB.cols;c++){
+    for(let r=0;r<BB.rowsTop;r++){
+      const id = bbHoleId('top', c, r);
+      const p = bbHoleXY(c, r, 'top');
+      const used = occupied.has(id);
+      const pending = labPendingHole===id;
+      html += '<circle class="bb-hole" data-role="hole" data-hole="'+id+'" cx="'+p.x+'" cy="'+p.y+'" r="'+(used?7.2:6)+'" fill="'+(pending?'#4dd8ff':(used?'#ffd23f':'#2a2520'))+'" stroke="#5a5348" stroke-width="1" style="cursor:pointer"/>';
+    }
+  }
+  // Zona BOT (abajo del canal)
+  for(let c=0;c<BB.cols;c++){
+    for(let r=0;r<BB.rowsBot;r++){
+      const id = bbHoleId('bot', c, r);
+      const p = bbHoleXY(c, r, 'bot');
+      const used = occupied.has(id);
+      const pending = labPendingHole===id;
+      html += '<circle class="bb-hole" data-role="hole" data-hole="'+id+'" cx="'+p.x+'" cy="'+p.y+'" r="'+(used?7.2:6)+'" fill="'+(pending?'#4dd8ff':(used?'#ffd23f':'#2a2520'))+'" stroke="#5a5348" stroke-width="1" style="cursor:pointer"/>';
+    }
+  }
+
+  // Bridges hole-hole
+  (lab.bridges||[]).forEach(function(br, idx){
+    const h1 = bbParseHole(br[0]), h2 = bbParseHole(br[1]);
+    if(!h1||!h2) return;
+    const p1 = bbHoleXY(h1.col,h1.row,h1.zone);
+    const p2 = bbHoleXY(h2.col,h2.row,h2.zone);
+    const col = ['#2e7d32','#c62828','#1565c0','#f9a825'][idx%4];
+    const midY = Math.min(p1.y,p2.y) - (14+(idx%3)*6);
+    const d = 'M'+p1.x+','+p1.y+' L'+p1.x+','+midY+' L'+p2.x+','+midY+' L'+p2.x+','+p2.y;
+    html += '<path data-role="bridge" data-idx="'+idx+'" d="'+d+'" stroke="'+col+'" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer"/>';
+    html += '<circle cx="'+p1.x+'" cy="'+p1.y+'" r="3.5" fill="'+col+'"/>';
+    html += '<circle cx="'+p2.x+'" cy="'+p2.y+'" r="3.5" fill="'+col+'"/>';
+  });
+
+  // --- Jumpers estilo Tinkercad (trayecto en L / U, colores vivos) ---
+  const wireColors = ['#2e7d32','#c62828','#1565c0','#f9a825','#6a1b9a','#00838f','#ef6c00','#455a64'];
+  lab.wires.forEach(function(w, idx){
+    const ka = w[0], kb = w[1];
+    const pa = labParseKey(ka), pb = labParseKey(kb);
+    let p1 = null, p2 = null;
+    if(pa && pb){
+      p1 = labTermPos(pa.id, pa.suffix);
+      p2 = labTermPos(pb.id, pb.suffix);
+    }
+    if(!p1 && typeof ka==='string' && ka.indexOf(':')>=0){
+      const h = bbParseHole(ka); if(h) p1 = bbHoleXY(h.col, h.row, h.zone);
+    }
+    if(!p2 && typeof kb==='string' && kb.indexOf(':')>=0){
+      const h = bbParseHole(kb); if(h) p2 = bbHoleXY(h.col, h.row, h.zone);
+    }
+    if(!p1 || !p2) return;
+    const col = wireColors[idx % wireColors.length];
+    // Ruta tipo jumper: sale vertical, cruza, baja (como Tinkercad)
+    const midY = Math.min(p1.y, p2.y) - (12 + (idx%4)*5);
+    const d = 'M'+p1.x+','+p1.y+' L'+p1.x+','+midY+' L'+p2.x+','+midY+' L'+p2.x+','+p2.y;
+    const isLive = lab.lastResult && lab.lastResult.liveWires && lab.lastResult.liveWires.has(idx);
+    const sw = isLive ? 4.2 : 3.4;
+    html += '<path data-role="wire" data-idx="'+idx+'" d="'+d+'" stroke="'+col+'" stroke-width="'+sw+'" fill="none" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer;filter:'+(isLive?'url(#wireGlow)':'none')+'"/>';
+    // extremos redondos del jumper
+    html += '<circle cx="'+p1.x+'" cy="'+p1.y+'" r="3.2" fill="'+col+'" style="pointer-events:none"/>';
+    html += '<circle cx="'+p2.x+'" cy="'+p2.y+'" r="3.2" fill="'+col+'" style="pointer-events:none"/>';
+    if(isLive){
+      html += '<circle r="3.5" fill="#fff59d" style="pointer-events:none"><animateMotion dur="0.9s" repeatCount="indefinite" path="'+d+'"/></circle>';
+    }
+  });
+
+  // Resaltar columna pendiente (misma tira = mismo nodo)
+  if(labPendingHole){
+    const hp = bbParseHole(labPendingHole);
+    if(hp && (hp.zone==='top'||hp.zone==='bot')){
+      for(let r=0;r<(hp.zone==='top'?BB.rowsTop:BB.rowsBot);r++){
+        const p = bbHoleXY(hp.col, r, hp.zone);
+        html += '<circle cx="'+p.x+'" cy="'+p.y+'" r="5.5" fill="none" stroke="#4dd8ff" stroke-width="1.5" opacity="0.7"/>';
+      }
+    }
+  }
+
+  // --- Componentes ---
   lab.instances.forEach(inst=>{
     const diag = (lab.lastResult && lab.lastResult.details[inst.id]) || {active:false};
     const active = diag.active;
@@ -2214,14 +2354,14 @@ function renderLab(){
     const clsB = 'wire-terminal' + (labPendingTerminal===inst.id+'_b'?' pending':'') + (lab.wires.some(([a,b])=>a===inst.id+'_b'||b===inst.id+'_b')?' connected':'');
 
     html += '<g data-role="body" data-inst="'+inst.id+'">';
-    html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="56" rx="10" fill="rgba(255,255,255,0.15)" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>';
+    html += '<rect class="'+boxClass+'" x="'+inst.x+'" y="'+inst.y+'" width="100" height="52" rx="8" fill="rgba(255,255,255,0.08)" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>';
     html += labDrawComponentArt(inst, diag);
     html += '<text class="wire-comp-label" x="'+(inst.x+50)+'" y="'+(inst.y+52)+'" text-anchor="middle" style="font-size:9px;pointer-events:none;fill:#1a1a1a;font-weight:700;">'+labelText+(active?' ✓':'')+'</text>';
 
     if(inst.type==='led'){
       // Etiquetas fuera del área del botón borrar (x+92) para que no se lea "×ORTA"
-      html += '<text x="'+(inst.x+18)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#166534" style="font-size:8px;font-weight:800;pointer-events:none">+ LARGA</text>';
-      html += '<text x="'+(inst.x+62)+'" y="'+(inst.y+11)+'" text-anchor="middle" fill="#c2410c" style="font-size:8px;font-weight:800;pointer-events:none">− CORTA</text>';
+      html += '<text x="'+pa.x+'" y="'+(inst.y+8)+'" text-anchor="middle" fill="#166534" style="font-size:8px;font-weight:800;pointer-events:none">+L</text>';
+      html += '<text x="'+pb.x+'" y="'+(inst.y+8)+'" text-anchor="middle" fill="#c2410c" style="font-size:8px;font-weight:800;pointer-events:none">−C</text>';
       if(diag.status==='danger'){
         html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-6)+'" text-anchor="middle" fill="#dc2626" style="font-size:9px;pointer-events:none">mucha corriente</text>';
       } else if(active){
@@ -2232,24 +2372,45 @@ function renderLab(){
     } else if(isSwitch){
       html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="'+(inst.closed?'#2f6b45':'#8a2e2e')+'" style="font-size:9px;pointer-events:none">'+(inst.closed?'CERRADO (toca)':'ABIERTO (toca)')+'</text>';
     } else if(inst.type==='bateria'){
-      html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none">toca: cambiar V</text>';
+      html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#92400e" style="font-size:8px;pointer-events:none;opacity:0.7">clic: voltaje</text>';
     } else if(inst.type==='resistencia'){
       html += '<text x="'+(inst.x+50)+'" y="'+(inst.y-4)+'" text-anchor="middle" fill="#b45309" style="font-size:9px;pointer-events:none">toca: cambiar ohm</text>';
     }
 
     const bodyMidY = inst.y + 48;
-    // LED: a=+ verde mas gruesa, b=- naranja mas fina
     let legA = '#6b7280', legB = '#6b7280', wA = 2.5, wB = 2.5;
     if(inst.type==='led' || inst.type==='bateria'){
       legA = '#22c55e'; legB = '#f97316';
-      if(inst.type==='led'){ wA = 3.5; wB = 2.2; }
+      if(inst.type==='led'){ wA = 4; wB = 2.2; }
     }
-    const startAY = inst.type==='led' ? (inst.y+42) : bodyMidY;
-    const startBY = inst.type==='led' ? (inst.y+48) : bodyMidY;
-    html += '<line x1="'+pa.x+'" y1="'+startAY+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="'+wA+'" stroke-linecap="round"/>';
-    html += '<line x1="'+pb.x+'" y1="'+startBY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="'+wB+'" stroke-linecap="round"/>';
-    html += '<circle class="'+clsA+'" data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="8" style="fill:#0b1f18;stroke:'+legA+';stroke-width:2.5;cursor:pointer"></circle>';
-    html += '<circle class="'+clsB+'" data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="8" style="fill:#0b1f18;stroke:'+legB+';stroke-width:2.5;cursor:pointer"></circle>';
+    // Pila en rieles: NO dibujar lineas larguisimas que cruzan todo el tablero.
+    // Solo marcas en los agujeros del riel + y −.
+    const ha2 = inst.holeA ? bbParseHole(inst.holeA) : null;
+    const hb2 = inst.holeB ? bbParseHole(inst.holeB) : null;
+    const battOnRails = inst.type==='bateria' && ha2 && hb2 &&
+      ((ha2.zone==='rail+'||ha2.zone==='rail-') && (hb2.zone==='rail+'||hb2.zone==='rail-'));
+
+    if(battOnRails){
+      // Cables cortos desde el cuerpo de la pila hacia el borde (no hasta el riel lejano)
+      const midBodyX = inst.x + 50;
+      const midBodyY = inst.y + 28;
+      // Salida + hacia arriba (riel rojo)
+      html += '<line x1="'+midBodyX+'" y1="'+inst.y+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="3" stroke-linecap="round"/>';
+      // Salida - hacia abajo (riel azul)
+      html += '<line x1="'+midBodyX+'" y1="'+(inst.y+52)+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="3" stroke-linecap="round"/>';
+    } else {
+      const startAY = inst.type==='led' ? (inst.y + 40) : bodyMidY;
+      const startBY = inst.type==='led' ? (inst.y + 50) : bodyMidY;
+      html += '<line x1="'+pa.x+'" y1="'+startAY+'" x2="'+pa.x+'" y2="'+pa.y+'" stroke="'+legA+'" stroke-width="'+wA+'" stroke-linecap="round"/>';
+      html += '<line x1="'+pb.x+'" y1="'+startBY+'" x2="'+pb.x+'" y2="'+pb.y+'" stroke="'+legB+'" stroke-width="'+wB+'" stroke-linecap="round"/>';
+    }
+    // terminales en los agujeros
+    const pendA = labPendingTerminal===inst.id+'_a';
+    const pendB = labPendingTerminal===inst.id+'_b';
+    html += '<circle data-role="terminal" data-key="'+inst.id+'_a" cx="'+pa.x+'" cy="'+pa.y+'" r="'+(pendA?11:8)+'" style="fill:#052e16;stroke:'+(pendA?'#fde047':legA)+';stroke-width:'+(pendA?4:2.5)+';cursor:pointer"></circle>';
+    html += '<circle data-role="terminal" data-key="'+inst.id+'_b" cx="'+pb.x+'" cy="'+pb.y+'" r="'+(pendB?11:8)+'" style="fill:#431407;stroke:'+(pendB?'#fde047':legB)+';stroke-width:'+(pendB?4:2.5)+';cursor:pointer"></circle>';
+    if(pendA) html += '<circle cx="'+pa.x+'" cy="'+pa.y+'" r="16" fill="none" stroke="#fde047" stroke-width="2" opacity="0.7"><animate attributeName="r" values="14;18;14" dur="1s" repeatCount="indefinite"/></circle>';
+    if(pendB) html += '<circle cx="'+pb.x+'" cy="'+pb.y+'" r="16" fill="none" stroke="#fde047" stroke-width="2" opacity="0.7"><animate attributeName="r" values="14;18;14" dur="1s" repeatCount="indefinite"/></circle>';
     html += '<circle data-role="delete" data-inst="'+inst.id+'" cx="'+(inst.x+98)+'" cy="'+(inst.y-2)+'" r="7" style="fill:#fecaca;stroke:#dc2626;stroke-width:1.5;cursor:pointer"></circle>';
     html += '<text data-role="delete" data-inst="'+inst.id+'" x="'+(inst.x+98)+'" y="'+(inst.y+2)+'" text-anchor="middle" fill="#7f1d1d" style="font-size:10px;font-weight:800;pointer-events:none">×</text>';
     html += '</g>';
@@ -2259,6 +2420,11 @@ function renderLab(){
   svg.innerHTML = html;
 
   svg.querySelectorAll('[data-role="hole"]').forEach(el=>el.addEventListener('pointerdown', labHoleDown));
+  svg.querySelectorAll('[data-role="bridge"]').forEach(el=>el.addEventListener('pointerdown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    const idx = parseInt(e.currentTarget.getAttribute('data-idx'),10);
+    if(!isNaN(idx) && lab.bridges){ lab.bridges.splice(idx,1); lab.lastResult=null; renderLab(); }
+  }));
   svg.querySelectorAll('[data-role="terminal"]').forEach(el=>el.addEventListener('pointerdown', labTerminalDown));
   svg.querySelectorAll('[data-role="body"]').forEach(el=>el.addEventListener('pointerdown', labBodyDown));
   svg.querySelectorAll('[data-role="delete"]').forEach(el=>{
@@ -2278,7 +2444,7 @@ function renderLab(){
 
 function labSetHint(msg){
   const el = document.getElementById('labHintBar');
-  if(el) el.textContent = msg || 'LED: pata larga (+) / pata corta (-) · Toca circulo y luego otro · Misma columna = conectados';
+  if(el) el.textContent = msg || 'Clic en un circulo → clic en el otro = cable. Misma columna = ya unidos. Usa una receta lista si quieres.';
 }
 function labConnectWire(fromKey, toKey){
   if(!fromKey || !toKey || fromKey===toKey) return false;
@@ -2295,77 +2461,149 @@ function labConnectWire(fromKey, toKey){
 
 function labHoleDown(e){
   e.preventDefault(); e.stopPropagation();
-  const holeId = e.target.dataset.hole;
+  const holeId = e.currentTarget.getAttribute('data-hole') || e.target.dataset.hole;
   if(!holeId) return;
-  // Si hay un terminal pendiente, clavarlo en este agujero
+
+  // 1) Si hay terminal pendiente: clavar patita en este agujero
   if(labPendingTerminal){
     const {id, suffix} = labParseKey(labPendingTerminal);
     const inst = lab.instances.find(i=>i.id===id);
     if(inst){
-      // ¿agujero ocupado por otra patita?
       const taken = lab.instances.some(o=>{
         if(o.id===id) return false;
         return o.holeA===holeId || o.holeB===holeId;
       });
       if(taken){
-        if(window.PG) PG.toast('Ese agujero ya tiene una patita');
+        if(window.PG) PG.toast('Agujero ocupado');
+        labSetHint('Ese agujero ya tiene una patita. Elige otro.');
         return;
       }
       if(suffix==='a') inst.holeA = holeId; else inst.holeB = holeId;
-      // Reposicionar cuerpo entre las dos patitas
-      const pa = labTermPos(id,'a'), pb = labTermPos(id,'b');
-      if(pa && pb){
-        inst.x = Math.min(pa.x, pb.x) - 10;
-        inst.y = (pa.y+pb.y)/2 - 28;
-      }
+      labLayoutFromHoles(inst);
       labPendingTerminal = null;
       labPendingHole = null;
       lab.lastResult = null;
-      labSetHint && labSetHint('Patita clavada en el agujero. Une la otra o simula.');
+      labSetHint('Patita clavada. Une la otra o conecta un cable.');
+      if(window.PG) PG.sfxOk();
       renderLab();
       return;
     }
   }
-  // Seleccionar agujero para mostrar nodo (feedback)
-  labPendingHole = (labPendingHole===holeId) ? null : holeId;
-  const net = (function(){
+
+  // 2) Cable entre dos agujeros (jumper hole→hole)
+  if(labPendingHole && labPendingHole !== holeId){
+    // Crear nodos virtuales: unimos redes via un wire entre "hole keys" 
+    // Usamos keys especiales hole::id para que el simulador una por net
+    const netA = (function(){ const h=bbParseHole(labPendingHole); return h?bbNetId(h.zone,h.col,h.row):null; })();
+    const netB = (function(){ const h=bbParseHole(holeId); return h?bbNetId(h.zone,h.col,h.row):null; })();
+    if(netA && netB && netA === netB){
+      labSetHint('Ya estan en la misma tira (misma columna). No hace falta cable.');
+      labPendingHole = null;
+      renderLab();
+      return;
+    }
+    // Buscar cualquier terminal clavado en esos agujeros / redes para cablear
+    // Si no hay terminales, guardamos bridge como wire entre hole markers en lab.bridges
+    if(!lab.bridges) lab.bridges = [];
+    const exists = lab.bridges.some(b=>(b[0]===labPendingHole&&b[1]===holeId)||(b[0]===holeId&&b[1]===labPendingHole));
+    if(!exists){
+      lab.bridges.push([labPendingHole, holeId]);
+      // Tambien intentar unir terminales que compartan esos nets via wires sinteticos
+      const termsA = [], termsB = [];
+      lab.instances.forEach(inst=>{
+        ['a','b'].forEach(suf=>{
+          const hid = suf==='a'?inst.holeA:inst.holeB;
+          if(!hid) return;
+          const h = bbParseHole(hid);
+          if(!h) return;
+          const net = bbNetId(h.zone,h.col,h.row);
+          if(net===netA) termsA.push(inst.id+'_'+suf);
+          if(net===netB) termsB.push(inst.id+'_'+suf);
+        });
+      });
+      // Si hay terminales en ambos lados, conectar el primero de cada lado
+      if(termsA.length && termsB.length){
+        labConnectWire(termsA[0], termsB[0]);
+      } else {
+        // Bridge puro hole-hole: se aplica en simulacion por nets
+        if(window.PG) PG.toast('Jumper colocado');
+      }
+      lab.lastResult = null;
+    }
+    labPendingHole = null;
+    labSetHint('Cable listo. Sigue armando o pulsa Simular.');
+    renderLab();
+    return;
+  }
+
+  // 3) Seleccionar agujero (primer clic)
+  labPendingHole = (labPendingHole === holeId) ? null : holeId;
+  labPendingTerminal = null;
+  if(labPendingHole){
     const h = bbParseHole(holeId);
-    return h ? bbNetId(h.zone,h.col,h.row) : '';
-  })();
-  labSetHint && labSetHint('Agujero '+holeId+' · nodo '+net+' (misma columna = conectados). Toca una patita y luego un agujero para clavarla.');
+    const net = h ? bbNetId(h.zone, h.col, h.row) : '';
+    labSetHint('Agujero seleccionado ('+holeId+'). Toca otro agujero para tender un jumper, o una patita.');
+  } else {
+    labSetHint();
+  }
   renderLab();
 }
 
 function labTerminalDown(e){
   e.preventDefault(); e.stopPropagation();
-  const key = e.target.dataset.key;
+  const key = (e.currentTarget && e.currentTarget.dataset.key) || e.target.dataset.key;
   if(!key) return;
 
-  // Click-to-connect mode (primary for kids)
+  // Si habia un agujero pendiente: clavar esta patita ahi
+  if(labPendingHole){
+    const {id, suffix} = labParseKey(key);
+    const inst = lab.instances.find(i=>i.id===id);
+    if(inst){
+      const taken = lab.instances.some(o=>o.id!==id && (o.holeA===labPendingHole || o.holeB===labPendingHole));
+      if(taken){
+        if(window.PG) PG.toast('Agujero ocupado');
+      } else {
+        if(suffix==='a') inst.holeA = labPendingHole; else inst.holeB = labPendingHole;
+        labLayoutFromHoles(inst);
+        if(window.PG) PG.sfxOk();
+        labSetHint('Patita clavada con clic. Sigue conectando.');
+      }
+    }
+    labPendingHole = null;
+    labPendingTerminal = null;
+    lab.lastResult = null;
+    renderLab();
+    return;
+  }
+
+  // Clic → clic entre dos patitas (sin arrastrar)
   if(labPendingTerminal){
     if(labPendingTerminal === key){
-      // same terminal → cancel
       labPendingTerminal = null;
-      labSetHint();
+      labDragMode = null;
+      labDragData = null;
+      labSetHint('Cancelado. Toca una patita o un agujero.');
       renderLab();
       return;
     }
     labConnectWire(labPendingTerminal, key);
     labPendingTerminal = null;
-    labSetHint();
+    labDragMode = null;
+    labDragData = null;
+    labSetHint('Cable listo (clic + clic). Toca otro par o Simular.');
     renderLab();
     return;
   }
 
-  // First click: select terminal (pending) + also allow drag
+  // Primer clic: deja pendiente (el segundo clic completa)
   labPendingTerminal = key;
+  labPendingHole = null;
   const p = labParseKey(key);
-  const pos = labTermPos(p.id, p.suffix);
-  labDragMode = 'wire';
-  labDragData = {fromKey:key, x:pos.x, y:pos.y, startedAt: Date.now()};
-  labSetHint('👆 Ahora toca el OTRO conector para completar el cable (o arrastra)');
+  const pos = labTermPos(p.id, p.suffix) || {x:0,y:0};
+  labDragMode = null; // no obliga a arrastrar
+  labDragData = null;
+  labSetHint('1/2 seleccionado. Ahora HAZ CLIC en la otra patita o en un agujero (no hace falta jalar).');
   renderLab();
-  drawLabTemp(pos.x, pos.y);
 }
 function labBodyDown(e){
   e.preventDefault(); e.stopPropagation();
@@ -2389,10 +2627,10 @@ function labPointerMove(e){
     const inst = lab.instances.find(i=>i.id===labDragData.id);
     if(inst){
       const rawX = Math.max(6, Math.min(590, labDragData.origX+dx));
-      const rawY = Math.max(46, Math.min(272, labDragData.origY+dy));
+      const rawY = Math.max(40, Math.min(300, labDragData.origY+dy));
       inst.x = Math.round(rawX/LAB_GRID)*LAB_GRID;
       inst.y = Math.round(rawY/LAB_GRID)*LAB_GRID;
-      if(typeof labSyncHolesOne==='function') labSyncHolesOne(inst);
+      // No reasignar agujeros aqui: los cables siguen al cuerpo (labTermPos)
       renderLab();
     }
   }
@@ -2455,6 +2693,22 @@ function labPointerUp(e){
           lab.lastResult=null;
         }
       }
+    } else {
+      // Al soltar: reenganchar patitas al agujero mas cercano (los cables se mantienen)
+      const inst = lab.instances.find(i=>i.id===labDragData.id);
+      if(inst && typeof labSyncHolesOne==='function'){
+        // Pila: si estaba en rieles, mantenerla en rieles cercanos
+        const wasRail = inst.holeA && String(inst.holeA).startsWith('rail');
+        labSyncHolesOne(inst);
+        if(wasRail && inst.type==='bateria'){
+          const col = Math.max(0, Math.min(BB.cols-1, Math.round((inst.x - BB.railOx) / BB.pitch)));
+          inst.holeA = 'rail+:'+col;
+          inst.holeB = 'rail-:'+col;
+        }
+        labLayoutFromHoles(inst);
+        lab.lastResult = null;
+        labSetHint('Componente movido. Los cables siguen conectados.');
+      }
     }
   }
   labDragMode=null; labDragData=null;
@@ -2462,7 +2716,7 @@ function labPointerUp(e){
 }
 
 function clearLab(){
-  lab = { instances: [], wires: [], nextId: 1, lastResult: null };
+  lab = { instances: [], wires: [], bridges: [], nextId: 1, lastResult: null };
   labPendingTerminal = null;
   labSetHint();
   const r = document.getElementById('labResult');
@@ -2498,6 +2752,16 @@ function simulateLab(){
         columnPairs.push([pins[i].key, pins[j].key]);
     }
   }
+  // Jumpers hole→hole (bridges): unen las redes de esos agujeros
+  (lab.bridges||[]).forEach(function(br){
+    const h1 = bbParseHole(br[0]), h2 = bbParseHole(br[1]);
+    if(!h1||!h2) return;
+    const n1 = bbNetId(h1.zone,h1.col,h1.row);
+    const n2 = bbNetId(h2.zone,h2.col,h2.row);
+    const keys1 = pins.filter(p=>p.net===n1).map(p=>p.key);
+    const keys2 = pins.filter(p=>p.net===n2).map(p=>p.key);
+    keys1.forEach(a=> keys2.forEach(b=> columnPairs.push([a,b])));
+  });
 
   // --- grafo base: cables + columnas + pasivos conductores ---
   const parent = {};
@@ -2833,6 +3097,8 @@ const LAB_PRESETS = {
     ]
   }
 };
+
+
 
 function labDemoLED(){
   try {
