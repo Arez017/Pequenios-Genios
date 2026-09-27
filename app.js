@@ -1936,105 +1936,235 @@ let labPendingHole = null; // agujero de protoboard seleccionado
 
 /* ---- dibujo de una pieza según su tipo, con estética "protoboard" ---- */
 function labDrawComponentArt(inst, diag){
-  const x=inst.x, y=inst.y, cx=x+50, cy=y+28;
+  const x = inst.x, y = inst.y, cx = x + 50, cy = y + 28;
   const active = diag && diag.active;
-  const ledDef = LED_COLORS[inst.color||'red'];
-  const glowColor = inst.type==='led' ? (diag.status==='danger' ? '#ffffff' : ledDef.lit) : '#ffd23f';
-  const glowRadius = active ? (inst.type==='led' ? 4 + 14*(diag.brightness||0) : 8) : 0;
-  const glow = active ? `style="filter:drop-shadow(0 0 ${glowRadius}px ${glowColor})"` : '';
-  if(inst.type==='resistencia'){
+  const ledDef = LED_COLORS[inst.color || 'red'];
+
+  /* ===== RESISTENCIA ===== */
+  if(inst.type === 'resistencia'){
     const bands = RESISTOR_BAND_COLORS[inst.value] || RESISTOR_BAND_COLORS[220];
-    return `<rect x="${x+18}" y="${y+14}" width="64" height="28" rx="6" fill="#d9c8a0" stroke="#8a7a55" stroke-width="1.5"/>
-      <rect x="${x+30}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[0]]}"/>
-      <rect x="${x+40}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[1]]}"/>
-      <rect x="${x+50}" y="${y+14}" width="6" height="28" fill="${COLOR_HEX[bands[2]]}"/>
-      <rect x="${x+66}" y="${y+14}" width="6" height="28" fill="#d4af37"/>`;
+    return `
+    <g>
+      <rect x="${x+14}" y="${y+15}" width="72" height="26" rx="9"
+            fill="#e8d9b5" stroke="#8a7a55" stroke-width="1.6"/>
+      <rect x="${x+26}" y="${y+15}" width="7" height="26" fill="${COLOR_HEX[bands[0]]}"/>
+      <rect x="${x+38}" y="${y+15}" width="7" height="26" fill="${COLOR_HEX[bands[1]]}"/>
+      <rect x="${x+50}" y="${y+15}" width="7" height="26" fill="${COLOR_HEX[bands[2]]}"/>
+      <rect x="${x+68}" y="${y+15}" width="6" height="26" fill="#d4af37"/>
+      <line x1="${x+6}"  y1="${cy}" x2="${x+14}" y2="${cy}" stroke="#9a9a9a" stroke-width="2.8" stroke-linecap="round"/>
+      <line x1="${x+86}" y1="${cy}" x2="${x+94}" y2="${cy}" stroke="#9a9a9a" stroke-width="2.8" stroke-linecap="round"/>
+    </g>`;
   }
-  if(inst.type==='led'){
-    let domeColor = ledDef.hex, op = 0.55;
+
+  /* ===== LED (mejorado – aspecto realista) ===== */
+  if(inst.type === 'led'){
+    let domeColor = ledDef.hex;
+    let baseColor = '#3a1520';
+    let op = 0.92;
+    let glowStyle = '';
+
     if(active){
-      if(diag.status==='danger'){ domeColor = '#ffffff'; op = 1; }
-      else { domeColor = ledDef.lit; op = Math.max(0.4, diag.brightness||0.55); }
+      if(diag.status === 'danger'){
+        domeColor = '#ffffff';
+        baseColor = '#888';
+        op = 1;
+        glowStyle = 'filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 8px #fff);';
+      } else {
+        domeColor = ledDef.lit;
+        op = Math.max(0.55, diag.brightness || 0.7);
+        const r = 6 + 16 * (diag.brightness || 0.6);
+        glowStyle = `filter: drop-shadow(0 0 ${r}px ${ledDef.lit}) drop-shadow(0 0 ${r*0.45}px ${ledDef.lit});`;
+      }
     }
-    // a (izq)= ánodo + pata LARGA | b (der)= cátodo − pata CORTA (borde plano real)
-    return `<g ${glow}>
-      <path d="M${x+30} ${y+38} V${y+18} A20 20 0 0 1 ${x+70} ${y+18} V${y+38} Z" fill="${domeColor}" stroke="#6b1f1f" stroke-width="1.5" opacity="${op}"/>
-      <rect x="${x+30}" y="${y+34}" width="40" height="8" rx="2" fill="#4a1520"/>
-      <line x1="${x+68}" y1="${y+16}" x2="${x+68}" y2="${y+38}" stroke="#ddd" stroke-width="2.5"/>
-      <text x="${x+50}" y="${y+32}" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" opacity="0.9">LED</text>
-      </g>`;
+
+    // a = ánodo (+) pata LARGA (derecha)
+    // b = cátodo (−) pata CORTA + lado plano (izquierda)
+    return `
+    <g style="${glowStyle}">
+      <rect x="${x+32}" y="${y+28}" width="36" height="16" rx="3"
+            fill="${baseColor}" stroke="#1a0a0c" stroke-width="1.2"/>
+      <path d="M${x+32} ${y+30}
+               Q${x+32} ${y+10} ${x+50} ${y+10}
+               Q${x+68} ${y+10} ${x+68} ${y+30} Z"
+            fill="${domeColor}" opacity="${op}"
+            stroke="#1a0a0c" stroke-width="1.3"/>
+      <line x1="${x+32}" y1="${y+12}" x2="${x+32}" y2="${y+44}"
+            stroke="#ddd" stroke-width="2.8" stroke-linecap="round"/>
+      <ellipse cx="${x+42}" cy="${y+18}" rx="7" ry="4"
+               fill="#fff" opacity="${active ? 0.35 : 0.15}"/>
+      <text x="${x+50}" y="${y+40}" text-anchor="middle"
+            fill="#fff" font-size="8" font-weight="800" opacity="0.9">LED</text>
+      <line x1="${x+62}" y1="${y+44}" x2="${x+62}" y2="${y+62}"
+            stroke="#4ade80" stroke-width="3.2" stroke-linecap="round"/>
+      <text x="${x+62}" y="${y+12}" text-anchor="middle"
+            fill="#4ade80" font-size="9" font-weight="800">+</text>
+      <line x1="${x+38}" y1="${y+44}" x2="${x+38}" y2="${y+56}"
+            stroke="#fb923c" stroke-width="3.2" stroke-linecap="round"/>
+      <text x="${x+38}" y="${y+12}" text-anchor="middle"
+            fill="#fb923c" font-size="9" font-weight="800">−</text>
+    </g>`;
   }
-  if(inst.type==='bateria'){
-    return `<rect x="${x+12}" y="${y+12}" width="76" height="34" rx="3" fill="#2c2c2c" stroke="#111" stroke-width="1.5"/>
-      <rect x="${x+12}" y="${y+12}" width="28" height="34" rx="3" fill="#c62828"/>
-      <rect x="${x+42}" y="${y+4}" width="16" height="10" rx="2" fill="#bdbdbd" stroke="#757575"/>
-      <text x="${x+26}" y="${y+34}" text-anchor="middle" fill="#fff" style="font-size:10px;font-weight:800;pointer-events:none;">+</text>
-      <text x="${x+62}" y="${y+34}" text-anchor="middle" fill="#eee" style="font-size:10px;font-weight:800;pointer-events:none;">−</text>
-      <text x="${x+50}" y="${y+28}" text-anchor="middle" fill="#ffd54f" style="font-size:9px;font-weight:700;pointer-events:none;">${labVLabel(inst.voltage||9)}</text>`;
+
+  /* ===== PILA / BATERÍA ===== */
+  if(inst.type === 'bateria'){
+    return `
+    <g>
+      <rect x="${x+12}" y="${y+12}" width="76" height="34" rx="4"
+            fill="#2c2c2c" stroke="#111" stroke-width="1.5"/>
+      <rect x="${x+12}" y="${y+12}" width="28" height="34" rx="4"
+            fill="#c62828"/>
+      <rect x="${x+42}" y="${y+4}" width="16" height="10" rx="2"
+            fill="#bdbdbd" stroke="#757575"/>
+      <text x="${x+26}" y="${y+34}" text-anchor="middle" fill="#fff"
+            style="font-size:11px;font-weight:800;pointer-events:none;">+</text>
+      <text x="${x+62}" y="${y+34}" text-anchor="middle" fill="#eee"
+            style="font-size:11px;font-weight:800;pointer-events:none;">−</text>
+      <text x="${x+50}" y="${y+28}" text-anchor="middle" fill="#ffd54f"
+            style="font-size:9px;font-weight:700;pointer-events:none;">${labVLabel(inst.voltage||9)}</text>
+    </g>`;
   }
-  if(inst.type==='interruptor'){
+
+  /* ===== INTERRUPTOR ===== */
+  if(inst.type === 'interruptor'){
     const on = inst.closed;
-    return `<rect x="${x+26}" y="${y+18}" width="48" height="20" rx="10" fill="${on?'#2f6b45':'#6b2f2f'}" stroke="${on?'#4ade80':'#ff5c5c'}" stroke-width="1.5"/>
-      <circle cx="${on? x+64 : x+36}" cy="${y+28}" r="8" fill="#fef8ec"/>`;
+    return `
+    <g>
+      <rect x="${x+22}" y="${y+16}" width="56" height="24" rx="12"
+            fill="${on ? '#1b5e20' : '#4a1c1c'}"
+            stroke="${on ? '#4ade80' : '#ff5c5c'}" stroke-width="2"/>
+      <circle cx="${on ? x+64 : x+36}" cy="${y+28}" r="9"
+              fill="#fef8ec" stroke="#333" stroke-width="1.2"/>
+      <text x="${cx}" y="${y+52}" text-anchor="middle"
+            fill="${on ? '#4ade80' : '#ff8a80'}"
+            style="font-size:9px;font-weight:700;">${on ? 'ON' : 'OFF'}</text>
+    </g>`;
   }
-  if(inst.type==='motor'){
-    const spin = active ? `<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="0.8s" repeatCount="indefinite"/>` : '';
-    return `<circle cx="${cx}" cy="${cy}" r="20" fill="#3b3b3b" stroke="#8a8a8a" stroke-width="2"/>
+
+  /* ===== MOTOR ===== */
+  if(inst.type === 'motor'){
+    const spin = active
+      ? `<animateTransform attributeName="transform" type="rotate"
+           from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="0.7s" repeatCount="indefinite"/>`
+      : '';
+    return `
+    <g>
+      <circle cx="${cx}" cy="${cy}" r="20" fill="#3b3b3b" stroke="#8a8a8a" stroke-width="2.2"/>
       <g>${spin}
-        <line x1="${cx-14}" y1="${cy}" x2="${cx+14}" y2="${cy}" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
-        <line x1="${cx}" y1="${cy-14}" x2="${cx}" y2="${cy+14}" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+        <line x1="${cx-13}" y1="${cy}" x2="${cx+13}" y2="${cy}"
+              stroke="#ffd23f" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="${cx}" y1="${cy-13}" x2="${cx}" y2="${cy+13}"
+              stroke="#ffd23f" stroke-width="3.2" stroke-linecap="round"/>
       </g>
-      <circle cx="${cx}" cy="${cy}" r="4" fill="#fef8ec"/>`;
+      <circle cx="${cx}" cy="${cy}" r="4.5" fill="#fef8ec"/>
+      ${active ? `<text x="${cx}" y="${y+54}" text-anchor="middle" fill="#4ade80" style="font-size:8px;">gira</text>` : ''}
+    </g>`;
   }
-  if(inst.type==='buzzer'){
+
+  /* ===== BUZZER ===== */
+  if(inst.type === 'buzzer'){
     const rings = active ? `
-      <circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="#4dd8ff" stroke-width="2" opacity="0.8">
-        <animate attributeName="r" values="10;22;10" dur="1s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.8;0;0.8" dur="1s" repeatCount="indefinite"/>
+      <circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="#4dd8ff" stroke-width="2" opacity="0.85">
+        <animate attributeName="r" values="10;24;10" dur="0.9s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.85;0;0.85" dur="0.9s" repeatCount="indefinite"/>
       </circle>` : '';
-    return `<circle cx="${cx}" cy="${cy}" r="18" fill="#e8e2d0" stroke="#8a7a55" stroke-width="2"/>
-      ${[0,1,2].map(i=>`<circle cx="${cx-8+i*8}" cy="${cy}" r="1.6" fill="#6b6b6b"/>`).join('')}
-      ${rings}`;
+    return `
+    <g>
+      <circle cx="${cx}" cy="${cy}" r="18" fill="#e8e2d0" stroke="#8a7a55" stroke-width="2.2"/>
+      ${[0,1,2].map(i => `<circle cx="${cx-8+i*8}" cy="${cy}" r="1.8" fill="#5a5a5a"/>`).join('')}
+      ${rings}
+      ${active ? `<text x="${cx}" y="${y+54}" text-anchor="middle" fill="#4dd8ff" style="font-size:8px;">♪ sonido</text>` : ''}
+    </g>`;
   }
-  if(inst.type==='pulsador'){
+
+  /* ===== PULSADOR ===== */
+  if(inst.type === 'pulsador'){
     const down = inst.closed;
-    return `<rect x="${x+30}" y="${y+14}" width="40" height="28" rx="6" fill="#455a64" stroke="#263238" stroke-width="1.5"/>
-      <rect x="${x+38}" y="${y+(down?22:12)}" width="24" height="14" rx="4" fill="${down?'#4ade80':'#ef5350'}"/>
-      <text x="${cx}" y="${y+50}" text-anchor="middle" fill="#aaa" style="font-size:8px">clic</text>`;
+    return `
+    <g>
+      <rect x="${x+28}" y="${y+14}" width="44" height="28" rx="6"
+            fill="#455a64" stroke="#263238" stroke-width="1.8"/>
+      <rect x="${x+36}" y="${down ? y+20 : y+10}" width="28" height="${down ? 14 : 18}" rx="4"
+            fill="${down ? '#ff8a3d' : '#ffb74d'}" stroke="#e65100" stroke-width="1.2"/>
+      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#aaa" style="font-size:8px;">
+        ${down ? 'PRESIONADO' : 'clic'}
+      </text>
+    </g>`;
   }
-  if(inst.type==='diodo'){
+
+  /* ===== DIODO ===== */
+  if(inst.type === 'diodo'){
     const on = active;
-    return `<polygon points="${x+28},${cy} ${x+55},${cy-14} ${x+55},${cy+14}" fill="${on?'#ffd54f':'#666'}" stroke="#333"/>
-      <line x1="${x+55}" y1="${cy-14}" x2="${x+55}" y2="${cy+14}" stroke="#333" stroke-width="3"/>
-      <text x="${x+22}" y="${y+14}" fill="#4ade80" style="font-size:9px;font-weight:700">A</text>
-      <text x="${x+70}" y="${y+14}" fill="#f87171" style="font-size:9px;font-weight:700">K</text>`;
+    return `
+    <g>
+      <polygon points="${x+28},${cy} ${x+55},${cy-14} ${x+55},${cy+14}"
+               fill="${on ? '#ffd54f' : '#666'}" stroke="#333" stroke-width="1.5"/>
+      <line x1="${x+55}" y1="${cy-14}" x2="${x+55}" y2="${cy+14}"
+            stroke="#333" stroke-width="3.5"/>
+      <text x="${x+20}" y="${y+14}" fill="#4ade80" style="font-size:9px;font-weight:700">A</text>
+      <text x="${x+70}" y="${y+14}" fill="#f87171" style="font-size:9px;font-weight:700">K</text>
+    </g>`;
   }
-  if(inst.type==='capacitor'){
-    return `<line x1="${x+40}" y1="${y+12}" x2="${x+40}" y2="${y+44}" stroke="#333" stroke-width="3"/>
-      <line x1="${x+52}" y1="${y+12}" x2="${x+52}" y2="${y+44}" stroke="#333" stroke-width="3"/>
-      <line x1="${x+20}" y1="${cy}" x2="${x+40}" y2="${cy}" stroke="#555" stroke-width="2"/>
-      <line x1="${x+52}" y1="${cy}" x2="${x+80}" y2="${cy}" stroke="#555" stroke-width="2"/>
-      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#888" style="font-size:8px">${inst.value||100}µF</text>`;
+
+  /* ===== CAPACITOR ===== */
+  if(inst.type === 'capacitor'){
+    return `
+    <g>
+      <line x1="${x+40}" y1="${y+12}" x2="${x+40}" y2="${y+44}" stroke="#333" stroke-width="3.5"/>
+      <line x1="${x+52}" y1="${y+12}" x2="${x+52}" y2="${y+44}" stroke="#333" stroke-width="3.5"/>
+      <line x1="${x+20}" y1="${cy}" x2="${x+40}" y2="${cy}" stroke="#555" stroke-width="2.2"/>
+      <line x1="${x+52}" y1="${cy}" x2="${x+80}" y2="${cy}" stroke="#555" stroke-width="2.2"/>
+      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#888" style="font-size:8px">${inst.value||100}µF</text>
+    </g>`;
   }
-  if(inst.type==='ldr'){
+
+  /* ===== LDR ===== */
+  if(inst.type === 'ldr'){
     const light = inst.light !== false;
-    return `<circle cx="${cx}" cy="${cy}" r="16" fill="${light?'#fff59d':'#37474f'}" stroke="#5d4037" stroke-width="2"/>
-      <path d="M${cx-8} ${cy-6} L${cx+8} ${cy+6} M${cx+8} ${cy-6} L${cx-8} ${cy+6}" stroke="#5d4037" stroke-width="2"/>
-      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#aaa" style="font-size:8px">${light?'luz':'oscuro'}</text>`;
+    return `
+    <g>
+      <circle cx="${cx}" cy="${cy}" r="16"
+              fill="${light ? '#fff59d' : '#37474f'}" stroke="#5d4037" stroke-width="2.2"/>
+      <path d="M${cx-8} ${cy-6} L${cx+8} ${cy+6} M${cx+8} ${cy-6} L${cx-8} ${cy+6}"
+            stroke="#5d4037" stroke-width="2.2"/>
+      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#aaa" style="font-size:8px">
+        ${light ? 'luz' : 'oscuro'}
+      </text>
+    </g>`;
   }
-  if(inst.type==='potenciometro'){
-    return `<circle cx="${cx}" cy="${cy}" r="16" fill="#6d4c41" stroke="#3e2723" stroke-width="2"/>
-      <line x1="${cx}" y1="${cy}" x2="${cx+12}" y2="${cy-8}" stroke="#ffd23f" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#aaa" style="font-size:8px">${inst.value||5000}Ω</text>`;
+
+  /* ===== POTENCIÓMETRO ===== */
+  if(inst.type === 'potenciometro'){
+    return `
+    <g>
+      <circle cx="${cx}" cy="${cy}" r="16" fill="#6d4c41" stroke="#3e2723" stroke-width="2.2"/>
+      <line x1="${cx}" y1="${cy}" x2="${cx+12}" y2="${cy-8}"
+            stroke="#ffd23f" stroke-width="2.8" stroke-linecap="round"/>
+      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="#aaa" style="font-size:8px">
+        ${inst.value||5000}Ω
+      </text>
+    </g>`;
   }
-  if(inst.type==='fusible'){
+
+  /* ===== FUSIBLE ===== */
+  if(inst.type === 'fusible'){
     const blown = inst.blown;
-    return `<rect x="${x+22}" y="${y+18}" width="56" height="20" rx="4" fill="${blown?'#b71c1c':'#eceff1'}" stroke="#546e7a" stroke-width="1.5"/>
-      <line x1="${x+30}" y1="${cy}" x2="${x+70}" y2="${cy}" stroke="${blown?'#ff5252':'#37474f'}" stroke-width="2" stroke-dasharray="${blown?'4 3':'0'}"/>
-      <text x="${cx}" y="${y+54}" text-anchor="middle" fill="${blown?'#ff5252':'#888'}" style="font-size:8px">${blown?'FUNDIDO':'OK'}</text>`;
+    return `
+    <g>
+      <rect x="${x+22}" y="${y+18}" width="56" height="20" rx="5"
+            fill="${blown ? '#b71c1c' : '#eceff1'}" stroke="#546e7a" stroke-width="1.6"/>
+      <line x1="${x+30}" y1="${cy}" x2="${x+70}" y2="${cy}"
+            stroke="${blown ? '#ff5252' : '#37474f'}" stroke-width="2.2"
+            stroke-dasharray="${blown ? '4 3' : '0'}"/>
+      <text x="${cx}" y="${y+54}" text-anchor="middle"
+            fill="${blown ? '#ff5252' : '#888'}" style="font-size:8px">
+        ${blown ? 'FUNDIDO' : 'OK'}
+      </text>
+    </g>`;
   }
+
   return '';
 }
+
 
 function renderLab(){
   const svg = document.getElementById('labSvg');
