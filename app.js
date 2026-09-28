@@ -775,14 +775,15 @@ function switchGame(name){
    ============================================================ */
 let wireInitDone = false;
 const WIRE_COMPONENTS = [
-  {id:'bateria', label:'PILA', x:40, y:40, w:120, h:70,
-    terms:[{id:'batt_neg', tag:'-', dx:0, dy:35},{id:'batt_pos', tag:'+', dx:120, dy:35}]},
-  {id:'interruptor', label:'INTERRUPTOR', x:460, y:30, w:140, h:70,
-    terms:[{id:'sw_l', tag:'', dx:0, dy:35},{id:'sw_r', tag:'', dx:140, dy:35}]},
-  {id:'resistencia', label:'RESISTENCIA', x:460, y:220, w:140, h:70,
-    terms:[{id:'res_l', tag:'', dx:0, dy:35},{id:'res_r', tag:'', dx:140, dy:35}]},
-  {id:'led', label:'LED', x:40, y:210, w:130, h:90,
-    terms:[{id:'led_neg', tag:'-', dx:30, dy:90},{id:'led_pos', tag:'+', dx:100, dy:90}]}
+  /* Camino en serie horizontal (no cuadrado): PILA → SW → R → LED → retorno */
+  {id:'bateria', label:'PILA', x:24, y:110, w:100, h:64,
+    terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
+  {id:'interruptor', label:'INTERRUPTOR', x:180, y:110, w:110, h:64,
+    terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]},
+  {id:'resistencia', label:'RESISTENCIA', x:350, y:110, w:110, h:64,
+    terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:110, dy:32}]},
+  {id:'led', label:'LED', x:510, y:95, w:100, h:90,
+    terms:[{id:'led_pos', tag:'+', dx:0, dy:45},{id:'led_neg', tag:'-', dx:100, dy:45}]}
 ];
 const WIRE_PAIRS = [
   ['batt_pos','sw_l'],
@@ -882,105 +883,99 @@ function renderWireBoard(){
   const svg = document.getElementById('wireSvg');
   if(!svg) return;
   const complete = (typeof wireCircuitLooksValid==='function' ? wireCircuitLooksValid() : wireConnected.length === 4);
-  let parts = '';
+  let html = '';
+  // Fondo tipo protoboard / esquema
+  html += `<defs>
+    <pattern id="wireDots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="1.3" fill="#5c5648"/>
+    </pattern>
+    <filter id="wireSoft"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-opacity="0.25"/></filter>
+  </defs>`;
+  html += `<rect x="0" y="0" width="640" height="360" rx="14" fill="#d9ceb0"/>`;
+  html += `<rect x="10" y="10" width="620" height="340" rx="10" fill="#cfc4a4"/>`;
+  html += `<rect x="10" y="10" width="620" height="340" rx="10" fill="url(#wireDots)" opacity="0.35"/>`;
+  // Rieles decorativos
+  html += `<rect x="18" y="18" width="604" height="16" rx="3" fill="#e8c8c8" opacity="0.9"/>`;
+  html += `<text x="28" y="30" fill="#b71c1c" font-size="10" font-weight="800">+ camino de ida</text>`;
+  html += `<rect x="18" y="326" width="604" height="16" rx="3" fill="#c5d0e0" opacity="0.9"/>`;
+  html += `<text x="28" y="338" fill="#0d47a1" font-size="10" font-weight="800">− retorno a la pila</text>`;
+  // Flecha de flujo
+  html += `<text x="320" y="52" text-anchor="middle" fill="#5a5348" font-size="12" font-weight="700">Serie: PILA → INTERRUPTOR → RESISTENCIA → LED → (retorno)</text>`;
 
-  // cables hechos
-  wireConnected.forEach(function(pair){
-    var a = pair[0], b = pair[1];
-    var p1 = wireTermPos(a), p2 = wireTermPos(b);
+  // Cables ya puestos (curvas suaves, colores)
+  const wireColors = ['#e53935','#1e88e5','#43a047','#8e24aa','#fb8c00'];
+  wireConnected.forEach(function(pair, idx){
+    const p1 = wireTermPos(pair[0]), p2 = wireTermPos(pair[1]);
     if(!p1||!p2) return;
-    var mx = (p1.x+p2.x)/2;
-    parts += '<path class="wire-line done" data-wire="1" d="M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y+'" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 8"/>';
+    const col = wireColors[idx % wireColors.length];
+    const midY = (p1.y + p2.y) / 2 + (idx % 2 === 0 ? -28 : 28);
+    // Si es el retorno LED− → pila−, bajar por el riel inferior
+    const isReturn = (pair[0]==='led_neg'||pair[1]==='led_neg') && (pair[0]==='batt_neg'||pair[1]==='batt_neg');
+    let d;
+    if(isReturn){
+      d = `M${p1.x} ${p1.y} C${p1.x} 300, ${p2.x} 300, ${p2.x} ${p2.y}`;
+    } else {
+      d = `M${p1.x} ${p1.y} C${p1.x} ${midY}, ${p2.x} ${midY}, ${p2.x} ${p2.y}`;
+    }
+    html += `<path class="wire-line done" d="${d}" fill="none" stroke="${col}" stroke-width="4.5" stroke-linecap="round" filter="url(#wireSoft)"/>`;
   });
 
-  WIRE_COMPONENTS.forEach(function(c){
-    if(c.id==='bateria'){
-      // pila realista
-      parts += '<rect x="'+c.x+'" y="'+(c.y+8)+'" width="'+c.w+'" height="54" rx="8" fill="#f4a13c" stroke="#a5651a" stroke-width="2"/>';
-      parts += '<rect x="'+(c.x+c.w/2-12)+'" y="'+c.y+'" width="24" height="12" rx="3" fill="#6b6b6b"/>';
-      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+40)+'" text-anchor="middle" fill="#3d2405" font-size="14" font-weight="800">PILA</text>';
-      parts += '<text x="'+(c.x+18)+'" y="'+(c.y+28)+'" fill="#3d2405" font-size="16" font-weight="800">-</text>';
-      parts += '<text x="'+(c.x+c.w-18)+'" y="'+(c.y+28)+'" text-anchor="middle" fill="#3d2405" font-size="16" font-weight="800">+</text>';
-    } else if(c.id==='interruptor'){
-      parts += '<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" rx="12" fill="#1a3d32" stroke="#5eead4" stroke-width="2"/>';
-      parts += '<rect x="'+(c.x+30)+'" y="'+(c.y+22)+'" width="80" height="26" rx="13" fill="#2f6b45" stroke="#4ade80" stroke-width="2"/>';
-      parts += '<circle cx="'+(c.x+90)+'" cy="'+(c.y+35)+'" r="10" fill="#fef8ec"/>';
-      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+16)+'" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">INTERRUPTOR</text>';
-      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+c.h-6)+'" text-anchor="middle" fill="#94a3b8" font-size="9">sin polaridad</text>';
-    } else if(c.id==='resistencia'){
-      parts += '<rect x="'+c.x+'" y="'+c.y+'" width="'+c.w+'" height="'+c.h+'" rx="12" fill="#1a3d32" stroke="#fb923c" stroke-width="2"/>';
-      // cuerpo resistencia
-      parts += '<rect x="'+(c.x+35)+'" y="'+(c.y+22)+'" width="70" height="28" rx="6" fill="#d4a574" stroke="#8a6a3a" stroke-width="1.5"/>';
-      parts += '<rect x="'+(c.x+45)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#1a1a1a"/>';
-      parts += '<rect x="'+(c.x+58)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#b45309"/>';
-      parts += '<rect x="'+(c.x+71)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#dc2626"/>';
-      parts += '<rect x="'+(c.x+90)+'" y="'+(c.y+22)+'" width="6" height="28" fill="#ca8a04"/>';
-      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+16)+'" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">RESISTENCIA</text>';
-      parts += '<text x="'+(c.x+c.w/2)+'" y="'+(c.y+c.h-6)+'" text-anchor="middle" fill="#94a3b8" font-size="9">sin polaridad</text>';
-    } else if(c.id==='led'){
-      var glow = complete;
-      // cuerpo LED (domo)
-      parts += '<path d="M'+(c.x+35)+' '+(c.y+55)+' V'+(c.y+28)+' A30 30 0 0 1 '+(c.x+95)+' '+(c.y+28)+' V'+(c.y+55)+' Z" fill="'+(glow?'#ff4d5e':'#5a2030')+'" stroke="#ff8a9a" stroke-width="2" style="'+(glow?'filter:drop-shadow(0 0 12px #ff4d5e)':'')+'"/>';
-      parts += '<rect x="'+(c.x+35)+'" y="'+(c.y+52)+'" width="60" height="10" fill="#3d1520"/>';
-      // patita LARGA = + (derecha)
-      parts += '<line x1="'+(c.x+100)+'" y1="'+(c.y+62)+'" x2="'+(c.x+100)+'" y2="'+(c.y+90)+'" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>';
-      parts += '<text x="'+(c.x+100)+'" y="'+(c.y+18)+'" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ larga</text>';
-      // patita CORTA = - (izquierda)
-      parts += '<line x1="'+(c.x+30)+'" y1="'+(c.y+62)+'" x2="'+(c.x+30)+'" y2="'+(c.y+82)+'" stroke="#fb923c" stroke-width="4" stroke-linecap="round"/>';
-      parts += '<text x="'+(c.x+30)+'" y="'+(c.y+18)+'" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">- corta</text>';
-      parts += '<text x="'+(c.x+65)+'" y="'+(c.y+48)+'" text-anchor="middle" fill="#fef8ec" font-size="12" font-weight="800">LED</text>';
-      if(glow) parts += '<text x="'+(c.x+65)+'" y="'+(c.y+8)+'" text-anchor="middle" font-size="16">✨</text>';
-    }
+  // Cable temporal mientras arrastras
+  if(wireDrag){
+    html += `<path class="wire-line temp" d="M${wireDrag.x1} ${wireDrag.y1} L${wireDrag.x2||wireDrag.x1} ${wireDrag.y2||wireDrag.y1}" fill="none" stroke="#ffd23f" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>`;
+  }
 
-    // terminales (circulos para conectar)
-    c.terms.forEach(function(t){
-      var isConn = wireConnected.some(function(p){ return p.indexOf(t.id)>=0; });
-      var tx = c.x+t.dx, ty = c.y+t.dy;
-      var col = isConn ? '#4ade80' : '#fde047';
-      parts += '<circle class="wire-terminal '+(isConn?'connected':'')+'" data-term="'+t.id+'" cx="'+tx+'" cy="'+ty+'" r="11" fill="'+(isConn?'#4ade80':'#0b1f18')+'" stroke="'+col+'" stroke-width="3" style="cursor:pointer"/>';
-      if(t.tag){
-        parts += '<text x="'+tx+'" y="'+(ty-16)+'" text-anchor="middle" fill="'+col+'" font-size="13" font-weight="800" style="pointer-events:none">'+t.tag+'</text>';
+  // Componentes
+  WIRE_COMPONENTS.forEach(function(c){
+    const x = c.x, y = c.y, w = c.w, h = c.h;
+    html += `<g filter="url(#wireSoft)">`;
+    if(c.id === 'bateria'){
+      html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#2c2c2c" stroke="#111" stroke-width="1.5"/>`;
+      html += `<rect x="${x}" y="${y}" width="28" height="${h}" rx="8" fill="#c62828"/>`;
+      html += `<text x="${x+w/2}" y="${y+28}" text-anchor="middle" fill="#ffd54f" font-size="13" font-weight="800">PILA</text>`;
+      html += `<text x="${x+w/2}" y="${y+46}" text-anchor="middle" fill="#eee" font-size="11">9V</text>`;
+    } else if(c.id === 'interruptor'){
+      html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#1b4332" stroke="#4ade80" stroke-width="2"/>`;
+      html += `<text x="${x+w/2}" y="${y+26}" text-anchor="middle" fill="#ffd23f" font-size="11" font-weight="800">SW</text>`;
+      html += `<text x="${x+w/2}" y="${y+44}" text-anchor="middle" fill="#c8e6c9" font-size="10">INTERRUPTOR</text>`;
+    } else if(c.id === 'resistencia'){
+      html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#d9c8a0" stroke="#8a7a55" stroke-width="1.5"/>`;
+      html += `<rect x="${x+28}" y="${y+12}" width="8" height="${h-24}" fill="#6b4423"/>`;
+      html += `<rect x="${x+42}" y="${y+12}" width="8" height="${h-24}" fill="#d61f1f"/>`;
+      html += `<rect x="${x+56}" y="${y+12}" width="8" height="${h-24}" fill="#6b4423"/>`;
+      html += `<text x="${x+w/2}" y="${y+h-10}" text-anchor="middle" fill="#3e2723" font-size="10" font-weight="800">RESISTENCIA</text>`;
+    } else if(c.id === 'led'){
+      const on = complete;
+      html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="rgba(255,255,255,0.2)" stroke="${on?'#ff4d5e':'#888'}" stroke-width="2"/>`;
+      html += `<ellipse cx="${x+w/2}" cy="${y+32}" rx="22" ry="16" fill="${on?'#ff4d5e':'#4a1520'}" stroke="#6b1f1f" stroke-width="1.5" opacity="${on?1:0.7}"/>`;
+      html += `<text x="${x+w/2}" y="${y+36}" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">LED</text>`;
+      html += `<text x="${x+18}" y="${y+72}" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="800">+ LARGA</text>`;
+      html += `<text x="${x+w-18}" y="${y+72}" text-anchor="middle" fill="#f97316" font-size="9" font-weight="800">− CORTA</text>`;
+    } else {
+      html += `<rect class="wire-comp-box" x="${x}" y="${y}" width="${w}" height="${h}" rx="10"/>`;
+      html += `<text class="wire-comp-label" x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle">${c.label}</text>`;
+    }
+    html += `</g>`;
+
+    c.terms.forEach(function(term){
+      const tx = x + term.dx, ty = y + term.dy;
+      const isConn = wireConnected.some(function(p){ return p.indexOf(term.id)>=0; });
+      const pending = wireDrag && wireDrag.fromId === term.id;
+      const fill = pending ? '#ffd23f' : (isConn ? '#4ade80' : '#0b1f18');
+      const stroke = term.tag === '+' ? '#4ade80' : (term.tag === '-' ? '#f97316' : '#ffb454');
+      html += `<circle class="wire-terminal${isConn?' connected':''}${pending?' pending':''}" data-term="${term.id}" cx="${tx}" cy="${ty}" r="11" fill="${fill}" stroke="${stroke}" stroke-width="3" style="cursor:pointer"/>`;
+      if(term.tag){
+        html += `<text x="${tx}" y="${ty-16}" text-anchor="middle" fill="${stroke}" font-size="12" font-weight="800">${term.tag}</text>`;
       }
     });
   });
 
-  // estilo de animacion DENTRO del SVG (no depende de CSS externo)
-  var styleAnim = '<defs><style type="text/css">'
-    + '@keyframes wireDash { to { stroke-dashoffset: -40; } }'
-    + '@keyframes wireDrawIn { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }'
-    + 'path.wire-line.done { animation: wireDrawIn 0.5s ease-out forwards, wireDash 0.7s linear infinite; }'
-    + 'path.wire-line.temp { stroke: #fde047; stroke-width: 4; stroke-dasharray: 8 6; animation: wireDash 0.45s linear infinite; }'
-    + '</style></defs>';
-  svg.innerHTML = styleAnim + parts;
+  // Mini leyenda
+  html += `<text x="320" y="310" text-anchor="middle" fill="#5a5348" font-size="11" font-weight="600">Arrastrá de un círculo a otro · 4 cables para cerrar el circuito</text>`;
 
-  // forzar animacion por JS por si el CSS del SVG falla en algunos navegadores
-  svg.querySelectorAll('path.wire-line.done').forEach(function(path, idx){
-    try {
-      var len = path.getTotalLength ? path.getTotalLength() : 200;
-      path.style.strokeDasharray = '12 8';
-      path.style.strokeDashoffset = '0';
-      path.animate(
-        [
-          { strokeDashoffset: len },
-          { strokeDashoffset: 0 }
-        ],
-        { duration: 450, easing: 'ease-out', fill: 'forwards' }
-      );
-      // flujo continuo despues
-      setTimeout(function(){
-        path.style.strokeDasharray = '12 8';
-        path.animate(
-          [
-            { strokeDashoffset: 0 },
-            { strokeDashoffset: -40 }
-          ],
-          { duration: 700, iterations: Infinity }
-        );
-      }, 460);
-    } catch(e) {}
-  });
-
-  svg.querySelectorAll('.wire-terminal').forEach(function(circle){
+  svg.setAttribute('viewBox', '0 0 640 360');
+  svg.innerHTML = html;
+  svg.querySelectorAll('[data-term]').forEach(function(circle){
     circle.addEventListener('pointerdown', onWirePointerDown);
   });
 }
@@ -1618,11 +1613,27 @@ function spRender(){
 
   var circuit = (mode === "serie") ? spDrawProtoSerie(leds) : spDrawProtoParalelo(leds);
 
+  var deadOverlay = "";
+  if(spState.feedback === "dead"){
+    var dm = spState.deadMsg || spRandomDeathMsg();
+    deadOverlay =
+      '<div class="sp-dead-overlay" role="dialog" aria-modal="true">' +
+        '<div class="sp-dead-card">' +
+          '<div class="sp-dead-boom">💥⚡💀</div>' +
+          '<h3>'+dm.title+'</h3>' +
+          '<p>'+dm.body+'</p>' +
+          '<p class="sp-dead-sub">Vidas: 🖤🖤🖤 · La corriente se fue de vacaciones</p>' +
+          '<button type="button" class="btn" onclick="spRevive()">🔄 Reintentar (revivir)</button>' +
+          '<button type="button" class="btn ghost" onclick="spState.score=0;spState.stars=0;spState.completed={};spRevive();spStartMission(0);">🏠 Empezar desde misión 1</button>' +
+        '</div>' +
+      '</div>';
+  }
+
   root.innerHTML = '<div class="sp-hud"><div>'+livesHtml+'</div><div>⭐ '+spState.stars+' · pts '+spState.score+'</div><div>Mision '+(spState.mission+1)+'/'+SP_MISSIONS.length+'</div></div>'+
     '<div class="sp-dots">'+dots+'</div>'+
     '<div class="sp-mission-card"><h4>'+m.title+'</h4><p class="sp-brief">'+m.brief+'</p><p class="sp-goal"><b>Objetivo:</b> '+m.goal+'</p><p class="sp-mode-tag">'+modeLabel+'</p></div>'+
     '<div class="sp-proto-wrap">'+circuit+'</div>'+
-    '<div class="sp-actions"><button type="button" class="btn" onclick="spCheckGoal()">Comprobar objetivo</button><button type="button" class="btn ghost" onclick="spResetSwitches(true);spState.feedback=\'\';spRender();">Reiniciar SW</button></div>'+fb;
+    '<div class="sp-actions"><button type="button" class="btn" onclick="spCheckGoal()">Comprobar objetivo</button><button type="button" class="btn ghost" onclick="spResetSwitches(true);spState.feedback=\'\';spRender();">Reiniciar SW</button></div>'+fb+deadOverlay;
 }
 
 /** Agujeros decorativos del protoboard */
@@ -3260,120 +3271,205 @@ function loadPreset(key){
 
 
 /* ============================================================
-   JUEGO: LEY DE OHM
+   JUEGO: LEY DE OHM — las 3 fórmulas (× y ÷)
    ============================================================ */
-const OHM_QUESTIONS = [
-  {q:'Si la pila es de 9 V y la resistencia es de 300 Ω, ¿cuánta corriente circula?', opts:['30 mA','3 mA','300 mA','90 mA'], correct:0, hint:'I = V ÷ R = 9 ÷ 300 = 0,03 A = 30 mA'},
-  {q:'¿Qué pasa si aumentas la resistencia y dejas el mismo voltaje?', opts:['La corriente baja','La corriente sube','El voltaje cambia','Nada'], correct:0, hint:'Más R → menos I (I = V/R)'},
-  {q:'Un LED se ve muy brillante y se puede quemar. ¿Qué puedes hacer?', opts:['Poner una resistencia más grande','Quitar la resistencia','Subir el voltaje','Cortar un cable'], correct:0, hint:'Más resistencia limita la corriente'},
-  {q:'Pila de 6 V y resistencia de 200 Ω. ¿Cuántos mA hay?', opts:['30 mA','12 mA','3 mA','1200 mA'], correct:0, hint:'I = 6 ÷ 200 = 0,03 A = 30 mA'},
-  {q:'La fórmula de la Ley de Ohm es:', opts:['I = V ÷ R','V = I ÷ R','R = V × I','I = V × R'], correct:0, hint:'Corriente = Voltaje dividido entre Resistencia'},
-  {q:'Si V = 12 V y quieres unos 20 mA, ¿qué resistencia usas aproximadamente?', opts:['600 Ω','12 Ω','20 Ω','2400 Ω'], correct:0, hint:'R = V ÷ I = 12 ÷ 0,02 = 600 Ω'},
-  {q:'¿Qué unidad usamos para la corriente en circuitos de LED?', opts:['mA (miliamperios)','Voltios','Ohmios','Watts'], correct:0, hint:'Los LEDs suelen usar 10–20 mA'},
+/**
+ * Triángulo de Ohm:
+ *   V = I × R
+ *   I = V ÷ R
+ *   R = V ÷ I
+ */
+let ohmState = {
+  mode: 'I', // qué calcular: I | V | R
+  idx: 0,
+  score: 0,
+  answered: false,
+  order: [],
+  streak: 0
+};
+
+const OHM_CHALLENGES = [
+  // Calcular I = V / R
+  {find:'I', V:9, R:300, I:30, q:'Pila 9 V y R = 300 Ω. ¿Cuánta corriente (mA)?', opts:['30 mA','3 mA','90 mA','300 mA'], correct:0, hint:'I = V ÷ R = 9 ÷ 300 = 0,03 A = 30 mA'},
+  {find:'I', V:6, R:200, I:30, q:'Pila 6 V y R = 200 Ω. ¿Cuántos mA?', opts:['30 mA','12 mA','3 mA','60 mA'], correct:0, hint:'I = 6 ÷ 200 = 0,03 A = 30 mA'},
+  {find:'I', V:12, R:600, I:20, q:'12 V y 600 Ω. ¿Corriente en mA?', opts:['20 mA','2 mA','72 mA','50 mA'], correct:0, hint:'I = 12 ÷ 600 = 0,02 A = 20 mA'},
+  {find:'I', V:3, R:150, I:20, q:'3 V y 150 Ω. ¿mA?', opts:['20 mA','5 mA','45 mA','150 mA'], correct:0, hint:'I = 3 ÷ 150 = 0,02 A = 20 mA'},
+  // Calcular V = I × R
+  {find:'V', V:9, R:300, I:30, q:'Si I = 30 mA y R = 300 Ω, ¿cuántos voltios hay?', opts:['9 V','3 V','30 V','0,9 V'], correct:0, hint:'V = I × R = 0,03 × 300 = 9 V'},
+  {find:'V', V:6, R:200, I:30, q:'Corriente 30 mA y R = 200 Ω. ¿Voltaje?', opts:['6 V','60 V','0,6 V','12 V'], correct:0, hint:'V = 0,03 × 200 = 6 V'},
+  {find:'V', V:12, R:400, I:30, q:'I = 30 mA, R = 400 Ω. ¿V?', opts:['12 V','4 V','1,2 V','120 V'], correct:0, hint:'V = 0,03 × 400 = 12 V'},
+  {find:'V', V:3, R:150, I:20, q:'20 mA atraviesan 150 Ω. ¿Voltaje de la pila?', opts:['3 V','15 V','0,3 V','30 V'], correct:0, hint:'V = 0,02 × 150 = 3 V'},
+  // Calcular R = V / I
+  {find:'R', V:12, R:600, I:20, q:'Querés ~20 mA con pila de 12 V. ¿Qué R usar?', opts:['600 Ω','12 Ω','20 Ω','240 Ω'], correct:0, hint:'R = V ÷ I = 12 ÷ 0,02 = 600 Ω'},
+  {find:'R', V:9, R:450, I:20, q:'9 V y querés 20 mA. ¿R aproximada?', opts:['450 Ω','90 Ω','180 Ω','9 Ω'], correct:0, hint:'R = 9 ÷ 0,02 = 450 Ω'},
+  {find:'R', V:6, R:300, I:20, q:'6 V, 20 mA. ¿Resistencia?', opts:['300 Ω','120 Ω','30 Ω','6 Ω'], correct:0, hint:'R = 6 ÷ 0,02 = 300 Ω'},
+  {find:'R', V:9, R:900, I:10, q:'9 V y solo 10 mA. ¿R?', opts:['900 Ω','90 Ω','9 Ω','0,9 Ω'], correct:0, hint:'R = 9 ÷ 0,01 = 900 Ω'},
+  // Concepto
+  {find:'concept', q:'Si aumentás R y dejás el mismo V, la corriente…', opts:['Baja','Sube','No cambia','Se hace voltaje'], correct:0, hint:'I = V ÷ R → más R, menos I'},
+  {find:'concept', q:'¿Cuál es la fórmula para hallar el voltaje?', opts:['V = I × R','V = I ÷ R','V = R ÷ I','V = I + R'], correct:0, hint:'Multiplicás corriente (en A) por resistencia'},
+  {find:'concept', q:'Un LED muy brillante (se puede quemar). ¿Qué hacés?', opts:['Subís la resistencia','Quitás la R','Subís el voltaje','Cortás un cable'], correct:0, hint:'Más R → menos corriente'},
 ];
 
-let ohmState = {idx:0, score:0, answered:false, order:[]};
-
 function updateOhmLive(){
+  const mode = ohmState.mode || 'I';
   const V = parseFloat(document.getElementById('ohmV')?.value || 9);
   const R = parseFloat(document.getElementById('ohmR')?.value || 300);
-  const I_mA = Math.round((V / R) * 1000);
+  const I_mA_slider = parseFloat(document.getElementById('ohmI')?.value || 20);
   const vLab = document.getElementById('ohmVLabel');
   const rLab = document.getElementById('ohmRLabel');
+  const iLab = document.getElementById('ohmILabel');
   const calc = document.getElementById('ohmCalc');
+  const formula = document.getElementById('ohmFormulaBig');
   const led = document.getElementById('ohmLed');
   const ledText = document.getElementById('ohmLedText');
-  if(vLab) vLab.textContent = V + ' V';
-  if(rLab) rLab.textContent = R + ' Ω';
-  if(calc) calc.innerHTML = `I = ${V} ÷ ${R} = <b>${I_mA} mA</b>`;
+
+  // según modo, qué se calcula
+  let I_mA, Vshow = V, Rshow = R, formulaHtml, calcHtml;
+
+  if(mode === 'I'){
+    I_mA = Math.round((V / R) * 1000);
+    formulaHtml = 'I = V ÷ R';
+    calcHtml = `I = ${V} ÷ ${R} = <b>${I_mA} mA</b>`;
+  } else if(mode === 'V'){
+    // V = I × R  (I del slider en mA)
+    I_mA = I_mA_slider;
+    Vshow = Math.round((I_mA / 1000) * R * 100) / 100;
+    formulaHtml = 'V = I × R';
+    calcHtml = `V = ${I_mA} mA × ${R} Ω = <b>${Vshow} V</b>`;
+  } else {
+    // R = V ÷ I
+    I_mA = I_mA_slider;
+    Rshow = I_mA > 0 ? Math.round(V / (I_mA / 1000)) : 0;
+    formulaHtml = 'R = V ÷ I';
+    calcHtml = `R = ${V} ÷ ${(I_mA/1000).toFixed(3)} A = <b>${Rshow} Ω</b>`;
+  }
+
+  if(vLab) vLab.textContent = (mode === 'V' ? Vshow : V) + ' V';
+  if(rLab) rLab.textContent = (mode === 'R' ? Rshow : R) + ' Ω';
+  if(iLab) iLab.textContent = I_mA + ' mA';
+  if(formula) formula.textContent = formulaHtml;
+  if(calc) calc.innerHTML = calcHtml;
+
+  // sliders enable/disable visual
+  document.querySelectorAll('.ohm-sliders label').forEach(function(lab){
+    lab.classList.remove('ohm-solving');
+  });
+  const solveFor = mode === 'I' ? 'ohmR' : (mode === 'V' ? 'ohmV' : 'ohmI');
+  // highlight the row being calculated (output)
+  const outId = mode === 'I' ? 'ohmIRow' : (mode === 'V' ? 'ohmVRow' : 'ohmRRow');
+  const out = document.getElementById(outId);
+  if(out) out.classList.add('ohm-solving');
+
   if(led){
-    // brightness based on current (typical LED ~15-20mA full)
     let bright = Math.min(1, Math.max(0.08, I_mA / 25));
     let danger = I_mA > 40;
     let dim = I_mA < 5;
     led.style.opacity = bright;
-    led.style.transform = `scale(${0.7 + bright*0.4})`;
+    led.style.transform = 'scale(' + (0.7 + bright * 0.4) + ')';
     led.style.boxShadow = danger
-      ? `0 0 ${20+I_mA}px #fff, 0 0 40px #ff4d5e`
-      : `0 0 ${12*bright}px #ff4d5e`;
+      ? ('0 0 ' + (20 + I_mA) + 'px #fff, 0 0 40px #ff4d5e')
+      : ('0 0 ' + (12 * bright) + 'px #ff4d5e');
     if(ledText){
       if(danger) ledText.textContent = '🔥 ¡Mucha corriente! El LED se puede quemar';
-      else if(dim) ledText.textContent = '🔅 Muy poca corriente — LED tenue';
-      else ledText.textContent = '💡 LED con buen brillo (~' + I_mA + ' mA)';
+      else if(dim) ledText.textContent = '🔅 Muy poca corriente: LED tenue';
+      else ledText.textContent = '💡 LED con brillo normal (~' + I_mA + ' mA)';
     }
   }
 }
 
-function initOhmGame(){
-  ohmState = {
-    idx: 0,
-    score: 0,
-    answered: false,
-    order: [...OHM_QUESTIONS.keys()].sort(()=>Math.random()-0.5).slice(0,5)
-  };
-  const sc = document.getElementById('ohmScore');
-  const tot = document.getElementById('ohmTotal');
-  if(sc) sc.textContent = '0';
-  if(tot) tot.textContent = '5';
+function setOhmMode(mode){
+  ohmState.mode = mode;
+  document.querySelectorAll('.ohm-mode-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  // mostrar/ocultar sliders según qué se calcula
+  var rowV = document.getElementById('ohmVRow');
+  var rowR = document.getElementById('ohmRRow');
+  var rowI = document.getElementById('ohmIRow');
+  if(rowV) rowV.style.display = (mode === 'V') ? 'none' : 'block'; // V se calcula → no slider de V? better show inputs for known values
+  // Mejor UX: siempre 2 entradas conocidas + 1 resultado
+  // mode I: inputs V,R  → out I
+  // mode V: inputs I,R  → out V
+  // mode R: inputs V,I  → out R
+  if(rowV) rowV.style.display = (mode === 'V') ? 'none' : 'block';
+  if(rowR) rowR.style.display = (mode === 'R') ? 'none' : 'block';
+  if(rowI) rowI.style.display = (mode === 'I') ? 'none' : 'block';
+  // resultado siempre visible en calc
   updateOhmLive();
+}
+
+function initOhmGame(){
+  ohmState.score = 0;
+  ohmState.idx = 0;
+  ohmState.answered = false;
+  ohmState.streak = 0;
+  // mezclar retos
+  ohmState.order = OHM_CHALLENGES.map(function(_, i){ return i; }).sort(function(){ return Math.random() - 0.5; }).slice(0, 8);
+  var sc = document.getElementById('ohmScore');
+  var tot = document.getElementById('ohmTotal');
+  if(sc) sc.textContent = '0';
+  if(tot) tot.textContent = String(ohmState.order.length);
+  if(!ohmState.mode) ohmState.mode = 'I';
+  setOhmMode(ohmState.mode);
   renderOhmChallenge();
 }
 
 function renderOhmChallenge(){
-  const host = document.getElementById('ohmChallenge');
+  var host = document.getElementById('ohmChallenge');
   if(!host) return;
   if(ohmState.idx >= ohmState.order.length){
+    var msg = '🏁 Terminaste: ' + ohmState.score + '/' + ohmState.order.length;
     if(window.PG){
-      if(ohmState.score >= 4){ PG.award('ohm','Maestro de Ohm'); PG.confetti(50); PG.sfxWin(); }
-      else if(ohmState.score >= 3){ PG.toast('📐 ¡Buen trabajo con Ohm!'); PG.sfxOk(); }
-      if(typeof saveScore==='function') saveScore('ohm_score', ohmState.score);
+      if(ohmState.score >= 6){ PG.award('ohm','Maestro de Ohm'); PG.confetti(50); PG.sfxWin(); }
+      else if(ohmState.score >= 4){ PG.toast('📐 ¡Buen trabajo con Ohm!'); }
     }
-    host.innerHTML = `<div style="text-align:center;">
-      <div style="font-size:2rem;font-weight:800;color:var(--wire-yellow);">${ohmState.score}/5</div>
-      <p>${ohmState.score===5?'¡Perfecto! Dominas la Ley de Ohm ⚡': ohmState.score>=3?'¡Muy bien! Sigue practicando con los deslizadores.':'Prueba mover V y R arriba y vuelve a intentar.'}</p>
-      <button class="btn" onclick="initOhmGame()">Jugar de nuevo</button>
-    </div>`;
+    host.innerHTML = '<div class="ohm-end"><h4>' + msg + '</h4>' +
+      '<p>Practicaste <b>I = V÷R</b>, <b>V = I×R</b> y <b>R = V÷I</b>.</p>' +
+      '<button type="button" class="btn" onclick="initOhmGame()">🔄 Otra ronda</button></div>';
     return;
   }
-  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
+  var q = OHM_CHALLENGES[ohmState.order[ohmState.idx]];
+  var tag = q.find === 'I' ? 'Hallar I (÷)' : (q.find === 'V' ? 'Hallar V (×)' : (q.find === 'R' ? 'Hallar R (÷)' : 'Concepto'));
+  var tagClass = q.find === 'V' ? 'mult' : 'div';
+  var opts = q.opts.map(function(o, i){
+    return '<button type="button" class="ohm-opt" onclick="answerOhm(' + i + ')">' + o + '</button>';
+  }).join('');
+  host.innerHTML =
+    '<div class="ohm-q-card">' +
+      '<div class="ohm-q-top"><span class="ohm-tag ' + tagClass + '">' + tag + '</span>' +
+      '<span class="ohm-q-num">Pregunta ' + (ohmState.idx + 1) + '/' + ohmState.order.length + '</span></div>' +
+      '<p class="ohm-q-text">' + q.q + '</p>' +
+      '<div class="ohm-opts">' + opts + '</div>' +
+      '<div class="feedback" id="ohmFeedback"></div>' +
+    '</div>';
   ohmState.answered = false;
-  host.innerHTML = `
-    <div class="ohm-q">${ohmState.idx+1}. ${q.q}</div>
-    <div class="ohm-opts" id="ohmOpts"></div>
-    <div class="feedback" id="ohmFeedback" style="margin-top:12px;"></div>`;
-  const wrap = document.getElementById('ohmOpts');
-  q.opts.forEach((opt,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'ohm-opt';
-    btn.textContent = opt;
-    btn.onclick = ()=>answerOhm(i);
-    wrap.appendChild(btn);
-  });
 }
 
 function answerOhm(i){
   if(ohmState.answered) return;
   ohmState.answered = true;
-  const q = OHM_QUESTIONS[ohmState.order[ohmState.idx]];
-  const opts = document.querySelectorAll('#ohmOpts .ohm-opt');
-  const fb = document.getElementById('ohmFeedback');
-  opts.forEach((o,idx)=>{
-    if(idx===q.correct) o.classList.add('correct');
-    else if(idx===i) o.classList.add('wrong');
+  var q = OHM_CHALLENGES[ohmState.order[ohmState.idx]];
+  var fb = document.getElementById('ohmFeedback');
+  document.querySelectorAll('.ohm-opt').forEach(function(btn, idx){
+    btn.disabled = true;
+    if(idx === q.correct) btn.classList.add('correct');
+    if(idx === i && i !== q.correct) btn.classList.add('wrong');
   });
-  if(i===q.correct){
+  if(i === q.correct){
     ohmState.score++;
+    ohmState.streak++;
     document.getElementById('ohmScore').textContent = ohmState.score;
-    if(fb){ fb.textContent = '✅ ¡Correcto! ' + q.hint; fb.className='feedback ok'; }
+    if(fb){ fb.innerHTML = '✅ ¡Correcto! ' + q.hint; fb.className = 'feedback ok'; }
     if(window.PG) PG.sfxOk();
   } else {
-    if(fb){ fb.textContent = '❌ ' + q.hint; fb.className='feedback bad'; }
+    ohmState.streak = 0;
+    if(fb){ fb.innerHTML = '❌ ' + q.hint; fb.className = 'feedback bad'; }
     if(window.PG) PG.sfxBad();
   }
-  setTimeout(()=>{
+  setTimeout(function(){
     ohmState.idx++;
     renderOhmChallenge();
-  }, 1600);
+  }, 1700);
 }
 
 
@@ -3470,53 +3566,95 @@ function labWireClick(idx){
 /* Patch: make wires clickable in renderLab — we intercept after wires are drawn */
 const _origRenderLab = typeof renderLab === 'function' ? renderLab : null;
 
-/* Color code game state */
+/* Color code game state — 4 bandas (valor + tolerancia) */
 const COLOR_CODE = [
-  {name:'Negro', val:0, mult:1, color:'#1a1a1a'},
-  {name:'Marrón', val:1, mult:10, color:'#6b3a1f'},
-  {name:'Rojo', val:2, mult:100, color:'#c0392b'},
-  {name:'Naranja', val:3, mult:1000, color:'#e67e22'},
-  {name:'Amarillo', val:4, mult:10000, color:'#f1c40f'},
-  {name:'Verde', val:5, mult:100000, color:'#27ae60'},
-  {name:'Azul', val:6, mult:1000000, color:'#2980b9'},
-  {name:'Violeta', val:7, mult:10000000, color:'#8e44ad'},
-  {name:'Gris', val:8, mult:100000000, color:'#7f8c8d'},
-  {name:'Blanco', val:9, mult:1000000000, color:'#ecf0f1'}
+  {name:'Negro',   val:0, mult:1,          color:'#1a1a1a', text:'#fff'},
+  {name:'Marrón',  val:1, mult:10,         color:'#6b3a1f', text:'#fff'},
+  {name:'Rojo',    val:2, mult:100,        color:'#c0392b', text:'#fff'},
+  {name:'Naranja', val:3, mult:1000,       color:'#e67e22', text:'#1a1a1a'},
+  {name:'Amarillo',val:4, mult:10000,      color:'#f1c40f', text:'#1a1a1a'},
+  {name:'Verde',   val:5, mult:100000,     color:'#27ae60', text:'#fff'},
+  {name:'Azul',    val:6, mult:1000000,    color:'#2980b9', text:'#fff'},
+  {name:'Violeta', val:7, mult:10000000,   color:'#8e44ad', text:'#fff'},
+  {name:'Gris',    val:8, mult:100000000,  color:'#7f8c8d', text:'#1a1a1a'},
+  {name:'Blanco',  val:9, mult:1000000000, color:'#ecf0f1', text:'#1a1a1a'}
 ];
-let ccBands = [1, 0, 2]; // brown black red = 1000Ω
+/* Las 4 tolerancias típicas de resistencia de 4 bandas */
+const TOLERANCE_CODE = [
+  {name:'Marrón',  tol:'±1%',  color:'#6b3a1f', text:'#fff'},
+  {name:'Rojo',    tol:'±2%',  color:'#c0392b', text:'#fff'},
+  {name:'Dorado',  tol:'±5%',  color:'#d4a574', text:'#1a1a1a'},
+  {name:'Plateado',tol:'±10%', color:'#c0c0c0', text:'#1a1a1a'}
+];
+/* [banda1, banda2, multiplicador, tolerancia]  default: marrón-negro-rojo-dorado = 1kΩ ±5% */
+let ccBands = [1, 0, 2, 2];
+
+function formatOhms(ohms){
+  if(ohms >= 1e9) return (ohms/1e9).toFixed(ohms%1e9?2:0).replace(/\.00$/,'') + ' GΩ';
+  if(ohms >= 1e6) return (ohms/1e6).toFixed(ohms%1e6?2:0).replace(/\.00$/,'') + ' MΩ';
+  if(ohms >= 1000) return (ohms/1000).toFixed(ohms%1000?2:0).replace(/\.00$/,'') + ' kΩ';
+  return ohms + ' Ω';
+}
+
 function renderColorCode(){
   const host = document.getElementById('colorCodeHost');
   if(!host) return;
-  const b0 = COLOR_CODE[ccBands[0]], b1 = COLOR_CODE[ccBands[1]], b2 = COLOR_CODE[ccBands[2]];
-  const ohms = (b0.val*10 + b1.val) * b2.mult;
-  let label = ohms >= 1e6 ? (ohms/1e6)+' MΩ' : ohms >= 1000 ? (ohms/1000)+' kΩ' : ohms+' Ω';
-  host.innerHTML = `
-    <div class="resistor-visual">
-      <div class="resistor-lead"></div>
-      <div class="resistor-body">
-        <div class="resistor-band" style="background:${b0.color}"></div>
-        <div class="resistor-band" style="background:${b1.color}"></div>
-        <div class="resistor-band" style="background:${b2.color}"></div>
-        <div class="resistor-band" style="background:#d4a574"></div>
-        <div class="resistor-band" style="background:#c9a227"></div>
-      </div>
-      <div class="resistor-lead"></div>
-    </div>
-    <p style="text-align:center;font-size:1.2rem;font-weight:800;">Valor: <span style="color:var(--wire-yellow)">${label}</span> ±5%</p>
-    <p style="text-align:center;opacity:.7;font-size:.85rem;">Toca una banda y elige el color</p>
-    <div class="band-row">
-      <span style="opacity:.6;font-size:.75rem;">1ª</span>
-      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[0]===i?'selected':''}" style="background:${c.color}" onclick="setBand(0,${i})" title="${c.name}">${c.val}</button>`).join('')}
-    </div>
-    <div class="band-row">
-      <span style="opacity:.6;font-size:.75rem;">2ª</span>
-      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[1]===i?'selected':''}" style="background:${c.color}" onclick="setBand(1,${i})" title="${c.name}">${c.val}</button>`).join('')}
-    </div>
-    <div class="band-row">
-      <span style="opacity:.6;font-size:.75rem;">×</span>
-      ${COLOR_CODE.map((c,i)=>`<button class="band-btn ${ccBands[2]===i?'selected':''}" style="background:${c.color}" onclick="setBand(2,${i})" title="${c.name} ×">${c.name[0]}</button>`).join('')}
-    </div>`;
+  const b0 = COLOR_CODE[ccBands[0]];
+  const b1 = COLOR_CODE[ccBands[1]];
+  const b2 = COLOR_CODE[ccBands[2]];
+  const tol = TOLERANCE_CODE[ccBands[3]] || TOLERANCE_CODE[2];
+  const ohms = (b0.val * 10 + b1.val) * b2.mult;
+  const label = formatOhms(ohms);
+
+  function bandBtns(pos, list, selectedIdx, labelFn){
+    return list.map(function(c, i){
+      var sel = selectedIdx === i ? ' selected' : '';
+      var lab = labelFn ? labelFn(c, i) : String(c.val);
+      return '<button type="button" class="band-btn'+sel+'" style="background:'+c.color+';color:'+(c.text||'#fff')+'" onclick="setBand('+pos+','+i+')" title="'+c.name+'">'+lab+'</button>';
+    }).join('');
+  }
+
+  host.innerHTML =
+    '<div class="cc-tool">'+
+      '<div class="resistor-visual">'+
+        '<div class="resistor-lead"></div>'+
+        '<div class="resistor-body">'+
+          '<div class="resistor-band" style="background:'+b0.color+'" title="1ª: '+b0.name+'"></div>'+
+          '<div class="resistor-band" style="background:'+b1.color+'" title="2ª: '+b1.name+'"></div>'+
+          '<div class="resistor-band" style="background:'+b2.color+'" title="× '+b2.name+'"></div>'+
+          '<div class="resistor-band gap-tol" style="background:'+tol.color+'" title="Tol: '+tol.name+'"></div>'+
+        '</div>'+
+        '<div class="resistor-lead"></div>'+
+      '</div>'+
+      '<div class="cc-value">Valor: <b>'+label+' '+tol.tol+'</b></div>'+
+      '<p class="cc-hint">Toca una banda y elegí el color · 4 bandas = valor + tolerancia</p>'+
+
+      '<div class="band-row">'+
+        '<span class="band-label">1ª</span>'+
+        '<div class="band-btns">'+bandBtns(0, COLOR_CODE, ccBands[0], function(c){ return c.val; })+'</div>'+
+      '</div>'+
+      '<div class="band-row">'+
+        '<span class="band-label">2ª</span>'+
+        '<div class="band-btns">'+bandBtns(1, COLOR_CODE, ccBands[1], function(c){ return c.val; })+'</div>'+
+      '</div>'+
+      '<div class="band-row">'+
+        '<span class="band-label">×</span>'+
+        '<div class="band-btns">'+bandBtns(2, COLOR_CODE, ccBands[2], function(c){
+          var m = c.mult;
+          if(m >= 1e6) return (m/1e6)+'M';
+          if(m >= 1000) return (m/1000)+'k';
+          return '×'+m;
+        })+'</div>'+
+      '</div>'+
+      '<div class="band-row band-row-tol">'+
+        '<span class="band-label">Tol</span>'+
+        '<div class="band-btns">'+bandBtns(3, TOLERANCE_CODE, ccBands[3], function(c){ return c.tol; })+'</div>'+
+      '</div>'+
+
+      '<p class="cc-formula">(1ª×10 + 2ª) × multiplicador · Tolerancia: margen de error real</p>'+
+    '</div>';
 }
+
 function setBand(pos, idx){
   ccBands[pos] = idx;
   renderColorCode();

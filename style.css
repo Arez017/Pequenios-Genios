@@ -1226,3 +1226,237 @@ header#inicio .mascot {
   .sp-proto-wrap{ max-width: 100%; }
   .sp-sw-btn{ min-width: 44px; min-height: 48px; }
 }
+
+
+/* Game over / corto circuito */
+.sp-dead-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(5, 12, 10, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: spDeadIn .35s ease;
+}
+@keyframes spDeadIn{ from{ opacity: 0; } to{ opacity: 1; } }
+.sp-dead-card{
+  background: linear-gradient(160deg, #1a0a0a 0%, #0d1f18 50%, #1a1508 100%);
+  border: 2px solid #ff5c5c;
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(255,92,92,0.35), 0 20px 50px rgba(0,0,0,0.5);
+  animation: spDeadPop .4s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes spDeadPop{
+  from{ transform: scale(0.85); opacity: 0; }
+  to{ transform: scale(1); opacity: 1; }
+}
+.sp-dead-boom{
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+  animation: spShake .5s ease;
+}
+@keyframes spShake{
+  0%,100%{ transform: rotate(0); }
+  25%{ transform: rotate(-8deg) scale(1.1); }
+  75%{ transform: rotate(8deg) scale(1.1); }
+}
+.sp-dead-card h3{
+  margin: 0 0 12px;
+  color: #ff8a8a;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+.sp-dead-card p{
+  margin: 0 0 10px;
+  color: #fef8ec;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.sp-dead-sub{
+  opacity: 0.7;
+  font-size: 0.85rem !important;
+  font-family: 'Space Mono', monospace;
+  margin-bottom: 18px !important;
+}
+.sp-dead-card .btn{
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  min-height: 48px;
+}
+
+
+/* Conecta cables — layout serie */
+.wire-board{
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.wire-board svg{
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: none;
+  user-select: none;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,.3));
+}
+
+
+/* Ley de Ohm — 3 fórmulas interactivas */
+.ohm-mode-bar{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  justify-content:center; margin: 0 0 14px;
+}
+.ohm-mode-label{ font-weight:700; opacity:0.85; margin-right:4px; }
+.ohm-mode-btn{
+  border:2px solid rgba(255,210,63,0.35);
+  background: rgba(0,0,0,0.25);
+  color: inherit;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Space Mono', monospace;
+}
+.ohm-mode-btn.active{
+  background: rgba(255,210,63,0.2);
+  border-color: var(--wire-yellow);
+  color: #ffd23f;
+  box-shadow: 0 0 16px rgba(255,210,63,0.25);
+}
+.ohm-sliders label.ohm-solving{
+  outline: 2px solid #4ade80;
+  border-radius: 12px;
+  padding: 6px;
+}
+.ohm-triangle{
+  display:inline-flex; flex-direction:column; align-items:center;
+  margin: 8px 0;
+  font-family: 'Space Mono', monospace;
+  font-weight: 800;
+}
+.ohm-tri-v{
+  background:#ffd23f; color:#1a1a1a; padding:4px 18px; border-radius:8px 8px 0 0;
+  font-size:1.1rem;
+}
+.ohm-tri-row{
+  display:flex; gap:10px; background:rgba(0,0,0,0.35);
+  padding:6px 14px; border-radius:0 0 8px 8px;
+  border:2px solid #ffd23f; border-top:none;
+}
+.ohm-q-card{
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,210,63,0.25);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.ohm-q-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.ohm-tag{
+  font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:999px;
+  font-family:'Space Mono',monospace;
+}
+.ohm-tag.div{ background:rgba(78,205,196,0.2); color:#4ecdc4; }
+.ohm-tag.mult{ background:rgba(255,210,63,0.2); color:#ffd23f; }
+.ohm-q-num{ opacity:0.7; font-size:0.85rem; }
+.ohm-q-text{ font-size:1.05rem; font-weight:700; margin:0 0 12px; }
+.ohm-opts{ display:flex; flex-direction:column; gap:8px; }
+.ohm-opt{
+  text-align:left; padding:12px 14px; border-radius:12px;
+  border:2px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: inherit; font-weight:700; cursor:pointer; min-height:48px;
+}
+.ohm-opt:hover{ border-color: rgba(255,210,63,0.5); }
+.ohm-opt.correct{ border-color:#4ade80; background:rgba(74,222,128,0.15); }
+.ohm-opt.wrong{ border-color:#ff5c5c; background:rgba(255,92,92,0.12); }
+.ohm-opt:disabled{ opacity:0.9; cursor:default; }
+.ohm-end{ text-align:center; padding:20px; }
+@media(max-width:520px){
+  .ohm-mode-btn{ font-size:0.75rem; padding:8px 10px; }
+}
+
+
+/* Calculadora código de colores — más aire + tolerancia */
+.cc-tool{ max-width: 520px; margin: 0 auto; }
+.resistor-visual{
+  display:flex; align-items:center; justify-content:center;
+  gap: 0; margin: 18px auto 12px; padding: 12px 0;
+}
+.resistor-lead{
+  width: 36px; height: 4px; background: #9a9a9a; border-radius: 2px;
+}
+.resistor-body{
+  display:flex; align-items:center; gap: 10px;
+  background: linear-gradient(180deg, #e8d5a8 0%, #c4a574 45%, #a89060 100%);
+  padding: 14px 22px; border-radius: 8px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.25);
+  min-width: 160px; justify-content: center;
+}
+.resistor-band{
+  width: 12px; height: 42px; border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.15);
+  flex-shrink: 0;
+}
+.resistor-band.gap-tol{
+  margin-left: 14px; /* separación típica de la banda de tolerancia */
+}
+.cc-value{
+  text-align:center; font-size: 1.35rem; font-weight: 800;
+  margin: 8px 0 4px; color: var(--wire-yellow, #ffd23f);
+}
+.cc-hint{
+  text-align:center; opacity: 0.75; font-size: 0.88rem; margin: 0 0 18px;
+}
+.cc-formula{
+  text-align:center; opacity: 0.65; font-size: 0.8rem; margin: 16px 0 0;
+  font-family: 'Space Mono', monospace;
+}
+.band-row{
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+.band-label{
+  flex: 0 0 36px; font-weight: 800; font-size: 0.85rem;
+  font-family: 'Space Mono', monospace; text-align: center;
+  opacity: 0.9;
+}
+.band-btns{
+  display: flex; flex-wrap: wrap; gap: 8px; flex: 1;
+  justify-content: flex-start;
+}
+.band-btn{
+  width: 40px; height: 40px; border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  cursor: pointer; font-weight: 800; font-size: 0.72rem;
+  font-family: 'Space Mono', monospace;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  transition: transform .12s, box-shadow .12s;
+  padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.band-btn:hover{ transform: translateY(-2px); }
+.band-btn.selected{
+  outline: 3px solid #ffd23f;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(255,210,63,.35), 0 4px 12px rgba(0,0,0,.3);
+  transform: scale(1.08);
+}
+.band-row-tol .band-btn{
+  width: auto; min-width: 64px; padding: 0 10px; font-size: 0.78rem;
+}
+@media(max-width:520px){
+  .band-btn{ width: 34px; height: 34px; font-size: 0.65rem; gap: 6px; }
+  .band-btns{ gap: 6px; }
+  .band-row-tol .band-btn{ min-width: 56px; }
+  .resistor-body{ gap: 8px; padding: 12px 16px; }
+}

@@ -405,7 +405,7 @@
 <div class="game-view" id="game-cables">
       <div class="game-view-head">
         <h3>🔗 Conecta los cables</h3>
-        <p>Arrastra de un circulo a otro. Camino: pila <b>+</b> → interruptor → resistencia → LED <b>(pata larga +)</b> → LED <b>(pata corta −)</b> → pila <b>−</b>. Interruptor y resistencia: sin polaridad.</p>
+        <p>Armá el camino en <b>serie</b> sobre el protoboard: pila <b>+</b> → interruptor → resistencia → LED <b>(pata larga +)</b> → retorno LED <b>(pata corta −)</b> → pila <b>−</b>.</p>
       </div>
       <div class="panel-top">
         <div class="stat">Cables tendidos: <b id="wireCount">0</b>/4</div>
@@ -413,12 +413,12 @@
         <button class="btn ghost" onclick="initWireGame()">🔄 Reiniciar</button>
       </div>
       <div class="wire-board">
-        <svg id="wireSvg" viewBox="0 0 640 320"></svg>
+        <svg id="wireSvg" viewBox="0 0 640 360"></svg>
       </div>
       <div class="cb-result" id="wireResult"></div>
       <div class="wire-hint" id="wireHint">
-        Toca un circulo y arrastra hasta otro. Necesitas 4 cables:<br>
-        1) Pila (+) → Interruptor · 2) Interruptor → Resistencia · 3) Resistencia → LED pata larga (+) · 4) LED pata corta (−) → Pila (−)
+        Camino en <b>serie</b> (de izquierda a derecha). Arrastrá de un círculo a otro:<br>
+        1) Pila <b>(+)</b> → Interruptor · 2) Interruptor → Resistencia · 3) Resistencia → LED <b>(+ larga)</b> · 4) LED <b>(− corta)</b> → Pila <b>(−)</b>
       </div>
     </div>
 
@@ -434,27 +434,43 @@
 
     <div class="game-view" id="game-ohm">
       <div class="game-view-head">
-        <h3>📐 Ley de Ohm</h3>
-        <p>La corriente I depende del voltaje V y de la resistencia R: <b>I = V ÷ R</b></p>
+        <h3>📐 Laboratorio de la Ley de Ohm</h3>
+        <p>Las <b>3 fórmulas</b>: <b>I = V÷R</b> · <b>V = I×R</b> · <b>R = V÷I</b>. Elegí qué calcular, mové los deslizadores y respondé.</p>
       </div>
-      <div class="panel-top">
-        <div class="stat">Aciertos: <b id="ohmScore">0</b>/<span id="ohmTotal">5</span></div>
-        <button class="btn ghost" onclick="initOhmGame()">🔄 Reiniciar</button>
+      <div class="cb-toolbar">
+        <div class="stat">Aciertos: <b id="ohmScore">0</b>/<span id="ohmTotal">8</span></div>
+        <button class="btn ghost" onclick="initOhmGame()">🔄 Reiniciar retos</button>
       </div>
+
+      <div class="ohm-mode-bar">
+        <span class="ohm-mode-label">Calcular:</span>
+        <button type="button" class="ohm-mode-btn active" data-mode="I" onclick="setOhmMode('I')">I = V ÷ R</button>
+        <button type="button" class="ohm-mode-btn" data-mode="V" onclick="setOhmMode('V')">V = I × R</button>
+        <button type="button" class="ohm-mode-btn" data-mode="R" onclick="setOhmMode('R')">R = V ÷ I</button>
+      </div>
+
       <div class="ohm-playground">
         <div class="ohm-sliders">
-          <label>Voltaje de la pila (V)
+          <label id="ohmVRow">Voltaje (V)
             <input type="range" id="ohmV" min="1.5" max="12" step="1.5" value="9" oninput="updateOhmLive()">
             <span class="ohm-val" id="ohmVLabel">9 V</span>
           </label>
-          <label>Resistencia (R)
+          <label id="ohmRRow">Resistencia (R)
             <input type="range" id="ohmR" min="100" max="2000" step="50" value="300" oninput="updateOhmLive()">
             <span class="ohm-val" id="ohmRLabel">300 Ω</span>
           </label>
+          <label id="ohmIRow" style="display:none">Corriente (I)
+            <input type="range" id="ohmI" min="5" max="50" step="1" value="20" oninput="updateOhmLive()">
+            <span class="ohm-val" id="ohmILabel">20 mA</span>
+          </label>
         </div>
         <div class="ohm-live-box">
-          <div class="ohm-formula-big">I = V ÷ R</div>
+          <div class="ohm-formula-big" id="ohmFormulaBig">I = V ÷ R</div>
           <div class="ohm-calc" id="ohmCalc">I = 9 ÷ 300 = <b>30 mA</b></div>
+          <div class="ohm-triangle" aria-hidden="true">
+            <div class="ohm-tri-v">V</div>
+            <div class="ohm-tri-row"><span>I</span><span>×</span><span>R</span></div>
+          </div>
           <div class="ohm-led-preview">
             <div class="ohm-led" id="ohmLed"></div>
             <span id="ohmLedText">LED con brillo normal</span>
