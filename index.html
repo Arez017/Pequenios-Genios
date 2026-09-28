@@ -345,9 +345,9 @@
         <p>Algunos componentes deben conectarse en un solo sentido. Adivina el terminal <b>positivo</b>.</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
-        <button class="btn ghost pol-level-btn active" data-level="facil" onclick="setPolLevel('facil')">Fácil (5)</button>
-        <button class="btn ghost pol-level-btn" data-level="normal" onclick="setPolLevel('normal')">Normal (7)</button>
-        <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil (10)</button>
+        <button class="btn ghost pol-level-btn active" data-level="facil" onclick="setPolLevel('facil')">Fácil (4)</button>
+        <button class="btn ghost pol-level-btn" data-level="normal" onclick="setPolLevel('normal')">Normal (5)</button>
+        <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil (6)</button>
       </div>
       <div class="panel-top">
         <div class="stat">Puntaje: <b id="polScore">0</b>/<span id="polTotal">5</span></div>
@@ -355,7 +355,7 @@
       </div>
       <div class="pol-stage">
         <div class="pol-item" id="polItem"></div>
-        <div class="pol-choices">
+        <div class="pol-choices pol-choices-legacy" style="display:none" aria-hidden="true">
           <button class="pol-btn" onclick="answerPolarity('A')">Terminal A</button>
           <button class="pol-btn" onclick="answerPolarity('B')">Terminal B</button>
         </div>
@@ -408,7 +408,11 @@
         <p>Armá el camino en <b>serie</b> sobre el protoboard: pila <b>+</b> → interruptor → resistencia → LED <b>(pata larga +)</b> → retorno LED <b>(pata corta −)</b> → pila <b>−</b>.</p>
       </div>
       <div class="panel-top">
-        <div class="stat">Cables tendidos: <b id="wireCount">0</b>/4</div>
+        <div class="stat"><span id="wireLevelLabel">Nivel 1 · Serie básica</span></div>
+        <div class="stat">Cables: <b id="wireCount">0</b>/<span id="wireNeed">4</span></div>
+        <button class="btn ghost" onclick="wireSetLevel(0)">1</button>
+        <button class="btn ghost" onclick="wireSetLevel(1)">2</button>
+        <button class="btn ghost" onclick="wireSetLevel(2)">3</button>
         <button class="btn ghost" onclick="toggleWireHint()">💡 Pista</button>
         <button class="btn ghost" onclick="initWireGame()">🔄 Reiniciar</button>
       </div>
@@ -542,6 +546,10 @@
           <span>I<sub>est.</sub> <b id="meterI">—</b></span>
           <span>Estado <b id="meterStatus">En espera</b></span>
         </div>
+      </div>
+      <div id="labChallengeBox" class="lab-challenge-box"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
+        <button type="button" class="btn ghost" onclick="labNextChallenge()">🎯 Cambiar reto</button>
       </div>
       <div id="labHintBar">LED: pata larga = + · pata corta = − · Toca un circulo y luego otro para cablear · Misma columna = conectados</div>
     </div>
