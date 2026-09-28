@@ -282,38 +282,7 @@ const SYMBOL_LABELS = {
    CENTRO DE TEORÍA — un set de contenido por nivel
    ============================================================ */
 const THEORY_PRIMARIA = [
-  {
-    title:'Ley de Ohm: la fórmula mágica',
-    body:`<p>La <b>Ley de Ohm</b> nos dice cómo se relacionan tres cosas en un circuito:</p>
-      <p style="text-align:center; font-size:1.4rem; font-weight:800; color:#ffd23f; margin:14px 0;">I = V ÷ R</p>
-      <ul style="margin:10px 0 10px 20px; line-height:1.7;">
-        <li><b>V</b> = Voltaje (la “fuerza” de la pila, en voltios)</li>
-        <li><b>R</b> = Resistencia (lo que frena la corriente, en ohms Ω)</li>
-        <li><b>I</b> = Corriente (cuánta electricidad pasa, en amperios o mA)</li>
-      </ul>
-      <p>Imagina el voltaje como la presión del agua, la resistencia como un grifo y la corriente como la cantidad de agua que sale.</p>
-      <p style="text-align:center; font-weight:700; margin:0 0 8px;">Ejemplos de la Ley de Ohm</p>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Voltaje</th><th>Resistencia</th><th>Corriente</th><th>Resultado</th></tr></thead>
-          <tbody>
-            <tr><td>9 V</td><td>300 Ω</td><td style="color:#4ade80;font-weight:700">30 mA</td><td>Ideal y seguro</td></tr>
-            <tr><td>9 V</td><td>1 000 Ω</td><td style="color:#4ade80;font-weight:700">9 mA</td><td>Corriente más baja</td></tr>
-            <tr><td>3 V</td><td>150 Ω</td><td style="color:#4ade80;font-weight:700">20 mA</td><td>Correcto</td></tr>
-            <tr><td>9 V</td><td>100 Ω</td><td style="color:#ff5c5c;font-weight:700">90 mA</td><td>¡Demasiada corriente!</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="margin-top:12px;"><b>Regla fácil:</b> Más resistencia → menos corriente. Más voltaje → más corriente.</p>`,
-    diagram:`<svg viewBox="0 0 280 130">
-      <polygon points="140,15 40,110 240,110" fill="none" stroke="#ff8a3d" stroke-width="3"/>
-      <text x="140" y="50" text-anchor="middle" fill="#ffd23f" font-size="22" font-weight="700">V</text>
-      <text x="80" y="100" text-anchor="middle" fill="#4dd8ff" font-size="18" font-weight="700">I</text>
-      <text x="200" y="100" text-anchor="middle" fill="#ff8a3d" font-size="18" font-weight="700">R</text>
-      <text x="140" y="125" text-anchor="middle" fill="#fef8ec" font-size="11">Voltaje = Corriente × Resistencia</text>
-    </svg>`
-  },
-  {
+{
     title:'¿Qué es un circuito eléctrico?',
     body:`<p style="text-align:center; font-size:1.15rem; font-weight:700; color:#ffd23f; margin-bottom:12px;">
         ¡La corriente necesita un camino REDONDO!
@@ -359,7 +328,7 @@ const THEORY_PRIMARIA = [
       <text x="150" y="152" text-anchor="middle" fill="#ffd23f" font-size="11">regresa al −</text>
     </svg>`
   },
-  {
+{
     title:'Polaridad: el sentido importa',
     body:`<p>Algunos componentes son <b>polarizados</b>: solo funcionan si los conectas en el sentido correcto. Otros son <b>no polarizados</b> y funcionan en cualquier sentido.</p>
       <p><b>Polarizados</b> (tienen + y −): pila, LED, capacitor electrolítico, buzzer, motor.</p>
@@ -381,7 +350,7 @@ const THEORY_PRIMARIA = [
       </ul>
       <p>Si lo conectas al revés, el LED no enciende (y a veces se daña). ¡Siempre revisa las patitas!</p>`
   },
-  {
+{
     title:'Simbología electrónica',
     body:`<p>Cada componente tiene un <b>símbolo</b> especial para dibujar esquemas de circuitos. Es como un idioma dibujado:</p>
       <ul style="margin:10px 0 10px 20px; line-height:1.7;">
@@ -401,70 +370,107 @@ const THEORY_PRIMARIA = [
       <line x1="145" y1="45" x2="160" y2="45" stroke="#ffd23f" stroke-width="3"/>
       <line x1="190" y1="25" x2="190" y2="65" stroke="#4dd8ff" stroke-width="4"/><path d="M205 25 Q198 45 205 65" fill="none" stroke="#4dd8ff" stroke-width="4"/></svg>`
   },
-  {
+{
     title:'Circuito en serie',
     body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Un solo camino ➡️ si se rompe uno, se apaga todo</p>
       <p>Los componentes van <b>uno detrás del otro</b>, como amigos tomados de la mano. La corriente sale del <b>+</b>, pasa por todos y <b>regresa al −</b>.</p>
       <p>Si un componente falla → se interrumpe el camino → todo se apaga.</p>
       <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>`,
-    diagram:`<svg viewBox="0 0 400 115">
-      <line x1="15" y1="45" x2="35" y2="45" stroke="#fde047" stroke-width="3"/>
-      <line x1="35" y1="25" x2="35" y2="65" stroke="#4ade80" stroke-width="3"/>
-      <line x1="45" y1="33" x2="45" y2="57" stroke="#4ade80" stroke-width="6"/>
-      <text x="40" y="18" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
-      <line x1="45" y1="45" x2="60" y2="45" stroke="#fde047" stroke-width="3"/>
-      <line x1="60" y1="25" x2="60" y2="65" stroke="#fb923c" stroke-width="3"/>
-      <line x1="70" y1="33" x2="70" y2="57" stroke="#fb923c" stroke-width="6"/>
-      <text x="65" y="18" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
-      <text x="52" y="80" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
-      <line x1="70" y1="45" x2="105" y2="45" stroke="#fde047" stroke-width="3"/>
-      <polygon points="103,39 115,45 103,51" fill="#fde047"/>
-      <polyline points="115,45 123,45 129,33 137,57 145,33 153,57 159,45 170,45" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="142" y="26" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
-      <line x1="170" y1="45" x2="210" y2="45" stroke="#fde047" stroke-width="3"/>
-      <polyline points="210,45 218,45 224,33 232,57 240,33 248,57 254,45 265,45" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="237" y="26" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
-      <line x1="265" y1="45" x2="310" y2="45" stroke="#fde047" stroke-width="3"/>
-      <line x1="310" y1="45" x2="310" y2="90" stroke="#fde047" stroke-width="3"/>
-      <line x1="310" y1="90" x2="52" y2="90" stroke="#fde047" stroke-width="3"/>
-      <line x1="52" y1="90" x2="52" y2="65" stroke="#fde047" stroke-width="3"/>
-      <polygon points="58,88 52,98 46,88" fill="#fde047"/>
-      <text x="180" y="12" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">SALE DEL POSITIVO (+)</text>
-      <text x="180" y="108" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+    diagram:`<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg">
+      
+      <text x="42" y="22" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
+      <!-- barras horizontales: larga corta larga corta larga -->
+      <line x1="26" y1="38" x2="58" y2="38" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="33" y1="46" x2="51" y2="46" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="54" x2="58" y2="54" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="33" y1="62" x2="51" y2="62" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="70" x2="58" y2="70" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="42" y="88" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
+      <text x="42" y="104" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+    
+      <!-- cable desde + hacia arriba e ida -->
+      <path d="M42 22 V14 H390 V48" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+      <polygon points="150,8 162,14 150,20" fill="#fde047"/>
+      <text x="250" y="10" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
+      <!-- R1 R2 -->
+      <line x1="150" y1="14" x2="150" y2="48" stroke="#fde047" stroke-width="3"/>
+      <path d="M150 48 h10 l6 -12 8 24 8 -24 8 24 6 -12 h10" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="178" y="78" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
+      <path d="M198 48 h10 l6 -12 8 24 8 -24 8 24 6 -12 h10" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="236" y="78" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
+      <line x1="256" y1="48" x2="256" y2="14" stroke="#fde047" stroke-width="3"/>
+      <!-- retorno al − -->
+      <path d="M390 48 V120 H42 V88" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+      <polygon points="220,126 208,120 220,114" fill="#fb923c"/>
+      <text x="230" y="142" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
     </svg>`
   },
-  {
+{
     title:'Circuito en paralelo',
     body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Varios caminos ➡️ si se rompe uno, los demás siguen</p>
       <p>Cada componente tiene <b>su propia rama</b>. Todos salen del <b>+</b> y todos regresan al <b>−</b>, pero por caminos separados.</p>
       <p>Si una rama falla → las otras siguen funcionando.</p>
       <p>💡 Ejemplo: las luces de tu casa. Apagas una y las demás siguen encendidas.</p>`,
-    diagram:`<svg viewBox="0 0 400 175">
-      <line x1="15" y1="55" x2="35" y2="55" stroke="#fde047" stroke-width="3"/>
-      <line x1="35" y1="35" x2="35" y2="75" stroke="#4ade80" stroke-width="3"/>
-      <line x1="45" y1="43" x2="45" y2="67" stroke="#4ade80" stroke-width="6"/>
-      <text x="40" y="28" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
-      <line x1="45" y1="55" x2="60" y2="55" stroke="#fde047" stroke-width="3"/>
-      <line x1="60" y1="35" x2="60" y2="75" stroke="#fb923c" stroke-width="3"/>
-      <line x1="70" y1="43" x2="70" y2="67" stroke="#fb923c" stroke-width="6"/>
-      <text x="65" y="28" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
-      <text x="52" y="90" text-anchor="middle" fill="#fef8ec" font-size="11">PILA</text>
-      <line x1="35" y1="35" x2="35" y2="18" stroke="#fde047" stroke-width="3"/>
-      <line x1="35" y1="18" x2="360" y2="18" stroke="#fde047" stroke-width="3.5"/>
-      <polygon points="100,12 112,18 100,24" fill="#fde047"/>
-      <line x1="70" y1="75" x2="70" y2="130" stroke="#fde047" stroke-width="3"/>
-      <line x1="70" y1="130" x2="360" y2="130" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="360" y1="18" x2="360" y2="130" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="160" y1="18" x2="160" y2="45" stroke="#fde047" stroke-width="3"/>
-      <polyline points="160,45 160,55 148,65 172,75 148,85 160,95" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
-      <text x="138" y="72" fill="#fb923c" font-size="13" font-weight="700">R1</text>
-      <line x1="160" y1="95" x2="160" y2="130" stroke="#fde047" stroke-width="3"/>
-      <line x1="270" y1="18" x2="270" y2="45" stroke="#fde047" stroke-width="3"/>
-      <polyline points="270,45 270,55 258,65 282,75 258,85 270,95" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
-      <text x="248" y="72" fill="#fb923c" font-size="13" font-weight="700">R2</text>
-      <line x1="270" y1="95" x2="270" y2="130" stroke="#fde047" stroke-width="3"/>
-      <text x="200" y="10" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">SALE DEL POSITIVO (+)</text>
-      <text x="200" y="155" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+    diagram:`<svg viewBox="0 0 420 180" xmlns="http://www.w3.org/2000/svg">
+      
+      <text x="42" y="32" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>
+      <!-- barras horizontales: larga corta larga corta larga -->
+      <line x1="26" y1="48" x2="58" y2="48" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="33" y1="56" x2="51" y2="56" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="64" x2="58" y2="64" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="33" y1="72" x2="51" y2="72" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="80" x2="58" y2="80" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="42" y="98" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="800">−</text>
+      <text x="42" y="114" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+    
+      <!-- riel + -->
+      <path d="M42 32 V14 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+      <polygon points="120,8 132,14 120,20" fill="#fde047"/>
+      <text x="250" y="10" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
+      <!-- riel − -->
+      <path d="M42 98 V150 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+      <text x="250" y="168" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+      <!-- R1 -->
+      <line x1="170" y1="14" x2="170" y2="48" stroke="#fde047" stroke-width="3"/>
+      <path d="M170 48 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="196" y="90" fill="#fb923c" font-size="12" font-weight="700">R1</text>
+      <line x1="170" y1="104" x2="170" y2="150" stroke="#fde047" stroke-width="3"/>
+      <!-- R2 -->
+      <line x1="300" y1="14" x2="300" y2="48" stroke="#fde047" stroke-width="3"/>
+      <path d="M300 48 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="326" y="90" fill="#fb923c" font-size="12" font-weight="700">R2</text>
+      <line x1="300" y1="104" x2="300" y2="150" stroke="#fde047" stroke-width="3"/>
+    </svg>`
+  },
+{
+    title:'Ley de Ohm: la fórmula mágica',
+    body:`<p>La <b>Ley de Ohm</b> nos dice cómo se relacionan tres cosas en un circuito:</p>
+      <p style="text-align:center; font-size:1.4rem; font-weight:800; color:#ffd23f; margin:14px 0;">I = V ÷ R</p>
+      <ul style="margin:10px 0 10px 20px; line-height:1.7;">
+        <li><b>V</b> = Voltaje (la “fuerza” de la pila, en voltios)</li>
+        <li><b>R</b> = Resistencia (lo que frena la corriente, en ohms Ω)</li>
+        <li><b>I</b> = Corriente (cuánta electricidad pasa, en amperios o mA)</li>
+      </ul>
+      <p>Imagina el voltaje como la presión del agua, la resistencia como un grifo y la corriente como la cantidad de agua que sale.</p>
+      <p style="text-align:center; font-weight:700; margin:0 0 8px;">Ejemplos de la Ley de Ohm</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Voltaje</th><th>Resistencia</th><th>Corriente</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td>9 V</td><td>300 Ω</td><td style="color:#4ade80;font-weight:700">30 mA</td><td>Ideal y seguro</td></tr>
+            <tr><td>9 V</td><td>1 000 Ω</td><td style="color:#4ade80;font-weight:700">9 mA</td><td>Corriente más baja</td></tr>
+            <tr><td>3 V</td><td>150 Ω</td><td style="color:#4ade80;font-weight:700">20 mA</td><td>Correcto</td></tr>
+            <tr><td>9 V</td><td>100 Ω</td><td style="color:#ff5c5c;font-weight:700">90 mA</td><td>¡Demasiada corriente!</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px;"><b>Regla fácil:</b> Más resistencia → menos corriente. Más voltaje → más corriente.</p>`,
+    diagram:`<svg viewBox="0 0 280 130">
+      <polygon points="140,15 40,110 240,110" fill="none" stroke="#ff8a3d" stroke-width="3"/>
+      <text x="140" y="50" text-anchor="middle" fill="#ffd23f" font-size="22" font-weight="700">V</text>
+      <text x="80" y="100" text-anchor="middle" fill="#4dd8ff" font-size="18" font-weight="700">I</text>
+      <text x="200" y="100" text-anchor="middle" fill="#ff8a3d" font-size="18" font-weight="700">R</text>
+      <text x="140" y="125" text-anchor="middle" fill="#fef8ec" font-size="11">Voltaje = Corriente × Resistencia</text>
     </svg>`
   }
 ];
