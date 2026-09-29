@@ -1561,3 +1561,13 @@ header#inicio .mascot {
 .pol-end-score{ font-size: 1.2rem; margin: 8px 0; }
 .pol-end-tip{ opacity: 0.85; margin-bottom: 16px; }
 .pol-term{ transition: fill .15s, transform .15s; }
+
+.lab-preset-locked{
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.4);
+}
+.pol-level-btn[data-level="extrema"].active{
+  border-color: #ff4d5e;
+  color: #ff4d5e;
+}

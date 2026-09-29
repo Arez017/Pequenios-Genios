@@ -705,7 +705,7 @@ function setPuzLevel(level){
 }
 
 function initPuzzle(){
-  const n = puzLevel==='facil' ? 4 : (puzLevel==='normal' ? 6 : 8);
+  const n = puzLevel==='facil' ? 5 : (puzLevel==='normal' ? 8 : (puzLevel==='extrema' ? 12 : 10));
   const pool = PUZ_POOL.filter(function(p){ return ICONS[p.id]; }).sort(function(){ return Math.random()-0.5; }).slice(0,n);
   puzState.items = pool;
   puzState.placed = {};
@@ -868,6 +868,28 @@ const WIRE_LEVELS = [
     need: 4,
     hint: 'Igual que el nivel 1, pero si invertís el LED no cuenta. LED (+) = pata larga.',
     validate: function(){ return typeof wireCircuitLooksValid === 'function' && wireCircuitLooksValid(); }
+  }
+,
+  {
+    name: 'Nivel 4 · Contra reloj mental',
+    need: 4,
+    hint: 'Mismo camino que el nivel 1, pero sin pistas en los cables. Orden: (+) → SW → R → LED(+) → LED(−) → (−)',
+    validate: function(){ return typeof wireCircuitLooksValid === 'function' && wireCircuitLooksValid(); }
+  },
+  {
+    name: 'Nivel 5 · Maestro del protoboard',
+    need: 4,
+    hint: 'Circuito completo y seguro. Si cortocircuitás o olvidás la R, no cuenta.',
+    validate: function(){
+      if(typeof wireCircuitLooksValid !== 'function' || !wireCircuitLooksValid()) return false;
+      // no cable directo batt_pos - batt_neg
+      for(var i=0;i<wireConnected.length;i++){
+        var a=wireConnected[i][0], b=wireConnected[i][1];
+        if((a==='batt_pos'&&b==='batt_neg')||(a==='batt_neg'&&b==='batt_pos')) return false;
+        if((a==='batt_pos'&&(b==='led_pos'||b==='led_neg'))||(b==='batt_pos'&&(a==='led_pos'||a==='led_neg'))) return false;
+      }
+      return true;
+    }
   }
 ];
 
@@ -1258,9 +1280,10 @@ function shuffle(arr){
 
 function setMemoLevel(level){
   memoState.level = level;
-  if(level==='facil') memoState.pairs = 4;
-  else if(level==='normal') memoState.pairs = 6;
-  else memoState.pairs = 8;
+  if(level==='facil') memoState.pairs = 5;
+  else if(level==='normal') memoState.pairs = 7;
+  else if(level==='extrema') memoState.pairs = 10;
+  else memoState.pairs = 9;
   // update buttons
   document.querySelectorAll('.memo-level-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.level===level);
@@ -1397,7 +1420,18 @@ const CIRCUIT_LEVELS = {
     order: ['bateria','interruptor','resistencia','led','buzzer'],
     hint: 'Pila (+) → Interruptor → Resistencia → LED → Buzzer → regreso al (−)'
   }
-};
+,
+  extrema: {
+    parts: [
+      {id:'bateria', label:'Pila', icon:ICONS.bateria},
+      {id:'interruptor', label:'Interruptor', icon:ICONS.interruptor},
+      {id:'resistencia', label:'Resistencia', icon:ICONS.resistencia},
+      {id:'led', label:'LED', icon:ICONS.led},
+      {id:'buzzer', label:'Buzzer', icon:ICONS.buzzer}
+    ],
+    order: ['bateria','interruptor','resistencia','led','buzzer'],
+    hint: 'Pila → SW → R → LED y también camino al buzzer. ¡Orden correcto y polaridad!'
+  }};
 let circuitLevel = 'facil';
 
 function setCircuitLevel(level){
@@ -1672,15 +1706,16 @@ const POL_ITEMS = [
   }
 ];
 
-let polState = { idx:0, score:0, answered:false, order:[], total:5 };
+let polState = { idx:0, score:0, answered:false, order:[], total:5, mode:"normal", pool:null };
 
 function setPolLevel(level){
-  var map = { facil: 4, normal: 5, dificil: 6 };
+  var map = { facil: 5, normal: 6, dificil: 8, extrema: 10 };
   var n = map[level] || 5;
   document.querySelectorAll('.pol-level-btn').forEach(function(el){
     el.classList.toggle('active', el.getAttribute('data-level') === level);
   });
   polState.total = n;
+  polState.mode = level || 'normal';
   initPolarity();
 }
 function setPolarDiff(n){
@@ -1693,9 +1728,11 @@ function setPolarDiff(n){
 
 function initPolarity(){
   if(typeof polState.total === 'undefined') polState.total = 5;
-  var n = Math.min(polState.total, POL_ITEMS.length);
+  if(!polState.mode) polState.mode = 'normal';
+  polState.pool = buildPolarPool(polState.mode);
+  var n = Math.min(polState.total, polState.pool.length);
   polState.order = [];
-  var keys = POL_ITEMS.map(function(_,i){ return i; });
+  var keys = polState.pool.map(function(_,i){ return i; });
   while(keys.length){
     var r = Math.floor(Math.random()*keys.length);
     polState.order.push(keys.splice(r,1)[0]);
@@ -1710,6 +1747,40 @@ function initPolarity(){
   if(tot) tot.textContent = n;
   renderPolarity();
 }
+/** En modo extrema: clona ítems y a veces invierte A/B (trampas visuales). */
+function buildPolarPool(mode){
+  var base = POL_ITEMS.slice();
+  if(mode !== 'extrema') return base;
+  var pool = [];
+  base.forEach(function(it){
+    pool.push(it);
+    // versión tramposa: intercambia A y B (correcto se invierte)
+    pool.push({
+      name: it.name + ' (¡trampa!)',
+      emoji: it.emoji,
+      correct: it.correct === 'A' ? 'B' : 'A',
+      lesson: it.lesson,
+      hint: it.hint + ' <b>Ojo: en esta vista los terminales están al revés.</b>',
+      svg: function(hi, showLabels){
+        // dibuja igual pero pide el otro lado como correcto — reusa svg intercambiando hi labels
+        function swapChoice(c){
+          if(c === 'A') return 'B';
+          if(c === 'B') return 'A';
+          return c;
+        }
+        // llamar svg original con hi intercambiado para colorear el terminal tocado
+        var raw = it.svg(swapChoice(hi), showLabels);
+        // renombrar data-choice A<->B en el markup
+        raw = raw.replace(/data-choice="A"/g, 'data-choice="TMP"')
+                 .replace(/data-choice="B"/g, 'data-choice="A"')
+                 .replace(/data-choice="TMP"/g, 'data-choice="B"');
+        // intercambiar textos A/B bajo los terminales (aprox)
+        return raw;
+      }
+    });
+  });
+  return pool;
+}
 
 function renderPolarity(){
   var host = document.getElementById('polItem');
@@ -1722,13 +1793,13 @@ function renderPolarity(){
         '<div class="pol-end-emoji">🏁🔋</div>'+
         '<h3>¡Terminaste!</h3>'+
         '<p class="pol-end-score">'+stars+' · <b>'+polState.score+'</b>/'+polState.order.length+' aciertos</p>'+
-        '<p class="pol-end-tip">Recordá: en el LED la <b>patita larga es +</b> y la <b>corta es −</b>.</p>'+
+        '<p class="pol-end-tip">Recordá: en el LED la <b>patita larga es +</b> y la <b>corta es −</b>.'+(polState.mode==='extrema'?' · Modo <b>extrema</b>: a veces los terminales están al revés.':'')+'</p>'+
         '<button type="button" class="btn" onclick="initPolarity()">🔄 Jugar de nuevo</button>'+
       '</div>';
     if(fb){ fb.innerHTML = ''; fb.className = 'feedback'; }
     return;
   }
-  var item = POL_ITEMS[polState.order[polState.idx]];
+  var item = (polState.pool || POL_ITEMS)[polState.order[polState.idx]];
   host.innerHTML =
     '<div class="pol-card">'+
       '<div class="pol-progress">Pregunta '+(polState.idx+1)+' / '+polState.order.length+'</div>'+
@@ -1754,7 +1825,7 @@ function renderPolarity(){
 function answerPolarity(choice){
   if(polState.answered) return;
   polState.answered = true;
-  var item = POL_ITEMS[polState.order[polState.idx]];
+  var item = (polState.pool || POL_ITEMS)[polState.order[polState.idx]];
   var host = document.getElementById('polItem');
   var fb = document.getElementById('polFeedback');
   if(host){
@@ -1819,7 +1890,9 @@ var SP_MISSIONS = [
   {id:"s2",mode:"serie",title:"Mision 3 · Solo el medio?",brief:"Intenta apagar solo L2.",goal:"Abre un SW: se apagan los 3.",hint:"Serie = no se apaga solo uno.",check:function(sw,leds){return leds.every(function(x){return !x;});},stars:1},
   {id:"p2",mode:"paralelo",title:"Mision 4 · Casa a medias",brief:"Se fundo L2. Las otras siguen.",goal:"Solo L2 apagado; L1 y L3 prendidos.",hint:"Abre solo SW del medio.",check:function(sw,leds){return !leds[1]&&leds[0]&&leds[2];},stars:1},
   {id:"mix1",mode:"mystery",mysteryMode:"serie",title:"Mision 5 · Misterio",brief:"Tipo oculto.",goal:"Apaga los 3 LEDs.",hint:"Si un SW apaga todo, era serie.",check:function(sw,leds){return leds.every(function(x){return !x;})&&sw.some(function(x){return !x;});},stars:2},
-  {id:"mix2",mode:"mystery",mysteryMode:"paralelo",title:"Mision 6 · Final",brief:"Ultimo reto.",goal:"L1 ON, L2 OFF, L3 ON",hint:"Si apagas solo el medio, es paralelo.",check:function(sw,leds){return leds[0]&&!leds[1]&&leds[2];},stars:2}
+  {id:"mix2",mode:"mystery",mysteryMode:"paralelo",title:"Mision 6 · Final",brief:"Ultimo reto.",goal:"L1 ON, L2 OFF, L3 ON",hint:"Si apagas solo el medio, es paralelo.",check:function(sw,leds){return leds[0]&&!leds[1]&&leds[2];},stars:2},
+  {id:"s3",mode:"serie",title:"Mision 7 · Todo o nada",brief:"Serie estricta.",goal:"Deja los 3 LEDs ON (todos los SW cerrados).",hint:"En serie hace falta que TODOS los SW esten cerrados.",check:function(sw,leds){return leds.every(function(x){return !!x;})&&sw.every(function(x){return !!x;});},stars:2},
+  {id:"p3",mode:"paralelo",title:"Mision 8 · Solo uno",brief:"Paralelo fino.",goal:"Solo L1 encendido; L2 y L3 apagados.",hint:"Cerra solo el primer SW.",check:function(sw,leds){return !!leds[0]&&!leds[1]&&!leds[2];},stars:2},
 ];
 
 var spState = {mission:0,switches:[true,true,true],lives:3,score:0,stars:0,attempts:0,completed:{},feedback:""};
@@ -2067,6 +2140,12 @@ const QUIZ_PRIMARIA = [
   {q:'¿Cuál de estos componentes NO tiene polaridad?', opts:['LED','Pila','Resistencia','Capacitor electrolítico'], correct:2},
   {q:'¿Qué hace un interruptor?', opts:['Almacena energía','Abre o cierra el paso de corriente','Cambia la resistencia con la luz','Produce sonido'], correct:1, diagram:ICONS.interruptor},
   {q:'Si en un circuito en paralelo se apaga un LED, ¿qué pasa con los demás?', opts:['También se apagan todos','Siguen encendidos','Se queman','Cambian de color'], correct:1}
+,
+  {q:'¿Qué pasa si conectás un LED sin resistencia a una pila de 9V?', opts:['Nada','Se puede quemar por exceso de corriente','Brilla mejor','Se apaga solo'], correct:1},
+  {q:'En un circuito en paralelo, si se apaga un LED…', opts:['Se apagan todos','Los demás pueden seguir prendidos','Se quema la pila','Se abre el interruptor'], correct:1},
+  {q:'La Ley de Ohm dice que I = …', opts:['V × R','V ÷ R','R ÷ V','V + R'], correct:1},
+  {q:'El potenciómetro es principalmente…', opts:['Una pila','Una resistencia variable','Un tipo de LED','Un motor'], correct:1},
+  {q:'¿Cuál es la patita positiva del LED?', opts:['La corta','La larga','Las dos iguales','La del lado plano'], correct:1}
 ];
 let quizState = {idx:0, score:0, answered:false};
 function initQuiz(){
@@ -3400,6 +3479,70 @@ function simulateLab(){
 }
 
 
+
+/* ============================================================
+   RECETAS DESBLOQUEABLES (reto del lab → receta nueva)
+   ============================================================ */
+const LAB_UNLOCK_MAP = {
+  led_safe: ['paralelo'],
+  series_two: ['serie'],
+  switch_control: ['motor', 'buzzer'],
+  pot_use: ['buzzer'],
+  safe_9v: ['serie']
+};
+const LAB_LOCKED_DEFAULT = ['paralelo', 'serie', 'motor', 'buzzer'];
+
+function labGetUnlocks(){
+  try {
+    var u = JSON.parse(localStorage.getItem('pg_lab_unlocks') || '[]');
+    return Array.isArray(u) ? u : [];
+  } catch(e){ return []; }
+}
+function labIsUnlocked(key){
+  if(LAB_LOCKED_DEFAULT.indexOf(key) < 0) return true;
+  return labGetUnlocks().indexOf(key) >= 0;
+}
+function labUnlockRecipe(key){
+  var u = labGetUnlocks();
+  if(u.indexOf(key) >= 0) return false;
+  u.push(key);
+  try { localStorage.setItem('pg_lab_unlocks', JSON.stringify(u)); } catch(e){}
+  return true;
+}
+function labUnlockFromChallenge(challengeId){
+  var keys = LAB_UNLOCK_MAP[challengeId] || [];
+  var opened = [];
+  keys.forEach(function(k){
+    if(labUnlockRecipe(k)) opened.push((LAB_PRESETS[k] && LAB_PRESETS[k].label) || k);
+  });
+  if(opened.length && window.PG){
+    PG.toast('🔓 Receta desbloqueada: ' + opened.join(', '));
+    PG.confetti(25);
+  }
+  labRenderPresetButtons();
+}
+function labRenderPresetButtons(){
+  var row = document.getElementById('labPresetRow');
+  if(!row) return;
+  var specs = [
+    { key:'simple', free:true },
+    { key:'interruptor', free:true },
+    { key:'paralelo', free:false },
+    { key:'serie', free:false },
+    { key:'motor', free:false },
+    { key:'buzzer', free:false }
+  ];
+  row.innerHTML = specs.map(function(s){
+    var p = LAB_PRESETS[s.key];
+    if(!p) return '';
+    var open = s.free || labIsUnlocked(s.key);
+    if(open){
+      return '<button type="button" class="btn ghost" onclick="loadPreset(\''+s.key+'\')">'+p.label+'</button>';
+    }
+    return '<button type="button" class="btn ghost lab-preset-locked" disabled title="Completá un reto del laboratorio para desbloquear">🔒 '+p.label+'</button>';
+  }).join('');
+}
+
 const LAB_PRESETS = {
   simple: {
     label:'LED simple',
@@ -3533,6 +3676,10 @@ function labHolesFromPositions(){
 
 
 function loadPreset(key){
+  if(typeof labIsUnlocked === 'function' && !labIsUnlocked(key)){
+    if(window.PG) PG.toast('🔒 Completá un reto del lab para desbloquear esta receta');
+    return;
+  }
   const p = LAB_PRESETS[key] || LAB_PRESETS.simple;
   if(!p){ console.error('Preset no encontrado', key); return; }
   lab.instances = p.instances.map(i=>({...i}));
@@ -3816,6 +3963,38 @@ const LAB_CHALLENGES = [
       return ledOn && sw;
     }
   }
+  ,
+  {
+    id: 'pot_use',
+    title: '🎚️ Potenciómetro',
+    goal: 'Encendé un LED usando un potenciómetro (además de la pila).',
+    check: function(res){
+      if(!res || !res.ok) return false;
+      var lit = res.lit;
+      var ledOn = lab.instances.some(function(i){
+        if(i.type!=='led') return false;
+        return lit && lit.has && lit.has(i.id);
+      });
+      var pot = lab.instances.some(function(i){ return i.type==='potenciometro'; });
+      return ledOn && pot;
+    }
+  },
+  {
+    id: 'safe_9v',
+    title: '🛡️ 9V seguro',
+    goal: 'LED ON con pila 9V y resistencia ≥ 1 kΩ.',
+    check: function(res){
+      if(!res || !res.ok) return false;
+      var lit = res.lit;
+      var ledOn = lab.instances.some(function(i){
+        if(i.type!=='led') return false;
+        return lit && lit.has && lit.has(i.id);
+      });
+      var batt = lab.instances.find(function(i){ return i.type==='bateria'; });
+      var hasR = lab.instances.some(function(i){ return i.type==='resistencia' && (i.value||0) >= 1000; });
+      return ledOn && hasR && batt && (batt.voltage||0) >= 9;
+    }
+  }
 ];
 let labChallengeIdx = 0;
 function labRenderChallenge(){
@@ -3835,6 +4014,7 @@ function labCheckChallenge(res){
   if(!c || !res) return;
   if(c.check(res)){
     if(window.PG){ PG.sfxWin(); PG.confetti(30); PG.toast('🏆 ¡Reto cumplido! '+c.title); }
+    try { labUnlockFromChallenge(c.id); } catch(e){}
     var el = document.getElementById('labChallengeBox');
     if(el) el.innerHTML = '<div class="lab-chal ok">🏆 ¡Reto cumplido! '+c.title+' <button type="button" class="btn ghost" onclick="labNextChallenge()">Siguiente reto</button></div>';
   }
@@ -4106,6 +4286,8 @@ function showView(id) {
   }
   if (id === 'laboratorio' && typeof renderLab === 'function') {
     try { renderLab(); } catch(e) {}
+    try { if(typeof labRenderPresetButtons==='function') labRenderPresetButtons(); } catch(e) {}
+    try { if(typeof labRenderChallenge==='function') labRenderChallenge(); } catch(e) {}
   }
   if (id === 'codigo-colores' && typeof renderColorCode === 'function') {
     try { renderColorCode(); } catch(e) {}
