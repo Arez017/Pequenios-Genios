@@ -100,15 +100,13 @@ const ICONS = {
     </g>
   </svg>`,
   bateria: `<svg viewBox="0 0 64 64" aria-label="Símbolo de pila">
-    <line x1="4" y1="32" x2="20" y2="32" stroke="#ffd23f" stroke-width="3"/>
-    <line x1="20" y1="14" x2="20" y2="50" stroke="#ff8a3d" stroke-width="3"/>
-    <line x1="28" y1="22" x2="28" y2="42" stroke="#ff8a3d" stroke-width="6"/>
-    <line x1="28" y1="32" x2="36" y2="32" stroke="#ffd23f" stroke-width="3"/>
-    <line x1="36" y1="14" x2="36" y2="50" stroke="#ff8a3d" stroke-width="3"/>
-    <line x1="44" y1="22" x2="44" y2="42" stroke="#ff8a3d" stroke-width="6"/>
-    <line x1="44" y1="32" x2="60" y2="32" stroke="#ffd23f" stroke-width="3"/>
-    <text x="14" y="11" fill="#fef8ec" font-size="11">+</text>
-    <text x="50" y="11" fill="#fef8ec" font-size="11">−</text>
+    <text x="32" y="12" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
+    <line x1="16" y1="18" x2="48" y2="18" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="22" y1="26" x2="42" y2="26" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="16" y1="34" x2="48" y2="34" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="22" y1="42" x2="42" y2="42" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="16" y1="50" x2="48" y2="50" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+    <text x="32" y="62" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
   </svg>`,
   interruptor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de interruptor">
     <line x1="4" y1="42" x2="16" y2="42" stroke="#ffd23f" stroke-width="3"/>
@@ -337,29 +335,26 @@ const THEORY_PRIMARIA = [
   },
 {
     title:'Polaridad: el sentido importa',
-    body:`<p>Algunos componentes son <b>polarizados</b>: solo funcionan si los conectas en el sentido correcto. Otros son <b>no polarizados</b> y funcionan en cualquier sentido.</p>
-      <p><b>Polarizados</b> (tienen + y −): pila, LED, capacitor electrolítico, buzzer, motor.</p>
+    body:`<p style="text-align:center;font-size:1.1rem;font-weight:800;color:#ffd23f;">En el LED: patita <b>larga = +</b> · patita <b>corta = −</b></p>
+      <p>El LED es el ejemplo más claro de componente <b>polarizado</b>: solo enciende si lo conectás en el sentido correcto.</p>
+      <p><b>Polarizados</b> (tienen + y −): LED, pila, capacitor electrolítico, buzzer, motor, diodo.</p>
       <p><b>No polarizados</b>: resistencia, interruptor, pulsador, jumpers.</p>
-      <p>Si conectas al revés un componente polarizado, puede que no funcione o incluso se dañe. Por eso siempre hay que revisar el terminal positivo (+) y el negativo (−).</p>`,
-    diagram:`<svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
-      
-      <text x="50" y="21" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="34" y1="35" x2="66" y2="35" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="41" y1="43" x2="59" y2="43" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="34" y1="51" x2="66" y2="51" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="41" y1="59" x2="59" y2="59" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="34" y1="67" x2="66" y2="67" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <text x="50" y="83" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
-      <text x="50" y="97" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
-    
-      <path d="M50 21 V14 H200" fill="none" stroke="#fde047" stroke-width="3"/>
-      <!-- LED -->
-      <polygon points="200,5 200,35 230,20" fill="#ff4d5e" stroke="#ff4d5e" stroke-width="2"/>
-      <line x1="230" y1="5" x2="230" y2="35" stroke="#ff4d5e" stroke-width="3"/>
-      <line x1="230" y1="20" x2="280" y2="20" stroke="#fde047" stroke-width="3"/>
-      <path d="M280 20 V95 H50 V83" fill="none" stroke="#fde047" stroke-width="3"/>
-      <text x="215" y="55" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ larga</text>
-      <text x="160" y="8" fill="#fde047" font-size="11" font-weight="700">hacia el +</text>
+      <p>Si conectás el LED al revés, no enciende. Si lo conectás sin resistencia, se puede quemar.</p>`,
+    diagram:`<svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+      <text x="140" y="22" text-anchor="middle" fill="#ffd23f" font-size="14" font-weight="800">LED — mirá las patitas</text>
+      <!-- cuerpo -->
+      <ellipse cx="140" cy="70" rx="36" ry="28" fill="#ff4d5e" stroke="#ff8a9a" stroke-width="2"/>
+      <text x="140" y="76" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">LED</text>
+      <rect x="118" y="95" width="44" height="12" rx="2" fill="#4a3030"/>
+      <!-- pata LARGA = + (izquierda) -->
+      <line x1="128" y1="107" x2="128" y2="165" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+      <text x="128" y="185" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+ LARGA</text>
+      <!-- pata CORTA = − (derecha) -->
+      <line x1="152" y1="107" x2="152" y2="148" stroke="#fb923c" stroke-width="6" stroke-linecap="round"/>
+      <text x="152" y="170" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">− CORTA</text>
+      <!-- flechas -->
+      <text x="70" y="140" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">ánodo</text>
+      <text x="210" y="130" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">cátodo</text>
     </svg>`
   },
 {
@@ -373,32 +368,27 @@ const THEORY_PRIMARIA = [
         <li>Una <b>abertura</b> = Interruptor</li>
       </ul>
       <p>Aprender estos símbolos te permite leer cualquier esquema de circuito. ¡Practica en el juego de Memorama!</p>`,
-    diagram:`<svg viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- R -->
-      <text x="30" y="18" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">R</text>
-      <path d="M10 50 h8 l5 -12 7 24 7 -24 7 24 5 -12 h8" fill="none" stroke="#fb923c" stroke-width="2.5"/>
-      <!-- LED -->
-      <text x="100" y="18" text-anchor="middle" fill="#ff4d5e" font-size="11" font-weight="700">LED</text>
-      <polygon points="85,35 85,65 110,50" fill="none" stroke="#ff4d5e" stroke-width="2.5"/>
-      <line x1="110" y1="35" x2="110" y2="65" stroke="#ff4d5e" stroke-width="3"/>
-      <line x1="70" y1="50" x2="85" y2="50" stroke="#fde047" stroke-width="2"/>
-      <line x1="110" y1="50" x2="125" y2="50" stroke="#fde047" stroke-width="2"/>
-      <!-- Pila estándar -->
-      <text x="175" y="14" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">PILA</text>
-      <line x1="159" y1="28" x2="191" y2="28" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="166" y1="36" x2="184" y2="36" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="159" y1="44" x2="191" y2="44" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="166" y1="52" x2="184" y2="52" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="159" y1="60" x2="191" y2="60" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <text x="175" y="76" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
-      <text x="175" y="90" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
-      <!-- SW -->
-      <text x="250" y="18" text-anchor="middle" fill="#ffd23f" font-size="11" font-weight="700">SW</text>
-      <circle cx="230" cy="50" r="4" fill="#ffd23f"/>
-      <circle cx="270" cy="50" r="4" fill="#ffd23f"/>
-      <line x1="230" y1="50" x2="255" y2="35" stroke="#4ade80" stroke-width="3"/>
-      <!-- GND note -->
-      <text x="310" y="55" text-anchor="middle" fill="#aaa" font-size="10">…</text>
+    diagram:`<svg viewBox="0 0 340 110" xmlns="http://www.w3.org/2000/svg">
+      <text x="40" y="16" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">R</text>
+      <path d="M18 55 h10 l5 -12 7 24 7 -24 7 24 5 -12 h10" fill="none" stroke="#fb923c" stroke-width="2.5"/>
+      <text x="110" y="16" text-anchor="middle" fill="#ff4d5e" font-size="11" font-weight="700">LED</text>
+      <ellipse cx="110" cy="48" rx="16" ry="12" fill="#ff4d5e"/>
+      <line x1="102" y1="60" x2="102" y2="85" stroke="#4ade80" stroke-width="3"/>
+      <line x1="118" y1="60" x2="118" y2="78" stroke="#fb923c" stroke-width="3"/>
+      <text x="102" y="98" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="700">+</text>
+      <text x="118" y="98" text-anchor="middle" fill="#fb923c" font-size="9" font-weight="700">−</text>
+      <text x="180" y="14" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">PILA</text>
+      <line x1="164" y1="24" x2="196" y2="24" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="170" y1="32" x2="190" y2="32" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="164" y1="40" x2="196" y2="40" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="170" y1="48" x2="190" y2="48" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="164" y1="56" x2="196" y2="56" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <text x="180" y="72" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="800">+</text>
+      <text x="180" y="86" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="800">−</text>
+      <text x="260" y="16" text-anchor="middle" fill="#ffd23f" font-size="11" font-weight="700">SW</text>
+      <circle cx="245" cy="50" r="4" fill="#ffd23f"/>
+      <circle cx="275" cy="50" r="4" fill="#ffd23f"/>
+      <line x1="245" y1="50" x2="268" y2="36" stroke="#4ade80" stroke-width="3"/>
     </svg>`
   },
 {
@@ -407,29 +397,43 @@ const THEORY_PRIMARIA = [
       <p>Los componentes van <b>uno detrás del otro</b>, como amigos tomados de la mano. La corriente sale del <b>+</b>, pasa por todos y <b>regresa al −</b>.</p>
       <p>Si un componente falla → se interrumpe el camino → todo se apaga.</p>
       <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>`,
-    diagram:`<svg viewBox="0 0 420 170" xmlns="http://www.w3.org/2000/svg">
-      
-      <text x="42" y="41" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="26" y1="55" x2="58" y2="55" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="33" y1="63" x2="51" y2="63" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="71" x2="58" y2="71" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="33" y1="79" x2="51" y2="79" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="87" x2="58" y2="87" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <text x="42" y="103" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
-      <text x="42" y="117" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
-    
-      <path d="M42 41 V20 H390 V50" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
-      <polygon points="150,14 162,20 150,26" fill="#fde047"/>
-      <text x="250" y="14" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
-      <line x1="150" y1="20" x2="150" y2="50" stroke="#fde047" stroke-width="3"/>
-      <path d="M150 50 h10 l6 -12 8 24 8 -24 8 24 6 -12 h10" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="178" y="80" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
-      <path d="M198 50 h10 l6 -12 8 24 8 -24 8 24 6 -12 h10" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="236" y="80" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
-      <line x1="256" y1="50" x2="256" y2="20" stroke="#fde047" stroke-width="3"/>
-      <path d="M390 50 V125 H42 V103" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
-      <polygon points="220,131 208,125 220,119" fill="#fb923c"/>
-      <text x="230" y="148" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+    diagram:`<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg">
+      <!-- Pila vertical -->
+      <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
+      <line x1="26" y1="38" x2="58" y2="38" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="32" y1="46" x2="52" y2="46" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="54" x2="58" y2="54" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="32" y1="62" x2="52" y2="62" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="70" x2="58" y2="70" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <text x="42" y="86" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
+      <text x="42" y="100" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+
+      <!-- Cable superior RECTO: desde + de la pila -->
+      <line x1="42" y1="38" x2="42" y2="28" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="42" y1="28" x2="100" y2="28" stroke="#fde047" stroke-width="3.5"/>
+
+      <!-- R1 en línea (zigzag horizontal) -->
+      <polyline points="100,28 108,28 114,16 122,40 130,16 138,40 144,28 160,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="130" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
+
+      <!-- tramo recto entre R1 y R2 -->
+      <line x1="160" y1="28" x2="180" y2="28" stroke="#fde047" stroke-width="3.5"/>
+
+      <!-- R2 en línea -->
+      <polyline points="180,28 188,28 194,16 202,40 210,16 218,40 224,28 240,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+      <text x="210" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
+
+      <!-- cierre superior e ida a la derecha -->
+      <line x1="240" y1="28" x2="380" y2="28" stroke="#fde047" stroke-width="3.5"/>
+      <polygon points="300,20 312,28 300,36" fill="#fde047"/>
+      <text x="300" y="16" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
+
+      <!-- bajada y retorno RECTO al − -->
+      <line x1="380" y1="28" x2="380" y2="120" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="380" y1="120" x2="42" y2="120" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="42" y1="120" x2="42" y2="70" stroke="#fde047" stroke-width="3.5"/>
+      <polygon points="220,128 208,120 220,112" fill="#fb923c"/>
+      <text x="220" y="144" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
     </svg>`
   },
 {
@@ -3484,13 +3488,13 @@ function simulateLab(){
    RECETAS DESBLOQUEABLES (reto del lab → receta nueva)
    ============================================================ */
 const LAB_UNLOCK_MAP = {
-  led_safe: ['paralelo'],
-  series_two: ['serie'],
-  switch_control: ['motor', 'buzzer'],
-  pot_use: ['buzzer'],
-  safe_9v: ['serie']
+  led_safe: ['paralelo', 'safe1k'],
+  series_two: ['serie', 'sw_doble'],
+  switch_control: ['motor', 'buzzer', 'pulsador'],
+  pot_use: ['pot', 'ldr'],
+  safe_9v: ['serie', 'diodo_led', 'tres_paralelo', 'motor_led']
 };
-const LAB_LOCKED_DEFAULT = ['paralelo', 'serie', 'motor', 'buzzer'];
+const LAB_LOCKED_DEFAULT = ['paralelo', 'serie', 'motor', 'buzzer', 'pot', 'ldr', 'diodo_led', 'tres_paralelo', 'motor_led', 'sw_doble', 'safe1k', 'pulsador'];
 
 function labGetUnlocks(){
   try {
@@ -3527,10 +3531,18 @@ function labRenderPresetButtons(){
   var specs = [
     { key:'simple', free:true },
     { key:'interruptor', free:true },
+    { key:'safe1k', free:false },
+    { key:'pulsador', free:false },
     { key:'paralelo', free:false },
     { key:'serie', free:false },
+    { key:'pot', free:false },
+    { key:'ldr', free:false },
+    { key:'diodo_led', free:false },
+    { key:'tres_paralelo', free:false },
     { key:'motor', free:false },
-    { key:'buzzer', free:false }
+    { key:'motor_led', free:false },
+    { key:'buzzer', free:false },
+    { key:'sw_doble', free:false }
   ];
   row.innerHTML = specs.map(function(s){
     var p = LAB_PRESETS[s.key];
@@ -3627,6 +3639,123 @@ const LAB_PRESETS = {
       ['bateria_1_a','buzzer_1_a'],['buzzer_1_b','bateria_1_b']
     ]
   }
+
+  ,
+  pulsador: {
+    label:'LED con pulsador',
+    materials:['1 pila de 9V','1 pulsador','1 resistencia 220Ω','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'pulsador_1', type:'pulsador', closed:false, holeA:'top:6:1', holeB:'top:10:1'},
+      {id:'resistencia_1', type:'resistencia', value:220, closed:true, holeA:'top:10:3', holeB:'top:14:1'},
+      {id:'led_1', type:'led', color:'red', closed:true, holeA:'top:14:3', holeB:'top:18:1'}
+    ],
+    wires:[
+      ['bateria_1_a','pulsador_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  },
+  pot: {
+    label:'LED + potenciómetro',
+    materials:['1 pila de 9V','1 potenciómetro','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'potenciometro_1', type:'potenciometro', value:5000, closed:true, holeA:'top:8:1', holeB:'top:14:1'},
+      {id:'led_1', type:'led', color:'green', closed:true, holeA:'top:14:3', holeB:'top:18:1'}
+    ],
+    wires:[
+      ['bateria_1_a','potenciometro_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  },
+  safe1k: {
+    label:'LED seguro 1kΩ',
+    materials:['1 pila de 9V','1 resistencia 1kΩ','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'resistencia_1', type:'resistencia', value:1000, closed:true, holeA:'top:8:1', holeB:'top:12:1'},
+      {id:'led_1', type:'led', color:'blue', closed:true, holeA:'top:12:3', holeB:'top:16:1'}
+    ],
+    wires:[
+      ['bateria_1_a','resistencia_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  },
+  ldr: {
+    label:'LED + LDR (luz)',
+    materials:['1 pila de 9V','1 LDR','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'ldr_1', type:'ldr', value:5000, light:true, closed:true, holeA:'top:8:1', holeB:'top:12:1'},
+      {id:'led_1', type:'led', color:'yellow', closed:true, holeA:'top:12:3', holeB:'top:16:1'}
+    ],
+    wires:[
+      ['bateria_1_a','ldr_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  },
+  diodo_led: {
+    label:'Diodo + LED',
+    materials:['1 pila de 9V','1 diodo','1 resistencia 220Ω','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'diodo_1', type:'diodo', closed:true, holeA:'top:6:1', holeB:'top:10:1'},
+      {id:'resistencia_1', type:'resistencia', value:220, closed:true, holeA:'top:10:3', holeB:'top:14:1'},
+      {id:'led_1', type:'led', color:'red', closed:true, holeA:'top:14:3', holeB:'top:18:1'}
+    ],
+    wires:[
+      ['bateria_1_a','diodo_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  },
+  tres_paralelo: {
+    label:'3 LEDs en paralelo',
+    materials:['1 pila de 9V','3 resistencias 220Ω','3 LEDs','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:120, closed:true, voltage:9},
+      {id:'resistencia_1', type:'resistencia', x:200, y:20, closed:true, value:220},
+      {id:'led_1', type:'led', color:'red', x:400, y:20, closed:true},
+      {id:'resistencia_2', type:'resistencia', x:200, y:120, closed:true, value:220},
+      {id:'led_2', type:'led', color:'green', x:400, y:120, closed:true},
+      {id:'resistencia_3', type:'resistencia', x:200, y:220, closed:true, value:220},
+      {id:'led_3', type:'led', color:'blue', x:400, y:220, closed:true}
+    ],
+    wires:[
+      ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b'],
+      ['bateria_1_a','resistencia_2_a'],['resistencia_2_b','led_2_a'],['led_2_b','bateria_1_b'],
+      ['bateria_1_a','resistencia_3_a'],['resistencia_3_b','led_3_a'],['led_3_b','bateria_1_b']
+    ]
+  },
+  motor_led: {
+    label:'Motor + LED',
+    materials:['1 pila de 9V','1 motor','1 resistencia 220Ω','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', x:10, y:120, closed:true, voltage:9},
+      {id:'motor_1', type:'motor', x:280, y:40, closed:true},
+      {id:'resistencia_1', type:'resistencia', x:200, y:200, closed:true, value:220},
+      {id:'led_1', type:'led', color:'red', x:400, y:200, closed:true}
+    ],
+    wires:[
+      ['bateria_1_a','motor_1_a'],['motor_1_b','bateria_1_b'],
+      ['bateria_1_a','resistencia_1_a'],['resistencia_1_b','led_1_a'],['led_1_b','bateria_1_b']
+    ]
+  },
+  sw_doble: {
+    label:'2 interruptores en serie',
+    materials:['1 pila de 9V','2 interruptores','1 resistencia 220Ω','1 LED','jumpers'],
+    instances:[
+      {id:'bateria_1', type:'bateria', voltage:9, closed:true, holeA:'rail+:2', holeB:'rail-:2'},
+      {id:'interruptor_1', type:'interruptor', closed:true, holeA:'top:4:1', holeB:'top:8:1'},
+      {id:'interruptor_2', type:'interruptor', closed:true, holeA:'top:8:3', holeB:'top:12:1'},
+      {id:'resistencia_1', type:'resistencia', value:220, closed:true, holeA:'top:12:3', holeB:'top:16:1'},
+      {id:'led_1', type:'led', color:'red', closed:true, holeA:'top:16:3', holeB:'top:20:1'}
+    ],
+    wires:[
+      ['bateria_1_a','interruptor_1_a'],
+      ['led_1_b','bateria_1_b']
+    ]
+  }
+
 };
 
 
