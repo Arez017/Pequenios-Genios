@@ -295,7 +295,7 @@
     <div class="game-view active" id="game-memorama">
       <div class="game-view-head">
         <h3>🧠 Memorama · Gemelos</h3>
-        <p>Encontrá los <b>gemelos</b>: cada carta tiene el <b>símbolo arriba</b> y el <b>nombre abajo</b>. Buscá las dos iguales.</p>
+        <p>Encontrá los <b>gemelos</b>: las dos cartas de cada par son <b>idénticas</b> (símbolo + nombre). Buscá las dos iguales.</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
         <button class="btn ghost memo-level-btn active" data-level="facil" onclick="setMemoLevel('facil')">Fácil</button>
@@ -305,7 +305,7 @@
       </div>
       <div class="panel-top">
         <div class="stat">Movimientos: <b id="memoMoves">0</b></div>
-        <div class="stat">Gemelos: <b id="memoPairs">0</b>/<span id="memoTotal">4</span></div>
+        <div class="stat">Gemelos: <b id="memoPairs">0</b>/<span id="memoTotal">5</span></div>
         <button class="btn ghost" onclick="initMemory()">🔄 Reiniciar</button>
       </div>
       <div class="memo-grid" id="memoGrid"></div>

@@ -353,26 +353,47 @@ const THEORY_PRIMARIA = [
   },
 {
     title:'Polaridad: el sentido importa',
-    body:`<p style="text-align:center;font-size:1.1rem;font-weight:800;color:#ffd23f;">En el LED: patita <b>larga = +</b> · patita <b>corta = −</b></p>
+    body:`<p style="text-align:center;font-size:1.15rem;font-weight:800;color:#ffd23f;">En el LED: patita <b>larga = +</b> · patita <b>corta = −</b></p>
       <p>El LED es el ejemplo más claro de componente <b>polarizado</b>: solo enciende si lo conectás en el sentido correcto.</p>
       <p><b>Polarizados</b> (tienen + y −): LED, pila, capacitor electrolítico, buzzer, motor, diodo.</p>
       <p><b>No polarizados</b>: resistencia, interruptor, pulsador, jumpers.</p>
-      <p>Si conectás el LED al revés, no enciende. Si lo conectás sin resistencia, se puede quemar.</p>`,
-    diagram:`<svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
-      <text x="140" y="22" text-anchor="middle" fill="#ffd23f" font-size="14" font-weight="800">LED — mirá las patitas</text>
-      <!-- cuerpo -->
-      <ellipse cx="140" cy="70" rx="36" ry="28" fill="#ff4d5e" stroke="#ff8a9a" stroke-width="2"/>
-      <text x="140" y="76" text-anchor="middle" fill="#fff" font-size="14" font-weight="800">LED</text>
-      <rect x="118" y="95" width="44" height="12" rx="2" fill="#4a3030"/>
-      <!-- pata LARGA = + (izquierda) -->
-      <line x1="128" y1="107" x2="128" y2="165" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
-      <text x="128" y="185" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+ LARGA</text>
-      <!-- pata CORTA = − (derecha) -->
-      <line x1="152" y1="107" x2="152" y2="148" stroke="#fb923c" stroke-width="6" stroke-linecap="round"/>
-      <text x="152" y="170" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">− CORTA</text>
-      <!-- flechas -->
-      <text x="70" y="140" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">ánodo</text>
-      <text x="210" y="130" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">cátodo</text>
+      <p style="text-align:center;font-weight:700;color:#4ade80;">✅ Bien conectado → enciende &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color:#ff5c5c;">❌ Al revés → no enciende</span></p>
+      <p>Si lo conectás sin resistencia, se puede quemar.</p>`,
+    diagram:`<svg viewBox="0 0 420 230" xmlns="http://www.w3.org/2000/svg">
+      <text x="210" y="18" text-anchor="middle" fill="#ffd23f" font-size="14" font-weight="800">LED — ¡el sentido importa!</text>
+
+      <!-- ===== BIEN CONECTADO (izquierda) ===== -->
+      <rect x="20" y="30" width="175" height="185" rx="12" fill="#0d2e24" stroke="#4ade80" stroke-width="2"/>
+      <text x="107" y="50" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">✅ BIEN</text>
+      <!-- LED brillante -->
+      <ellipse cx="107" cy="85" rx="32" ry="26" fill="#ff4d5e" stroke="#ffd23f" stroke-width="3"/>
+      <text x="107" y="90" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">LED</text>
+      <rect x="88" y="108" width="38" height="11" rx="2" fill="#3a2828"/>
+      <!-- pata larga + -->
+      <line x1="96" y1="119" x2="96" y2="165" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+      <text x="96" y="182" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ LARGA</text>
+      <!-- pata corta − -->
+      <line x1="118" y1="119" x2="118" y2="148" stroke="#fb923c" stroke-width="6" stroke-linecap="round"/>
+      <text x="118" y="165" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">− CORTA</text>
+      <!-- rayos de luz -->
+      <g stroke="#ffd23f" stroke-width="2" fill="none" stroke-linecap="round">
+        <line x1="85" y1="55" x2="72" y2="42"/><line x1="107" y1="52" x2="107" y2="36"/><line x1="129" y1="55" x2="142" y2="42"/>
+      </g>
+      <text x="107" y="205" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">¡enciende!</text>
+
+      <!-- ===== AL REVÉS (derecha) ===== -->
+      <rect x="225" y="30" width="175" height="185" rx="12" fill="#2a1515" stroke="#ff5c5c" stroke-width="2"/>
+      <text x="312" y="50" text-anchor="middle" fill="#ff5c5c" font-size="12" font-weight="800">❌ AL REVÉS</text>
+      <!-- LED apagado -->
+      <ellipse cx="312" cy="85" rx="32" ry="26" fill="#5a3030" stroke="#7a4545" stroke-width="2"/>
+      <text x="312" y="90" text-anchor="middle" fill="#888" font-size="13" font-weight="800">LED</text>
+      <rect x="293" y="108" width="38" height="11" rx="2" fill="#3a2828"/>
+      <!-- patas invertidas -->
+      <line x1="301" y1="119" x2="301" y2="148" stroke="#fb923c" stroke-width="6" stroke-linecap="round"/>
+      <text x="301" y="165" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">− CORTA</text>
+      <line x1="323" y1="119" x2="323" y2="165" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+      <text x="323" y="182" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ LARGA</text>
+      <text x="312" y="205" text-anchor="middle" fill="#ff5c5c" font-size="11" font-weight="700">no enciende</text>
     </svg>`
   },
 {
@@ -1302,7 +1323,7 @@ COMPONENTS.forEach(c=>{
 /* ============================================================
    JUEGO 1: MEMORAMA (con niveles)
    ============================================================ */
-let memoState = {flipped:[], matched:0, moves:0, lock:false, pairs:4, level:'facil'};
+let memoState = {flipped:[], matched:0, moves:0, lock:false, pairs:5, level:'facil'};
 
 // Solo componentes que tienen icono SVG seguro
 const MEMO_SAFE = ['resistencia','led','bateria','interruptor','capacitor','ldr','buzzer','motor','potenciometro','transistor'];
@@ -1345,11 +1366,13 @@ function initMemory(){
   const available = MEMO_SAFE.filter(id => ICONS[id]);
   const pool = shuffle(available).slice(0, memoState.pairs);
 
+  // Gemelos de verdad: cada par son DOS cartas IDÉNTICAS (símbolo + nombre juntas)
   let cards = [];
   pool.forEach(id=>{
     const comp = COMPONENTS.find(c=>c.id===id) || {id, name:id};
-    cards.push({type:'name', id, label:comp.name});
-    cards.push({type:'icon', id, label:comp.name});
+    // Dos cartas gemelas idénticas
+    cards.push({id, label:comp.name});
+    cards.push({id, label:comp.name});
   });
   cards = shuffle(cards);
 
@@ -1365,11 +1388,14 @@ function initMemory(){
     el.className = 'memo-card';
     el.dataset.id = c.id;
     el.dataset.index = i;
-    const iconHtml = (c.type==='icon' && ICONS[c.id]) ? ICONS[c.id] : '';
-    const nameHtml = c.type==='name' ? `<span style="font-size:0.75rem;font-weight:700;text-align:center;padding:4px;">${c.label}</span>` : '';
+    const iconHtml = ICONS[c.id] || '';
+    const nameHtml = `<span style="font-size:0.72rem;font-weight:700;text-align:center;padding:2px 4px;line-height:1.2;">${c.label}</span>`;
     el.innerHTML = `<div class="memo-inner">
       <div class="memo-face memo-front"></div>
-      <div class="memo-face memo-back">${iconHtml}${nameHtml}</div>
+      <div class="memo-face memo-back" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+        <div style="width:42px;height:42px;flex-shrink:0;">${iconHtml}</div>
+        ${nameHtml}
+      </div>
     </div>`;
     el.onclick = ()=>flipMemo(el);
     grid.appendChild(el);
