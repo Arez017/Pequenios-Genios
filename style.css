@@ -288,9 +288,10 @@
   .memo-front::after{content:"⚡"; font-size:1.8rem;}
   .memo-back{
     background:var(--cream); color:var(--ink); transform:rotateY(180deg);
-    font-size:0.68rem; font-weight:700; text-align:center; line-height:1.2; gap:4px;
+    font-size:0.72rem; font-weight:700; text-align:center; line-height:1.15;
+    gap:2px; padding:8px 6px 8px; justify-content:center;
   }
-  .memo-back svg{width:98px;height:98px;}
+  .memo-back svg{width:82%; height:82%; max-width:110px; max-height:110px;}
   .memo-card.matched .memo-back{background:var(--ok-green); color:#04310f;}
 
   /* GAME 2 circuit builder */

@@ -1366,11 +1366,10 @@ function initMemory(){
   const available = MEMO_SAFE.filter(id => ICONS[id]);
   const pool = shuffle(available).slice(0, memoState.pairs);
 
-  // Gemelos de verdad: cada par son DOS cartas IDÉNTICAS (símbolo + nombre juntas)
+  // Gemelos de verdad: DOS cartas IDÉNTICAS — símbolo grande + nombre abajo
   let cards = [];
   pool.forEach(id=>{
     const comp = COMPONENTS.find(c=>c.id===id) || {id, name:id};
-    // Dos cartas gemelas idénticas
     cards.push({id, label:comp.name});
     cards.push({id, label:comp.name});
   });
@@ -1389,12 +1388,11 @@ function initMemory(){
     el.dataset.id = c.id;
     el.dataset.index = i;
     const iconHtml = ICONS[c.id] || '';
-    const nameHtml = `<span style="font-size:0.72rem;font-weight:700;text-align:center;padding:2px 4px;line-height:1.2;">${c.label}</span>`;
     el.innerHTML = `<div class="memo-inner">
       <div class="memo-face memo-front"></div>
-      <div class="memo-face memo-back" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
-        <div style="width:42px;height:42px;flex-shrink:0;">${iconHtml}</div>
-        ${nameHtml}
+      <div class="memo-face memo-back">
+        ${iconHtml}
+        <span>${c.label}</span>
       </div>
     </div>`;
     el.onclick = ()=>flipMemo(el);
