@@ -869,88 +869,155 @@ function switchGame(name){
    JUEGO 5 (nuevo): CONECTA LOS CABLES
    ============================================================ */
 let wireInitDone = false;
-const WIRE_COMPONENTS = [
-  /* Camino en serie horizontal (no cuadrado): PILA → SW → R → LED → retorno */
-  {id:'bateria', label:'PILA', x:24, y:110, w:100, h:64,
-    terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
-  {id:'interruptor', label:'INTERRUPTOR', x:180, y:110, w:110, h:64,
-    terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]},
-  {id:'resistencia', label:'RESISTENCIA', x:350, y:110, w:110, h:64,
-    terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:110, dy:32}]},
-  {id:'led', label:'LED', x:510, y:95, w:100, h:90,
-    terms:[{id:'led_pos', tag:'+', dx:0, dy:45},{id:'led_neg', tag:'-', dx:100, dy:45}]}
-];
-const WIRE_PAIRS = [
-  ['batt_pos','sw_l'],
-  ['sw_r','res_r'],
-  ['res_l','led_pos'],
-  ['led_neg','batt_neg']
-];
-let wireConnected = []; // array of [a,b] arrays already made
-let wireDrag = null; // {fromId, x1,y1}
+/* Layouts por nivel — cada nivel es realmente distinto */
+function wireLayoutSerie(){
+  return [
+    {id:'bateria', label:'PILA', x:24, y:110, w:100, h:64,
+      terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
+    {id:'interruptor', label:'INTERRUPTOR', x:180, y:110, w:110, h:64,
+      terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]},
+    {id:'resistencia', label:'RESISTENCIA', x:350, y:110, w:110, h:64,
+      terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:110, dy:32}]},
+    {id:'led', label:'LED', x:510, y:95, w:100, h:90,
+      terms:[{id:'led_pos', tag:'+', dx:0, dy:45},{id:'led_neg', tag:'-', dx:100, dy:45}]}
+  ];
+}
+function wireLayoutSinSW(){
+  return [
+    {id:'bateria', label:'PILA', x:40, y:110, w:100, h:64,
+      terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
+    {id:'resistencia', label:'RESISTENCIA', x:220, y:110, w:120, h:64,
+      terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:120, dy:32}]},
+    {id:'led', label:'LED', x:420, y:95, w:110, h:90,
+      terms:[{id:'led_pos', tag:'+', dx:0, dy:45},{id:'led_neg', tag:'-', dx:110, dy:45}]}
+  ];
+}
+function wireLayoutPolaridad(){
+  /* LED con patas invertidas visualmente: + a la derecha, − a la izquierda */
+  return [
+    {id:'bateria', label:'PILA', x:24, y:110, w:100, h:64,
+      terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
+    {id:'interruptor', label:'INTERRUPTOR', x:180, y:110, w:110, h:64,
+      terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]},
+    {id:'resistencia', label:'RESISTENCIA', x:350, y:110, w:110, h:64,
+      terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:110, dy:32}]},
+    {id:'led', label:'LED', x:510, y:95, w:100, h:90, flip:true,
+      terms:[{id:'led_neg', tag:'−', dx:0, dy:45},{id:'led_pos', tag:'+', dx:100, dy:45}]}
+  ];
+}
+function wireLayoutRevuelto(){
+  /* Componentes en posiciones no lineales */
+  return [
+    {id:'bateria', label:'PILA', x:30, y:60, w:100, h:64,
+      terms:[{id:'batt_pos', tag:'+', dx:100, dy:32},{id:'batt_neg', tag:'-', dx:0, dy:32}]},
+    {id:'led', label:'LED', x:480, y:50, w:100, h:90,
+      terms:[{id:'led_pos', tag:'+', dx:0, dy:45},{id:'led_neg', tag:'-', dx:100, dy:45}]},
+    {id:'resistencia', label:'RESISTENCIA', x:250, y:200, w:120, h:64,
+      terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:120, dy:32}]},
+    {id:'interruptor', label:'INTERRUPTOR', x:40, y:220, w:110, h:64,
+      terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]}
+  ];
+}
+function wireLayoutSinPistas(){
+  /* Igual que serie pero sin etiquetas + / − */
+  return [
+    {id:'bateria', label:'PILA', x:24, y:110, w:100, h:64,
+      terms:[{id:'batt_pos', tag:'', dx:100, dy:32},{id:'batt_neg', tag:'', dx:0, dy:32}]},
+    {id:'interruptor', label:'INTERRUPTOR', x:180, y:110, w:110, h:64,
+      terms:[{id:'sw_l', tag:'', dx:0, dy:32},{id:'sw_r', tag:'', dx:110, dy:32}]},
+    {id:'resistencia', label:'RESISTENCIA', x:350, y:110, w:110, h:64,
+      terms:[{id:'res_l', tag:'', dx:0, dy:32},{id:'res_r', tag:'', dx:110, dy:32}]},
+    {id:'led', label:'LED', x:510, y:95, w:100, h:90,
+      terms:[{id:'led_pos', tag:'', dx:0, dy:45},{id:'led_neg', tag:'', dx:100, dy:45}]}
+  ];
+}
+
+let wireConnected = [];
+let wireDrag = null;
 let wireLevel = 0;
+
+function wireHasPair(a,b){
+  return wireConnected.some(function(p){ return (p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a); });
+}
+function wireValidSerieFull(){
+  if(wireConnected.length !== 4) return false;
+  const used = {};
+  for(const [a,b] of wireConnected){ if(used[a]||used[b]) return false; used[a]=1; used[b]=1; }
+  const flat = wireConnected.flat();
+  return flat.includes('batt_pos') && flat.includes('batt_neg') && flat.includes('led_pos') && flat.includes('led_neg')
+    && flat.some(function(t){ return t.startsWith('sw_'); })
+    && flat.some(function(t){ return t.startsWith('res_'); });
+}
+function wireValidSinSW(){
+  if(wireConnected.length < 3) return false;
+  const pair = wireHasPair;
+  const toRes = pair('batt_pos','res_l')||pair('batt_pos','res_r');
+  const resLed = pair('res_l','led_pos')||pair('res_r','led_pos');
+  const ledBack = pair('led_neg','batt_neg');
+  return toRes && resLed && ledBack;
+}
+function wireValidNoShort(){
+  if(!wireValidSerieFull()) return false;
+  for(var i=0;i<wireConnected.length;i++){
+    var a=wireConnected[i][0], b=wireConnected[i][1];
+    if((a==='batt_pos'&&b==='batt_neg')||(a==='batt_neg'&&b==='batt_pos')) return false;
+    if((a==='batt_pos'&&(b==='led_pos'||b==='led_neg'))||(b==='batt_pos'&&(a==='led_pos'||a==='led_neg'))) return false;
+  }
+  return true;
+}
+
 const WIRE_LEVELS = [
   {
     name: 'Nivel 1 · Serie básica',
     need: 4,
-    hint: 'Pila (+) → SW → R → LED (+) → LED (−) → Pila (−)',
-    validate: function(){ return typeof wireCircuitLooksValid === 'function' && wireCircuitLooksValid(); }
+    hint: 'Pila (+) → Interruptor → Resistencia → LED (+) → LED (−) → Pila (−)',
+    subtitle: 'Serie: PILA → SW → R → LED → (retorno)',
+    layout: wireLayoutSerie,
+    validate: wireValidSerieFull
   },
   {
-    name: 'Nivel 2 · Sin interruptor (reto mental)',
+    name: 'Nivel 2 · Sin interruptor',
     need: 3,
-    hint: 'Conectá pila (+) → R → LED (+) y LED (−) → pila (−). El SW puede quedar sin cable.',
-    validate: function(){
-      if(wireConnected.length < 3) return false;
-      const flat = wireConnected.flat();
-      const has = function(a,b){ return wireConnected.some(function(p){ return (p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a); }); };
-      // any path batt_pos to res, res to led_pos, led_neg to batt_neg
-      const posToRes = (flat.includes('batt_pos') && (flat.includes('res_l')||flat.includes('res_r')));
-      const resToLed = flat.includes('led_pos') && (flat.includes('res_l')||flat.includes('res_r'));
-      const ledToNeg = flat.includes('led_neg') && flat.includes('batt_neg');
-      // better check pairs
-      const ok1 = wireConnected.some(function(p){
-        return (p[0]==='batt_pos'||p[1]==='batt_pos') && (p[0].startsWith('res_')||p[1].startsWith('res_')||p[0].startsWith('sw_')||p[1].startsWith('sw_'));
-      });
-      // Level 2: allow batt_pos-res, res-led_pos, led_neg-batt_neg (3 wires) OR with sw
-      const pair = function(a,b){ return wireConnected.some(function(p){ return (p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a); }); };
-      const toRes = pair('batt_pos','res_l')||pair('batt_pos','res_r')||pair('batt_pos','sw_l')||pair('batt_pos','sw_r');
-      const swRes = pair('sw_l','res_l')||pair('sw_l','res_r')||pair('sw_r','res_l')||pair('sw_r','res_r');
-      const resLed = pair('res_l','led_pos')||pair('res_r','led_pos');
-      const ledBack = pair('led_neg','batt_neg');
-      if(pair('batt_pos','res_l')||pair('batt_pos','res_r')) return resLed && ledBack;
-      return toRes && (swRes||resLed) && resLed && ledBack;
-    }
+    hint: 'Solo 3 cables: Pila (+) → Resistencia → LED (+) y LED (−) → Pila (−). No hay interruptor.',
+    subtitle: 'Atajo: PILA → R → LED → (retorno) · sin SW',
+    layout: wireLayoutSinSW,
+    validate: wireValidSinSW
   },
   {
     name: 'Nivel 3 · ¡Cuidado con la polaridad!',
     need: 4,
-    hint: 'Igual que el nivel 1, pero si invertís el LED no cuenta. LED (+) = pata larga.',
-    validate: function(){ return typeof wireCircuitLooksValid === 'function' && wireCircuitLooksValid(); }
-  }
-,
-  {
-    name: 'Nivel 4 · Contra reloj mental',
-    need: 4,
-    hint: 'Mismo camino que el nivel 1, pero sin pistas en los cables. Orden: (+) → SW → R → LED(+) → LED(−) → (−)',
-    validate: function(){ return typeof wireCircuitLooksValid === 'function' && wireCircuitLooksValid(); }
+    hint: 'El LED está al revés: la pata larga (+) ahora está a la derecha. Conectá bien la polaridad.',
+    subtitle: 'Serie con LED girado · polaridad importa',
+    layout: wireLayoutPolaridad,
+    validate: wireValidSerieFull
   },
   {
-    name: 'Nivel 5 · Maestro del protoboard',
+    name: 'Nivel 4 · Componentes revueltos',
     need: 4,
-    hint: 'Circuito completo y seguro. Si cortocircuitás o olvidás la R, no cuenta.',
-    validate: function(){
-      if(typeof wireCircuitLooksValid !== 'function' || !wireCircuitLooksValid()) return false;
-      // no cable directo batt_pos - batt_neg
-      for(var i=0;i<wireConnected.length;i++){
-        var a=wireConnected[i][0], b=wireConnected[i][1];
-        if((a==='batt_pos'&&b==='batt_neg')||(a==='batt_neg'&&b==='batt_pos')) return false;
-        if((a==='batt_pos'&&(b==='led_pos'||b==='led_neg'))||(b==='batt_pos'&&(a==='led_pos'||a==='led_neg'))) return false;
-      }
-      return true;
-    }
+    hint: 'Los componentes están desordenados. Armá el mismo camino: (+) → SW → R → LED(+) → LED(−) → (−)',
+    subtitle: '¡Buscá el orden! Componentes en posiciones distintas',
+    layout: wireLayoutRevuelto,
+    validate: wireValidSerieFull
+  },
+  {
+    name: 'Nivel 5 · Maestro · sin pistas',
+    need: 4,
+    hint: 'Sin etiquetas +/−. Circuito completo y seguro. Si cortocircuitás o olvidás la R, no cuenta.',
+    subtitle: 'Sin pistas · no cortocircuitos · no LED sin resistencia',
+    layout: wireLayoutSinPistas,
+    validate: wireValidNoShort
   }
 ];
+
+function getWireComponents(){
+  const lvl = WIRE_LEVELS[wireLevel] || WIRE_LEVELS[0];
+  return (typeof lvl.layout === 'function') ? lvl.layout() : wireLayoutSerie();
+}
+/* compat: código antiguo que usaba WIRE_COMPONENTS */
+var WIRE_COMPONENTS = wireLayoutSerie();
+function refreshWireComponents(){
+  WIRE_COMPONENTS = getWireComponents();
+}
 
 function wireTermPos(termId){
   for(const c of WIRE_COMPONENTS){
@@ -961,30 +1028,26 @@ function wireTermPos(termId){
   return null;
 }
 function wirePairMatches(a,b){
-  // Pares exactos permitidos (polarizados fijos + no polarizados en cualquier sentido)
-  const allowed = [
-    // pila (+) → interruptor (cualquier lado: no tiene polaridad)
+  // Pares permitidos según nivel
+  const allowedBase = [
     ['batt_pos','sw_l'], ['batt_pos','sw_r'],
-    // interruptor → resistencia (ambos sin polaridad)
     ['sw_l','res_l'], ['sw_l','res_r'], ['sw_r','res_l'], ['sw_r','res_r'],
-    // resistencia → LED (+)
     ['res_l','led_pos'], ['res_r','led_pos'],
-    // LED (−) → pila (−)
     ['led_neg','batt_neg']
   ];
+  // Nivel 2: también pila → resistencia directa
+  const allowedL2 = [
+    ['batt_pos','res_l'], ['batt_pos','res_r'],
+    ['res_l','led_pos'], ['res_r','led_pos'],
+    ['led_neg','batt_neg']
+  ];
+  const allowed = (wireLevel === 1) ? allowedL2 : allowedBase;
   return allowed.some(p => (p[0]===a&&p[1]===b) || (p[0]===b&&p[1]===a));
 }
 function wireCircuitLooksValid(){
-  // 4 cables y cada terminal de componente usado a lo sumo 1 vez
-  if(wireConnected.length !== 4) return false;
-  const used = {};
-  for(const [a,b] of wireConnected){
-    if(used[a] || used[b]) return false;
-    used[a]=1; used[b]=1;
-  }
-  // debe incluir conexión al LED+ y LED- y pila+ y pila-
-  const flat = wireConnected.flat();
-  return flat.includes('batt_pos') && flat.includes('batt_neg') && flat.includes('led_pos') && flat.includes('led_neg');
+  const lvl = WIRE_LEVELS[wireLevel];
+  if(lvl && typeof lvl.validate === 'function') return lvl.validate();
+  return wireValidSerieFull();
 }
 function wireAlreadyConnected(a,b){
   return wireConnected.some(p => (p[0]===a&&p[1]===b) || (p[0]===b&&p[1]===a));
@@ -1029,6 +1092,7 @@ function initWireGame(){
   wireConnected = [];
   wireDrag = null;
   if(typeof wireLevel !== 'number') wireLevel = 0;
+  refreshWireComponents();
   document.getElementById('wireCount').textContent = '0';
   var wr = document.getElementById('wireResult');
   if(wr){ wr.textContent = ''; wr.className = 'cb-result'; }
@@ -1077,8 +1141,9 @@ function renderWireBoard(){
   html += `<text x="28" y="30" fill="#b71c1c" font-size="10" font-weight="800">+ camino de ida</text>`;
   html += `<rect x="18" y="326" width="604" height="16" rx="3" fill="#c5d0e0" opacity="0.9"/>`;
   html += `<text x="28" y="338" fill="#0d47a1" font-size="10" font-weight="800">− retorno a la pila</text>`;
-  // Flecha de flujo
-  html += `<text x="320" y="52" text-anchor="middle" fill="#5a5348" font-size="12" font-weight="700">Serie: PILA → INTERRUPTOR → RESISTENCIA → LED → (retorno)</text>`;
+  // Subtítulo del nivel
+  var _sub = (WIRE_LEVELS[wireLevel] && WIRE_LEVELS[wireLevel].subtitle) || 'Serie: PILA → SW → R → LED → (retorno)';
+  html += `<text x="320" y="52" text-anchor="middle" fill="#5a5348" font-size="12" font-weight="700">${_sub}</text>`;
 
   // Cables ya puestos (curvas suaves, colores)
   const wireColors = ['#e53935','#1e88e5','#43a047','#8e24aa','#fb8c00'];
@@ -1124,11 +1189,17 @@ function renderWireBoard(){
       html += `<text x="${x+w/2}" y="${y+h-10}" text-anchor="middle" fill="#3e2723" font-size="10" font-weight="800">RESISTENCIA</text>`;
     } else if(c.id === 'led'){
       const on = complete;
+      const flipped = !!c.flip;
       html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="rgba(255,255,255,0.2)" stroke="${on?'#ff4d5e':'#888'}" stroke-width="2"/>`;
       html += `<ellipse cx="${x+w/2}" cy="${y+32}" rx="22" ry="16" fill="${on?'#ff4d5e':'#4a1520'}" stroke="#6b1f1f" stroke-width="1.5" opacity="${on?1:0.7}"/>`;
       html += `<text x="${x+w/2}" y="${y+36}" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">LED</text>`;
-      html += `<text x="${x+18}" y="${y+72}" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="800">+ LARGA</text>`;
-      html += `<text x="${x+w-18}" y="${y+72}" text-anchor="middle" fill="#f97316" font-size="9" font-weight="800">− CORTA</text>`;
+      if(flipped){
+        html += `<text x="${x+18}" y="${y+72}" text-anchor="middle" fill="#f97316" font-size="9" font-weight="800">− CORTA</text>`;
+        html += `<text x="${x+w-18}" y="${y+72}" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="800">+ LARGA</text>`;
+      } else {
+        html += `<text x="${x+18}" y="${y+72}" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="800">+ LARGA</text>`;
+        html += `<text x="${x+w-18}" y="${y+72}" text-anchor="middle" fill="#f97316" font-size="9" font-weight="800">− CORTA</text>`;
+      }
     } else {
       html += `<rect class="wire-comp-box" x="${x}" y="${y}" width="${w}" height="${h}" rx="10"/>`;
       html += `<text class="wire-comp-label" x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle">${c.label}</text>`;
@@ -1149,7 +1220,8 @@ function renderWireBoard(){
   });
 
   // Mini leyenda
-  html += `<text x="320" y="310" text-anchor="middle" fill="#5a5348" font-size="11" font-weight="600">Arrastrá de un círculo a otro · 4 cables para cerrar el circuito</text>`;
+  var _needL = (WIRE_LEVELS[wireLevel] && WIRE_LEVELS[wireLevel].need) || 4;
+  html += `<text x="320" y="310" text-anchor="middle" fill="#5a5348" font-size="11" font-weight="600">Arrastrá de un círculo a otro · ${_needL} cables para cerrar el circuito</text>`;
 
   svg.setAttribute('viewBox', '0 0 640 360');
   svg.innerHTML = html;
