@@ -118,13 +118,10 @@ const ICONS = {
     </g>
   </svg>`,
   bateria: `<svg viewBox="0 0 64 64" aria-label="Símbolo de pila">
-    <text x="32" y="12" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
-    <line x1="16" y1="18" x2="48" y2="18" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-    <line x1="22" y1="26" x2="42" y2="26" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-    <line x1="16" y1="34" x2="48" y2="34" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-    <line x1="22" y1="42" x2="42" y2="42" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-    <line x1="16" y1="50" x2="48" y2="50" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-    <text x="32" y="62" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
+    <text x="32" y="18" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
+    <line x1="14" y1="28" x2="50" y2="28" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+    <line x1="22" y1="40" x2="42" y2="40" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+    <text x="32" y="56" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
   </svg>`,
   interruptor: `<svg viewBox="0 0 64 64" aria-label="Símbolo de interruptor">
     <line x1="4" y1="42" x2="16" y2="42" stroke="#ffd23f" stroke-width="3"/>
@@ -313,7 +310,7 @@ const THEORY_PRIMARIA = [
     body:`<p style="text-align:center; font-size:1.15rem; font-weight:700; color:#ffd23f; margin-bottom:12px;">
         ¡La corriente necesita un camino REDONDO!
       </p>
-      <p>Imagina una pista de carreras 🏎️. Los electrones salen del <b>+</b> de la pila, dan la vuelta completa y <b>regresan al −</b>. Si hay un hueco en la pista… ¡se detienen todos!</p>
+      <p>Imagina una pista de carreras 🏎️. Los electrones salen del <b>−</b> de la pila, dan la vuelta completa y <b>llegan al +</b>. (La corriente convencional se dibuja al revés: del + al −). Si hay un hueco en la pista… ¡se detienen todos!</p>
       <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:16px 0;">
         <div style="background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; text-align:center; min-width:120px;">
           <div style="font-size:1.6rem;">🔋</div>
@@ -331,17 +328,14 @@ const THEORY_PRIMARIA = [
       <p style="text-align:center; margin-top:8px;"><b>Regla de oro:</b> Si el camino no está cerrado… ¡no hay corriente!</p>`,
     diagram:`<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
       
-      <text x="50" y="41" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="34" y1="55" x2="66" y2="55" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="41" y1="63" x2="59" y2="63" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="34" y1="71" x2="66" y2="71" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="41" y1="79" x2="59" y2="79" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="34" y1="87" x2="66" y2="87" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <text x="50" y="103" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
-      <text x="50" y="117" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+      <text x="50" y="48" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
+      <line x1="32" y1="60" x2="68" y2="60" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <line x1="40" y1="74" x2="60" y2="74" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <text x="50" y="94" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
+      <text x="50" y="112" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
     
       <!-- camino cerrado -->
-      <path d="M50 41 V28 H270 V90 H50 V103" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M50 48 V28 H270 V90 H50 V94" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
       <polygon points="150,22 162,28 150,34" fill="#fde047"/>
       <text x="160" y="18" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">sale del +</text>
       <!-- carga -->
@@ -431,13 +425,10 @@ const THEORY_PRIMARIA = [
 
       <!-- PILA vertical -->
       <text x="230" y="16" text-anchor="middle" fill="#fde047" font-size="12" font-weight="700">PILA</text>
-      <line x1="214" y1="26" x2="246" y2="26" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="220" y1="34" x2="240" y2="34" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="214" y1="42" x2="246" y2="42" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="220" y1="50" x2="240" y2="50" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="214" y1="58" x2="246" y2="58" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <text x="230" y="74" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
-      <text x="230" y="90" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
+      <text x="230" y="28" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
+      <line x1="214" y1="38" x2="246" y2="38" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <line x1="222" y1="52" x2="238" y2="52" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <text x="230" y="70" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
 
       <!-- SW -->
       <text x="310" y="18" text-anchor="middle" fill="#ffd23f" font-size="12" font-weight="700">SW</text>
@@ -455,16 +446,13 @@ const THEORY_PRIMARIA = [
     diagram:`<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg">
       <!-- Pila vertical -->
       <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="26" y1="38" x2="58" y2="38" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="32" y1="46" x2="52" y2="46" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="54" x2="58" y2="54" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="32" y1="62" x2="52" y2="62" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="70" x2="58" y2="70" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="48" x2="58" y2="48" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <line x1="34" y1="62" x2="50" y2="62" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
       <text x="42" y="86" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
       <text x="42" y="100" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
 
       <!-- Cable superior RECTO: desde + de la pila -->
-      <line x1="42" y1="38" x2="42" y2="28" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="42" y1="48" x2="42" y2="28" stroke="#fde047" stroke-width="3.5"/>
       <line x1="42" y1="28" x2="100" y2="28" stroke="#fde047" stroke-width="3.5"/>
 
       <!-- R1 en línea (zigzag horizontal) -->
@@ -486,7 +474,7 @@ const THEORY_PRIMARIA = [
       <!-- bajada y retorno RECTO al − -->
       <line x1="380" y1="28" x2="380" y2="120" stroke="#fde047" stroke-width="3.5"/>
       <line x1="380" y1="120" x2="42" y2="120" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="42" y1="120" x2="42" y2="70" stroke="#fde047" stroke-width="3.5"/>
+      <line x1="42" y1="120" x2="42" y2="62" stroke="#fde047" stroke-width="3.5"/>
       <polygon points="220,128 208,120 220,112" fill="#fb923c"/>
       <text x="220" y="144" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
     </svg>`
@@ -500,11 +488,8 @@ const THEORY_PRIMARIA = [
     diagram:`<svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg">
       
       <text x="42" y="46" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="26" y1="60" x2="58" y2="60" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="33" y1="68" x2="51" y2="68" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="76" x2="58" y2="76" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="33" y1="84" x2="51" y2="84" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
-      <line x1="26" y1="92" x2="58" y2="92" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="26" y1="68" x2="58" y2="68" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+      <line x1="34" y1="82" x2="50" y2="82" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
       <text x="42" y="108" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
       <text x="42" y="122" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
     
