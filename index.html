@@ -294,18 +294,18 @@
     <!-- JUEGO 1: MEMORAMA -->
     <div class="game-view active" id="game-memorama">
       <div class="game-view-head">
-        <h3>🧠 Memorama de símbolos</h3>
-        <p>Encuentra la pareja: el nombre del componente con su símbolo de circuito.</p>
+        <h3>🧠 Memorama · Gemelos</h3>
+        <p>Encontrá los <b>gemelos</b>: cada carta tiene el <b>símbolo arriba</b> y el <b>nombre abajo</b>. Buscá las dos iguales.</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
-        <button class="btn ghost memo-level-btn active" data-level="facil" onclick="setMemoLevel('facil')">Fácil (5)</button>
-        <button class="btn ghost memo-level-btn" data-level="normal" onclick="setMemoLevel('normal')">Normal (7)</button>
-        <button class="btn ghost memo-level-btn" data-level="dificil" onclick="setMemoLevel('dificil')">Difícil (9)</button>
-        <button class="btn ghost memo-level-btn" data-level="extrema" onclick="setMemoLevel('extrema')">⚡ Extrema (10)</button>
+        <button class="btn ghost memo-level-btn active" data-level="facil" onclick="setMemoLevel('facil')">Fácil</button>
+        <button class="btn ghost memo-level-btn" data-level="normal" onclick="setMemoLevel('normal')">Normal</button>
+        <button class="btn ghost memo-level-btn" data-level="dificil" onclick="setMemoLevel('dificil')">Difícil</button>
+        <button class="btn ghost memo-level-btn" data-level="extrema" onclick="setMemoLevel('extrema')">⚡ Extrema</button>
       </div>
       <div class="panel-top">
         <div class="stat">Movimientos: <b id="memoMoves">0</b></div>
-        <div class="stat">Parejas: <b id="memoPairs">0</b>/<span id="memoTotal">4</span></div>
+        <div class="stat">Gemelos: <b id="memoPairs">0</b>/<span id="memoTotal">4</span></div>
         <button class="btn ghost" onclick="initMemory()">🔄 Reiniciar</button>
       </div>
       <div class="memo-grid" id="memoGrid"></div>
@@ -347,10 +347,10 @@
         <p>Algunos componentes deben conectarse en un solo sentido. Adivina el terminal <b>positivo</b>.</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
-        <button class="btn ghost pol-level-btn active" data-level="facil" onclick="setPolLevel('facil')">Fácil (5)</button>
-        <button class="btn ghost pol-level-btn" data-level="normal" onclick="setPolLevel('normal')">Normal (6)</button>
-        <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil (8)</button>
-        <button class="btn ghost pol-level-btn" data-level="extrema" onclick="setPolLevel('extrema')">⚡ Extrema (10)</button>
+        <button class="btn ghost pol-level-btn active" data-level="facil" onclick="setPolLevel('facil')">Fácil</button>
+        <button class="btn ghost pol-level-btn" data-level="normal" onclick="setPolLevel('normal')">Normal</button>
+        <button class="btn ghost pol-level-btn" data-level="dificil" onclick="setPolLevel('dificil')">Difícil</button>
+        <button class="btn ghost pol-level-btn" data-level="extrema" onclick="setPolLevel('extrema')">⚡ Extrema</button>
       </div>
       <div class="panel-top">
         <div class="stat">Puntaje: <b id="polScore">0</b>/<span id="polTotal">5</span></div>
@@ -374,10 +374,10 @@
         <p>Arrastra cada componente a su nombre correcto. ¡Aprende a reconocerlos!</p>
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;">
-        <button class="btn ghost puz-level-btn active" data-level="facil" onclick="setPuzLevel('facil')">Fácil (5)</button>
-        <button class="btn ghost puz-level-btn" data-level="normal" onclick="setPuzLevel('normal')">Normal (8)</button>
-        <button class="btn ghost puz-level-btn" data-level="dificil" onclick="setPuzLevel('dificil')">Difícil (10)</button>
-        <button class="btn ghost puz-level-btn" data-level="extrema" onclick="setPuzLevel('extrema')">⚡ Extrema (12)</button>
+        <button class="btn ghost puz-level-btn active" data-level="facil" onclick="setPuzLevel('facil')">Fácil</button>
+        <button class="btn ghost puz-level-btn" data-level="normal" onclick="setPuzLevel('normal')">Normal</button>
+        <button class="btn ghost puz-level-btn" data-level="dificil" onclick="setPuzLevel('dificil')">Difícil</button>
+        <button class="btn ghost puz-level-btn" data-level="extrema" onclick="setPuzLevel('extrema')">⚡ Extrema</button>
       </div>
       <div class="panel-top">
         <div class="stat">Correctos: <b id="puzScore">0</b>/<span id="puzTotal">4</span></div>

@@ -53,6 +53,24 @@ const PG = {
   sfxOk(){ this.tone(880,0.1); setTimeout(()=>this.tone(1175,0.12),90); },
   sfxBad(){ this.tone(220,0.18,'square',0.06); },
   sfxWin(){ this.tone(523,0.1); setTimeout(()=>this.tone(659,0.1),100); setTimeout(()=>this.tone(784,0.18),200); },
+  sfxClick(){ this.tone(1400,0.04,'triangle',0.045); },
+  sfxWire(){ this.tone(720,0.06,'sine',0.05); setTimeout(()=>this.tone(900,0.05,'sine',0.04),50); },
+  sfxPop(){ this.tone(520,0.07,'triangle',0.05); },
+  sfxSwitch(){ this.tone(300,0.05,'square',0.04); setTimeout(()=>this.tone(450,0.05,'square',0.03),40); },
+  sfxZap(){ this.tone(180,0.1,'sawtooth',0.07); setTimeout(()=>this.tone(90,0.22,'square',0.05),90); },
+  sfxBuzz(){
+    // zumbido corto tipo buzzer activo
+    this.tone(380,0.12,'square',0.055);
+    setTimeout(()=>this.tone(380,0.12,'square',0.05),160);
+    setTimeout(()=>this.tone(380,0.1,'square',0.04),320);
+  },
+  sfxMotor(){
+    // ronroneo grave del motor
+    this.tone(85,0.28,'sawtooth',0.045);
+    setTimeout(()=>this.tone(95,0.22,'sawtooth',0.035),140);
+    setTimeout(()=>this.tone(88,0.2,'sawtooth',0.03),280);
+  },
+  sfxLed(){ this.tone(1100,0.08,'sine',0.035); },
   award(medalId, label) {
     if(this.medals[medalId]) return;
     this.medals[medalId] = true;
@@ -362,33 +380,49 @@ const THEORY_PRIMARIA = [
     body:`<p>Cada componente tiene un <b>símbolo</b> especial para dibujar esquemas de circuitos. Es como un idioma dibujado:</p>
       <ul style="margin:10px 0 10px 20px; line-height:1.7;">
         <li>Un <b>zigzag</b> = Resistencia</li>
-        <li>Un <b>triángulo apuntando a una barra</b> = LED o diodo</li>
+        <li>Un <b>triángulo + barra</b> = LED/diodo · el <b>triángulo es + (ánodo)</b>, la <b>barra es − (cátodo)</b> · en el LED real: <b>pata larga = +</b></li>
         <li>Dos <b>líneas paralelas</b> = Capacitor</li>
         <li>Líneas largas y cortas = Pila / Batería</li>
         <li>Una <b>abertura</b> = Interruptor</li>
       </ul>
       <p>Aprender estos símbolos te permite leer cualquier esquema de circuito. ¡Practica en el juego de Memorama!</p>`,
-    diagram:`<svg viewBox="0 0 340 110" xmlns="http://www.w3.org/2000/svg">
-      <text x="40" y="16" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">R</text>
-      <path d="M18 55 h10 l5 -12 7 24 7 -24 7 24 5 -12 h10" fill="none" stroke="#fb923c" stroke-width="2.5"/>
-      <text x="110" y="16" text-anchor="middle" fill="#ff4d5e" font-size="11" font-weight="700">LED</text>
-      <ellipse cx="110" cy="48" rx="16" ry="12" fill="#ff4d5e"/>
-      <line x1="102" y1="60" x2="102" y2="85" stroke="#4ade80" stroke-width="3"/>
-      <line x1="118" y1="60" x2="118" y2="78" stroke="#fb923c" stroke-width="3"/>
-      <text x="102" y="98" text-anchor="middle" fill="#4ade80" font-size="9" font-weight="700">+</text>
-      <text x="118" y="98" text-anchor="middle" fill="#fb923c" font-size="9" font-weight="700">−</text>
-      <text x="180" y="14" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">PILA</text>
-      <line x1="164" y1="24" x2="196" y2="24" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="170" y1="32" x2="190" y2="32" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="164" y1="40" x2="196" y2="40" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="170" y1="48" x2="190" y2="48" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <line x1="164" y1="56" x2="196" y2="56" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
-      <text x="180" y="72" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="800">+</text>
-      <text x="180" y="86" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="800">−</text>
-      <text x="260" y="16" text-anchor="middle" fill="#ffd23f" font-size="11" font-weight="700">SW</text>
-      <circle cx="245" cy="50" r="4" fill="#ffd23f"/>
-      <circle cx="275" cy="50" r="4" fill="#ffd23f"/>
-      <line x1="245" y1="50" x2="268" y2="36" stroke="#4ade80" stroke-width="3"/>
+    diagram:`<svg viewBox="0 0 360 130" xmlns="http://www.w3.org/2000/svg">
+      <!-- R -->
+      <text x="40" y="18" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R</text>
+      <path d="M15 60 h12 l6 -14 8 28 8 -28 8 28 6 -14 h12" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <!-- LED (símbolo de esquema) -->
+      <text x="145" y="18" text-anchor="middle" fill="#ff4d5e" font-size="12" font-weight="700">LED</text>
+      <line x1="100" y1="58" x2="118" y2="58" stroke="#fde047" stroke-width="3"/>
+      <polygon points="118,38 118,78 150,58" fill="none" stroke="#ff4d5e" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="150" y1="38" x2="150" y2="78" stroke="#ff4d5e" stroke-width="3.5"/>
+      <line x1="150" y1="58" x2="172" y2="58" stroke="#fde047" stroke-width="3"/>
+      <!-- flechas de luz -->
+      <g stroke="#ff4d5e" stroke-width="2" fill="none" stroke-linecap="round">
+        <line x1="138" y1="32" x2="152" y2="18"/>
+        <polyline points="144,18 152,18 152,26"/>
+        <line x1="148" y1="40" x2="162" y2="26"/>
+        <polyline points="154,26 162,26 162,34"/>
+      </g>
+      <text x="110" y="98" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+ ánodo</text>
+      <text x="168" y="98" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">− cátodo</text>
+      <text x="140" y="118" text-anchor="middle" fill="#aaa" font-size="10">(pata larga)　　(pata corta)</text>
+
+      <!-- PILA vertical -->
+      <text x="230" y="16" text-anchor="middle" fill="#fde047" font-size="12" font-weight="700">PILA</text>
+      <line x1="214" y1="26" x2="246" y2="26" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="220" y1="34" x2="240" y2="34" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="214" y1="42" x2="246" y2="42" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="220" y1="50" x2="240" y2="50" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <line x1="214" y1="58" x2="246" y2="58" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+      <text x="230" y="74" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="800">+</text>
+      <text x="230" y="90" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="800">−</text>
+
+      <!-- SW -->
+      <text x="310" y="18" text-anchor="middle" fill="#ffd23f" font-size="12" font-weight="700">SW</text>
+      <circle cx="292" cy="58" r="5" fill="#ffd23f"/>
+      <circle cx="328" cy="58" r="5" fill="#ffd23f"/>
+      <line x1="292" y1="58" x2="318" y2="40" stroke="#4ade80" stroke-width="3"/>
     </svg>`
   },
 {
@@ -1572,145 +1606,215 @@ const POL_ITEMS = [
     name:'LED',
     emoji:'💡',
     correct:'A',
-    lesson:'Patita <b>larga = +</b> (ánodo) · Patita <b>corta = −</b> (cátodo)',
-    svg: function(hi, showLabels){
-      var legA = hi==='A' ? '#4ade80' : (hi==='B' ? '#555' : '#c0c0c0');
-      var legB = hi==='B' ? '#f97316' : (hi==='A' ? '#555' : '#c0c0c0');
-      var glow = hi==='A' ? 'filter:url(#polGlow)' : '';
-      var lab = '';
-      if(showLabels){
-        lab = '<text x="55" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+ LARGA</text>'+
-              '<text x="145" y="28" text-anchor="middle" fill="#f97316" font-size="13" font-weight="800">− CORTA</text>';
-      }
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+
-        '<defs><filter id="polGlow"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff4d5e"/></filter></defs>'+
-        lab+
-        '<ellipse cx="100" cy="70" rx="28" ry="22" fill="'+(hi==='A'?'#ff4d5e':'#5a1520')+'" stroke="#ff4d5e" stroke-width="2" style="'+glow+'"/>'+
-        '<text x="100" y="75" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">LED</text>'+
-        '<rect x="78" y="88" width="44" height="10" rx="2" fill="#4a3030"/>'+
-        /* pata A larga (izquierda) */
-        '<line x1="88" y1="98" x2="88" y2="155" stroke="'+legA+'" stroke-width="5" stroke-linecap="round"/>'+
-        '<circle class="pol-term" data-choice="A" cx="88" cy="162" r="12" fill="'+(hi==='A'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="88" y="188" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        /* pata B corta */
-        '<line x1="112" y1="98" x2="112" y2="140" stroke="'+legB+'" stroke-width="5" stroke-linecap="round"/>'+
-        '<circle class="pol-term" data-choice="B" cx="112" cy="148" r="12" fill="'+(hi==='B'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="112" y="178" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-        (showLabels?'':'<text x="100" y="18" text-anchor="middle" fill="#ffd23f" font-size="12" font-weight="700">¿Cuál pata es + ?</text>')+
-      '</svg>';
-    },
-    hint:'En el LED la <b>patita larga es el +</b> (ánodo) y la <b>corta es el −</b> (cátodo).'
+    flip:false,
+    lesson:'Patita <b>larga = +</b> · Patita <b>corta = −</b>',
+    hint:'En el LED la <b>patita larga es +</b> y la <b>corta es −</b>.',
+    svg: function(hi, showLabels){ return polSvgLed(hi, showLabels, false); }
   },
   {
     name:'Pila / Batería',
     emoji:'🔋',
     correct:'B',
+    flip:false,
     lesson:'El <b>botón saliente</b> es el <b>+</b>',
-    svg: function(hi, showLabels){
-      var colA = hi==='A' ? '#f97316' : '#fef8ec';
-      var colB = hi==='B' ? '#4ade80' : '#fef8ec';
-      var lab = showLabels ? ('<text x="70" y="42" text-anchor="middle" fill="#f97316" font-size="13" font-weight="800">−</text><text x="145" y="42" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>') : '';
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+lab+
-        '<rect x="40" y="60" width="100" height="55" rx="8" fill="#2c2c2c" stroke="#ff8a3d" stroke-width="3"/>'+
-        '<rect x="140" y="74" width="18" height="28" rx="3" fill="#ff8a3d"/>'+
-        '<text x="70" y="95" text-anchor="middle" fill="'+colA+'" font-size="28" font-weight="800">−</text>'+
-        '<text x="145" y="95" text-anchor="middle" fill="'+colB+'" font-size="28" font-weight="800">+</text>'+
-        '<circle class="pol-term" data-choice="A" cx="70" cy="150" r="14" fill="'+(hi==='A'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="70" y="178" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        '<circle class="pol-term" data-choice="B" cx="145" cy="150" r="14" fill="'+(hi==='B'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="145" y="178" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-        (showLabels?'':'<text x="100" y="28" text-anchor="middle" fill="#ffd23f" font-size="12" font-weight="700">¿Dónde está el + ?</text>')+
-      '</svg>';
-    },
-    hint:'En una pila, el <b>botón metálico saliente</b> es el terminal <b>positivo (+)</b>.'
+    hint:'En la pila, el <b>botón metálico que sobresale</b> es el positivo (+).',
+    svg: function(hi, showLabels){ return polSvgBatt(hi, showLabels, false); }
   },
   {
     name:'Capacitor electrolítico',
     emoji:'⚡',
     correct:'A',
-    lesson:'La pata marcada o más larga suele ser el <b>+</b>',
-    svg: function(hi, showLabels){
-      var legA = hi==='A' ? '#4ade80' : '#888';
-      var legB = hi==='B' ? '#f97316' : '#888';
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+
-        '<rect x="70" y="40" width="60" height="70" rx="6" fill="#1a3a4a" stroke="#4dd8ff" stroke-width="3"/>'+
-        '<text x="100" y="80" text-anchor="middle" fill="#4dd8ff" font-size="11" font-weight="800">CAP</text>'+
-        (showLabels?'<text x="85" y="32" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">+</text><text x="115" y="32" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">−</text>':'')+
-        '<line x1="85" y1="110" x2="85" y2="150" stroke="'+legA+'" stroke-width="5" stroke-linecap="round"/>'+
-        '<line x1="115" y1="110" x2="115" y2="140" stroke="'+legB+'" stroke-width="5" stroke-linecap="round"/>'+
-        '<circle class="pol-term" data-choice="A" cx="85" cy="158" r="12" fill="'+(hi==='A'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="85" y="186" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        '<circle class="pol-term" data-choice="B" cx="115" cy="148" r="12" fill="'+(hi==='B'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="115" y="178" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-      '</svg>';
-    },
-    hint:'En el capacitor electrolítico el <b>+</b> suele estar marcado; no lo conectes al revés.'
+    flip:false,
+    lesson:'La pata del <b>+</b> suele ser la más larga o la marcada',
+    hint:'En el capacitor electrolítico el <b>+</b> está marcado; no lo conectes al revés.',
+    svg: function(hi, showLabels){ return polSvgCap(hi, showLabels, false); }
   },
   {
     name:'Diodo',
     emoji:'▶️',
     correct:'A',
-    lesson:'La flecha del símbolo apunta hacia el <b>cátodo (−)</b>; el otro lado es <b>+</b>',
-    svg: function(hi, showLabels){
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+
-        (showLabels?'<text x="50" y="40" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">+ ánodo</text><text x="150" y="40" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">− cátodo</text>':'')+
-        '<line x1="40" y1="90" x2="75" y2="90" stroke="#ffd23f" stroke-width="4"/>'+
-        '<polygon points="75,60 75,120 120,90" fill="none" stroke="#4dd8ff" stroke-width="4"/>'+
-        '<line x1="120" y1="60" x2="120" y2="120" stroke="#ff8a3d" stroke-width="5"/>'+
-        '<line x1="120" y1="90" x2="160" y2="90" stroke="#ffd23f" stroke-width="4"/>'+
-        '<circle class="pol-term" data-choice="A" cx="40" cy="90" r="14" fill="'+(hi==='A'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="40" y="120" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        '<circle class="pol-term" data-choice="B" cx="160" cy="90" r="14" fill="'+(hi==='B'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="160" y="120" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-      '</svg>';
-    },
-    hint:'En el diodo, el lado de la <b>flecha (ánodo)</b> es el + y la <b>barra es el cátodo (−)</b>.'
+    flip:false,
+    lesson:'Ánodo (+) → flecha · Cátodo (−) → barra',
+    hint:'La <b>barra</b> es el cátodo (−). El otro lado (flecha) es el ánodo (+).',
+    svg: function(hi, showLabels){ return polSvgDiode(hi, showLabels, false); }
   },
   {
     name:'Buzzer',
     emoji:'🔊',
     correct:'B',
+    flip:false,
     lesson:'Muchos buzzers marcan el <b>+</b> en la carcasa',
-    svg: function(hi, showLabels){
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+
-        '<circle cx="100" cy="75" r="36" fill="#1a1a2e" stroke="#ffd23f" stroke-width="3"/>'+
-        '<circle cx="100" cy="75" r="18" fill="#0b1f18" stroke="#ff8a3d" stroke-width="2"/>'+
-        '<text x="100" y="80" text-anchor="middle" fill="#ffd23f" font-size="11" font-weight="800">BZ</text>'+
-        (showLabels?'<text x="70" y="130" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">−</text><text x="130" y="130" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">+</text>':'')+
-        '<line x1="70" y1="110" x2="70" y2="145" stroke="#888" stroke-width="4"/>'+
-        '<line x1="130" y1="110" x2="130" y2="145" stroke="#888" stroke-width="4"/>'+
-        '<circle class="pol-term" data-choice="A" cx="70" cy="155" r="12" fill="'+(hi==='A'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="70" y="182" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        '<circle class="pol-term" data-choice="B" cx="130" cy="155" r="12" fill="'+(hi==='B'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="130" y="182" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-      '</svg>';
-    },
-    hint:'En este buzzer el terminal <b>B es el +</b> (lado marcado).'
+    hint:'En este buzzer el terminal con marca <b>+</b> es el positivo.',
+    svg: function(hi, showLabels){ return polSvgBuzz(hi, showLabels, false); }
   },
   {
     name:'Motor DC',
     emoji:'⚙️',
     correct:'A',
+    flip:false,
     lesson:'Si invertís + y −, el motor gira al revés',
-    svg: function(hi, showLabels){
-      return '<svg viewBox="0 0 200 200" class="pol-svg">'+
-        '<rect x="55" y="45" width="90" height="55" rx="10" fill="#333" stroke="#ff8a3d" stroke-width="3"/>'+
-        '<circle cx="100" cy="72" r="14" fill="#222" stroke="#ffd23f" stroke-width="2"/>'+
-        '<text x="100" y="77" text-anchor="middle" fill="#ffd23f" font-size="10" font-weight="800">M</text>'+
-        (showLabels?'<text x="75" y="120" fill="#4ade80" font-size="12" font-weight="800">+</text><text x="125" y="120" fill="#f97316" font-size="12" font-weight="800">−</text>':'')+
-        '<line x1="75" y1="100" x2="75" y2="145" stroke="#888" stroke-width="4"/>'+
-        '<line x1="125" y1="100" x2="125" y2="145" stroke="#888" stroke-width="4"/>'+
-        '<circle class="pol-term" data-choice="A" cx="75" cy="155" r="12" fill="'+(hi==='A'?'#4ade80':'#0b1f18')+'" stroke="#4ade80" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="75" y="182" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">A</text>'+
-        '<circle class="pol-term" data-choice="B" cx="125" cy="155" r="12" fill="'+(hi==='B'?'#f97316':'#0b1f18')+'" stroke="#f97316" stroke-width="3" style="cursor:pointer"/>'+
-        '<text x="125" y="182" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800">B</text>'+
-      '</svg>';
-    },
-    hint:'En este motor el terminal <b>A es el +</b>. Si los cruzás, gira al revés.'
+    hint:'En este motor el terminal <b>A es el +</b>.',
+    svg: function(hi, showLabels){ return polSvgMotor(hi, showLabels, false); }
   }
 ];
 
+/** Terminales grandes y claros: verde = +, naranja = − solo después de responder */
+function polTerm(cx, cy, letter, choice, hi, isPos){
+  var answered = !!hi;
+  var fill, stroke, label;
+  if(!answered){
+    fill = '#0b1f18';
+    stroke = '#ffd23f';
+    label = letter;
+  } else if(choice === hi){
+    // tocado
+    fill = isPos ? '#4ade80' : '#f97316';
+    stroke = fill;
+    label = isPos ? '+' : '−';
+  } else {
+    fill = isPos ? 'rgba(74,222,128,0.25)' : 'rgba(249,115,22,0.25)';
+    stroke = isPos ? '#4ade80' : '#f97316';
+    label = isPos ? '+' : '−';
+  }
+  return '<circle class="pol-term" data-choice="'+choice+'" cx="'+cx+'" cy="'+cy+'" r="16" fill="'+fill+'" stroke="'+stroke+'" stroke-width="3.5" style="cursor:pointer"/>'+
+    '<text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="800" style="pointer-events:none">'+label+'</text>'+
+    '<text x="'+cx+'" y="'+(cy+32)+'" text-anchor="middle" fill="#fef8ec" font-size="13" font-weight="800">'+letter+'</text>';
+}
+
+function polSvgLed(hi, showLabels, flip){
+  // flip=false: A izquierda LARGA +, B derecha CORTA −
+  // flip=true:  A izquierda CORTA −, B derecha LARGA +
+  var longX = flip ? 118 : 82;
+  var shortX = flip ? 82 : 118;
+  var longChoice = flip ? 'B' : 'A';
+  var shortChoice = flip ? 'A' : 'B';
+  var legLong = (!hi) ? '#e5e5e5' : (hi===longChoice ? '#4ade80' : '#666');
+  var legShort = (!hi) ? '#e5e5e5' : (hi===shortChoice ? '#f97316' : '#666');
+  var glow = (hi===longChoice) ? 'filter:url(#polGlow)' : '';
+  var lab = '';
+  if(showLabels){
+    lab = '<text x="'+longX+'" y="28" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">+ LARGA</text>'+
+          '<text x="'+shortX+'" y="28" text-anchor="middle" fill="#f97316" font-size="12" font-weight="800">− CORTA</text>';
+  }
+  return '<svg viewBox="0 0 200 210" class="pol-svg">'+
+    '<defs><filter id="polGlow"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff4d5e"/></filter></defs>'+
+    lab+
+    (showLabels?'':'<text x="100" y="20" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Cuál es la pata + ?</text>')+
+    '<ellipse cx="100" cy="72" rx="30" ry="24" fill="'+(hi===longChoice?'#ff4d5e':'#7a1a28')+'" stroke="#ff4d5e" stroke-width="2.5" style="'+glow+'"/>'+
+    '<text x="100" y="78" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">LED</text>'+
+    '<rect x="78" y="92" width="44" height="12" rx="2" fill="#4a3030"/>'+
+    /* pata larga */
+    '<line x1="'+longX+'" y1="104" x2="'+longX+'" y2="158" stroke="'+legLong+'" stroke-width="7" stroke-linecap="round"/>'+
+    polTerm(longX, 172, longChoice, longChoice, hi, true)+
+    /* pata corta */
+    '<line x1="'+shortX+'" y1="104" x2="'+shortX+'" y2="142" stroke="'+legShort+'" stroke-width="7" stroke-linecap="round"/>'+
+    polTerm(shortX, 156, shortChoice, shortChoice, hi, false)+
+  '</svg>';
+}
+
+function polSvgBatt(hi, showLabels, flip){
+  // flip=false: A = − izquierda, B = + botón derecha
+  // flip=true: A = + botón izquierda, B = − derecha
+  var posChoice = flip ? 'A' : 'B';
+  var negChoice = flip ? 'B' : 'A';
+  var btnX = flip ? 48 : 148;
+  var bodyX = flip ? 60 : 40;
+  return '<svg viewBox="0 0 200 200" class="pol-svg">'+
+    (showLabels?'':'<text x="100" y="22" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Dónde está el + ?</text>')+
+    (showLabels?('<text x="'+btnX+'" y="42" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800">+</text>'):'')+
+    '<rect x="'+bodyX+'" y="55" width="100" height="50" rx="8" fill="#1a1a1a" stroke="#ff8a3d" stroke-width="3"/>'+
+    '<rect x="'+(flip?40:140)+'" y="68" width="18" height="26" rx="3" fill="#ff8a3d"/>'+
+    '<text x="100" y="88" text-anchor="middle" fill="#fef8ec" font-size="14" font-weight="700">PILA</text>'+
+    polTerm(flip?145:55, 150, negChoice, negChoice, hi, false)+
+    polTerm(flip?55:145, 150, posChoice, posChoice, hi, true)+
+  '</svg>';
+}
+
+function polSvgCap(hi, showLabels, flip){
+  var posC = flip?'B':'A', negC = flip?'A':'B';
+  var xPos = flip?120:80, xNeg = flip?80:120;
+  return '<svg viewBox="0 0 200 200" class="pol-svg">'+
+    (showLabels?'':'<text x="100" y="22" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Cuál es el + ?</text>')+
+    '<rect x="70" y="40" width="60" height="60" rx="6" fill="#0d3a4a" stroke="#4dd8ff" stroke-width="3"/>'+
+    '<text x="100" y="75" text-anchor="middle" fill="#4dd8ff" font-size="12" font-weight="800">CAP</text>'+
+    (showLabels?('<text x="'+xPos+'" y="32" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>'):'')+
+    '<line x1="'+xPos+'" y1="100" x2="'+xPos+'" y2="140" stroke="'+(hi===posC?'#4ade80':'#ccc')+'" stroke-width="6" stroke-linecap="round"/>'+
+    '<line x1="'+xNeg+'" y1="100" x2="'+xNeg+'" y2="128" stroke="'+(hi===negC?'#f97316':'#ccc')+'" stroke-width="6" stroke-linecap="round"/>'+
+    polTerm(xPos, 155, posC, posC, hi, true)+
+    polTerm(xNeg, 145, negC, negC, hi, false)+
+  '</svg>';
+}
+
+function polSvgDiode(hi, showLabels, flip){
+  // A = ánodo + izquierda unless flip
+  var posC = flip?'B':'A', negC = flip?'A':'B';
+  var xPos = flip?160:40, xNeg = flip?40:160;
+  return '<svg viewBox="0 0 200 180" class="pol-svg">'+
+    (showLabels?'':'<text x="100" y="22" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Cuál es el ánodo + ?</text>')+
+    '<line x1="50" y1="80" x2="150" y2="80" stroke="#ffd23f" stroke-width="3"/>'+
+    (flip
+      ? '<polygon points="130,55 130,105 90,80" fill="none" stroke="#4dd8ff" stroke-width="4"/><line x1="90" y1="55" x2="90" y2="105" stroke="#ff8a3d" stroke-width="5"/>'
+      : '<polygon points="70,55 70,105 110,80" fill="none" stroke="#4dd8ff" stroke-width="4"/><line x1="110" y1="55" x2="110" y2="105" stroke="#ff8a3d" stroke-width="5"/>')+
+    polTerm(xPos, 130, posC, posC, hi, true)+
+    polTerm(xNeg, 130, negC, negC, hi, false)+
+  '</svg>';
+}
+
+function polSvgBuzz(hi, showLabels, flip){
+  var posC = flip?'A':'B', negC = flip?'B':'A';
+  var xPos = flip?70:130, xNeg = flip?130:70;
+  return '<svg viewBox="0 0 200 200" class="pol-svg">'+
+    (showLabels?'':'<text x="100" y="22" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Cuál es el + ?</text>')+
+    '<circle cx="100" cy="70" r="34" fill="#1a1a2e" stroke="#ffd23f" stroke-width="3"/>'+
+    '<text x="100" y="76" text-anchor="middle" fill="#ffd23f" font-size="12" font-weight="800">BZ</text>'+
+    (showLabels?('<text x="'+xPos+'" y="118" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="800">+</text>'):'')+
+    polTerm(xPos, 150, posC, posC, hi, true)+
+    polTerm(xNeg, 150, negC, negC, hi, false)+
+  '</svg>';
+}
+
+function polSvgMotor(hi, showLabels, flip){
+  var posC = flip?'B':'A', negC = flip?'A':'B';
+  var xPos = flip?130:70, xNeg = flip?70:130;
+  return '<svg viewBox="0 0 200 200" class="pol-svg">'+
+    (showLabels?'':'<text x="100" y="22" text-anchor="middle" fill="#ffd23f" font-size="13" font-weight="700">¿Cuál es el + ?</text>')+
+    '<rect x="55" y="40" width="90" height="50" rx="10" fill="#2a2a2a" stroke="#ff8a3d" stroke-width="3"/>'+
+    '<text x="100" y="72" text-anchor="middle" fill="#ffd23f" font-size="14" font-weight="800">M</text>'+
+    polTerm(xPos, 150, posC, posC, hi, true)+
+    polTerm(xNeg, 150, negC, negC, hi, false)+
+  '</svg>';
+}
+
 let polState = { idx:0, score:0, answered:false, order:[], total:5, mode:"normal", pool:null };
+
+function buildPolarPool(mode){
+  var base = POL_ITEMS.slice();
+  if(mode !== 'extrema') return base;
+  var pool = [];
+  base.forEach(function(it){
+    pool.push(it);
+    // versión espejo: polaridad física del otro lado
+    var flippedCorrect = it.correct === 'A' ? 'B' : 'A';
+    pool.push({
+      name: it.name + ' (vista invertida)',
+      emoji: it.emoji,
+      correct: flippedCorrect,
+      flip: true,
+      lesson: it.lesson,
+      hint: it.hint + ' <b>Acá el dibujo está al revés: fijate en la pata larga / el botón +.</b>',
+      svg: function(hi, showLabels){
+        if(it.name.indexOf('LED')===0) return polSvgLed(hi, showLabels, true);
+        if(it.name.indexOf('Pila')===0) return polSvgBatt(hi, showLabels, true);
+        if(it.name.indexOf('Capacitor')===0) return polSvgCap(hi, showLabels, true);
+        if(it.name.indexOf('Diodo')===0) return polSvgDiode(hi, showLabels, true);
+        if(it.name.indexOf('Buzzer')===0) return polSvgBuzz(hi, showLabels, true);
+        if(it.name.indexOf('Motor')===0) return polSvgMotor(hi, showLabels, true);
+        return it.svg(hi, showLabels);
+      }
+    });
+  });
+  return pool;
+}
 
 function setPolLevel(level){
   var map = { facil: 5, normal: 6, dificil: 8, extrema: 10 };
@@ -1752,39 +1856,6 @@ function initPolarity(){
   renderPolarity();
 }
 /** En modo extrema: clona ítems y a veces invierte A/B (trampas visuales). */
-function buildPolarPool(mode){
-  var base = POL_ITEMS.slice();
-  if(mode !== 'extrema') return base;
-  var pool = [];
-  base.forEach(function(it){
-    pool.push(it);
-    // versión tramposa: intercambia A y B (correcto se invierte)
-    pool.push({
-      name: it.name + ' (¡trampa!)',
-      emoji: it.emoji,
-      correct: it.correct === 'A' ? 'B' : 'A',
-      lesson: it.lesson,
-      hint: it.hint + ' <b>Ojo: en esta vista los terminales están al revés.</b>',
-      svg: function(hi, showLabels){
-        // dibuja igual pero pide el otro lado como correcto — reusa svg intercambiando hi labels
-        function swapChoice(c){
-          if(c === 'A') return 'B';
-          if(c === 'B') return 'A';
-          return c;
-        }
-        // llamar svg original con hi intercambiado para colorear el terminal tocado
-        var raw = it.svg(swapChoice(hi), showLabels);
-        // renombrar data-choice A<->B en el markup
-        raw = raw.replace(/data-choice="A"/g, 'data-choice="TMP"')
-                 .replace(/data-choice="B"/g, 'data-choice="A"')
-                 .replace(/data-choice="TMP"/g, 'data-choice="B"');
-        // intercambiar textos A/B bajo los terminales (aprox)
-        return raw;
-      }
-    });
-  });
-  return pool;
-}
 
 function renderPolarity(){
   var host = document.getElementById('polItem');
@@ -1792,12 +1863,16 @@ function renderPolarity(){
   if(!host) return;
   if(polState.idx >= polState.order.length){
     var stars = polState.score >= polState.order.length ? '⭐⭐⭐' : (polState.score >= Math.ceil(polState.order.length*0.7) ? '⭐⭐' : '⭐');
+    var pts = polState.score * 10 + (polState.mode==='extrema' ? polState.score * 5 : 0);
+    if(typeof saveScore==='function') saveScore('polar_score', pts);
+    var best = (window.PG && PG.scores && PG.scores.polar_score) ? PG.scores.polar_score : pts;
     host.innerHTML =
       '<div class="pol-end">'+
         '<div class="pol-end-emoji">🏁🔋</div>'+
         '<h3>¡Terminaste!</h3>'+
         '<p class="pol-end-score">'+stars+' · <b>'+polState.score+'</b>/'+polState.order.length+' aciertos</p>'+
-        '<p class="pol-end-tip">Recordá: en el LED la <b>patita larga es +</b> y la <b>corta es −</b>.'+(polState.mode==='extrema'?' · Modo <b>extrema</b>: a veces los terminales están al revés.':'')+'</p>'+
+        '<p class="pol-end-score">Puntos: <b>'+pts+'</b> · Récord: <b>'+best+'</b></p>'+
+        '<p class="pol-end-tip">Recordá: en el LED la <b>patita larga es +</b> y la <b>corta es −</b>.'+(polState.mode==='extrema'?' · Modo <b>extrema</b>: mirá bien cuál pata es la larga.':'')+'</p>'+
         '<button type="button" class="btn" onclick="initPolarity()">🔄 Jugar de nuevo</button>'+
       '</div>';
     if(fb){ fb.innerHTML = ''; fb.className = 'feedback'; }
@@ -1811,8 +1886,8 @@ function renderPolarity(){
       '<p class="pol-ask">Tocá el terminal <b>positivo (+)</b></p>'+
       '<div class="pol-diagram">'+item.svg('', false)+'</div>'+
       '<div class="pol-btns">'+
-        '<button type="button" class="btn pol-btn" onclick="answerPolarity(\'A\')">Terminal A</button>'+
-        '<button type="button" class="btn pol-btn" onclick="answerPolarity(\'B\')">Terminal B</button>'+
+        '<button type="button" class="btn pol-btn pol-btn-a" onclick="answerPolarity(\'A\')">A</button>'+
+        '<button type="button" class="btn pol-btn pol-btn-b" onclick="answerPolarity(\'B\')">B</button>'+
       '</div>'+
     '</div>';
   if(fb){ fb.textContent = ''; fb.className = 'feedback'; }
@@ -2316,10 +2391,13 @@ function labAddComponent(type){
     labAssignDefaultHoles(inst);
   }
   lab.lastResult = null;
-  if(window.PG && PG.toast){
-    if(type==='bateria') PG.toast('Pila en rieles + / −');
-    else if(type==='led') PG.toast('LED: pata larga = + · pata corta = −');
-    else PG.toast('Componente en la protoboard');
+  if(window.PG){
+    if(PG.sfxPop) PG.sfxPop();
+    if(PG.toast){
+      if(type==='bateria') PG.toast('Pila en rieles + / −');
+      else if(type==='led') PG.toast('LED: pata larga = + · pata corta = −');
+      else PG.toast('Componente en la protoboard');
+    }
   }
   renderLab();
 }
@@ -2327,6 +2405,7 @@ function labRemoveInstance(id){
   lab.instances = lab.instances.filter(i=>i.id!==id);
   lab.wires = lab.wires.filter(([a,b])=>!a.startsWith(id+'_') && !b.startsWith(id+'_'));
   lab.lastResult = null;
+  if(window.PG && PG.sfxClick) PG.sfxClick();
   renderLab();
 }
 function labTermPos(id, suffix){
@@ -2909,7 +2988,7 @@ function labConnectWire(fromKey, toKey){
   }
   lab.wires.push([fromKey, toKey]);
   lab.lastResult = null;
-  if(window.PG){ PG.sfxOk(); PG.toast('⚡ Cable conectado'); }
+  if(window.PG){ PG.sfxWire(); PG.toast('⚡ Cable conectado'); }
   return true;
 }
 
@@ -2938,7 +3017,7 @@ function labHoleDown(e){
       labPendingHole = null;
       lab.lastResult = null;
       labSetHint('Patita clavada. Une la otra o conecta un cable.');
-      if(window.PG) PG.sfxOk();
+      if(window.PG && PG.sfxClick) PG.sfxClick();
       renderLab();
       return;
     }
@@ -3132,11 +3211,12 @@ function labPointerUp(e){
     if(!labDragData.moved){
       const inst = lab.instances.find(i=>i.id===labDragData.id);
       if(inst){
-        if(inst.type==='interruptor'){ inst.closed = !inst.closed; lab.lastResult=null; }
+        if(inst.type==='interruptor'){ inst.closed = !inst.closed; lab.lastResult=null; if(window.PG) PG.sfxSwitch(); }
         else if(inst.type==='resistencia'){
           const idx = RESISTOR_VALUES.indexOf(inst.value||220);
           inst.value = RESISTOR_VALUES[(idx+1)%RESISTOR_VALUES.length];
           lab.lastResult=null;
+          if(window.PG && PG.sfxClick) PG.sfxClick();
         } else if(inst.type==='bateria'){
           const idx = BATTERY_VOLTAGES.indexOf(inst.voltage||9);
           inst.voltage = BATTERY_VOLTAGES[(idx+1)%BATTERY_VOLTAGES.length];
@@ -3149,7 +3229,7 @@ function labPointerUp(e){
           const idx = POT_VALUES.indexOf(inst.value||5000);
           inst.value = POT_VALUES[(idx < 0 ? 0 : idx+1) % POT_VALUES.length];
           lab.lastResult=null;
-          if(window.PG) PG.toast('POT = ' + inst.value + ' Ω (toca otra vez para cambiar)');
+          if(window.PG){ if(PG.sfxClick) PG.sfxClick(); PG.toast('POT = ' + inst.value + ' Ω (toca otra vez para cambiar)'); }
         } else if(inst.type==='ldr'){
           inst.light = !(inst.light===false);
           lab.lastResult=null;
@@ -3464,13 +3544,23 @@ function simulateLab(){
     result.innerHTML = msg + ohmHtml;
     result.className = anyDanger ? 'cb-result bad' : (anyDim ? 'cb-result' : 'cb-result ok');
     if(window.PG && litSet.size > 0 && !anyDanger){
-      PG.sfxOk();
+      if(PG.sfxLed) PG.sfxLed();
+      else PG.sfxOk();
       if(!PG.medals.lab){ PG.award('lab','Ingeniero de Laboratorio'); PG.confetti(35); }
+      // Buzzer activo → zumbido
       if(buzzers.some(bz => litSet.has(bz.id))){
-        PG.tone(880, 0.35, 'square', 0.05);
-        setTimeout(()=>PG.tone(880, 0.2, 'square', 0.04), 400);
+        if(PG.sfxBuzz) PG.sfxBuzz();
+        else { PG.tone(380,0.15,'square',0.05); setTimeout(()=>PG.tone(380,0.12,'square',0.04),180); }
       }
-    } else if(window.PG && anyDanger){ PG.sfxBad(); }
+      // Motor activo → ronroneo
+      if(motors.some(m => litSet.has(m.id))){
+        if(PG.sfxMotor) PG.sfxMotor();
+        else { PG.tone(90,0.25,'sawtooth',0.04); }
+      }
+    } else if(window.PG && anyDanger){
+      if(PG.sfxZap) PG.sfxZap();
+      else PG.sfxBad();
+    }
     try {
       labCheckChallenge({
         ok: litSet.size > 0 && !anyDanger,
@@ -3806,9 +3896,10 @@ function labHolesFromPositions(){
 
 function loadPreset(key){
   if(typeof labIsUnlocked === 'function' && !labIsUnlocked(key)){
-    if(window.PG) PG.toast('🔒 Completá un reto del lab para desbloquear esta receta');
+    if(window.PG){ if(PG.sfxBad) PG.sfxBad(); PG.toast('🔒 Completá un reto del lab para desbloquear esta receta'); }
     return;
   }
+  if(window.PG && PG.sfxPop) PG.sfxPop();
   const p = LAB_PRESETS[key] || LAB_PRESETS.simple;
   if(!p){ console.error('Preset no encontrado', key); return; }
   lab.instances = p.instances.map(i=>({...i}));

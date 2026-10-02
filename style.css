@@ -1571,3 +1571,11 @@ header#inicio .mascot {
   border-color: #ff4d5e;
   color: #ff4d5e;
 }
+
+.pol-btns .pol-btn-a, .pol-btns .pol-btn-b{
+  min-width: 88px;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+.pol-term{ cursor: pointer; }
+.pol-svg{ max-width: 260px; }
