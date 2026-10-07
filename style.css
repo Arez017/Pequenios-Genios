@@ -1583,7 +1583,7 @@ header#inicio .mascot {
 
 
 /* ============================================================
-   GIGA - TUTOR DINÁMICO DE LA PÁGINA
+   CAROLAY GIGA - TUTOR DINÁMICO DE LA PÁGINA DAYAN - TUTORAS DINÁMICAS
    ============================================================ */
 .giga-container {
   position: relative;
@@ -1593,6 +1593,36 @@ header#inicio .mascot {
   margin: 18px auto 10px;
   z-index: 20;
   max-width: 300px;
+}
+
+/* Flotante que puede viajar por la pantalla */
+.giga-container.fixed {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  left: auto;
+  top: auto;
+  margin: 0;
+  max-width: 200px;
+  z-index: 300;
+  transition: left 2.8s cubic-bezier(.4,.1,.3,1), top 2.8s cubic-bezier(.4,.1,.3,1),
+              right 2.8s cubic-bezier(.4,.1,.3,1), bottom 2.8s cubic-bezier(.4,.1,.3,1);
+  will-change: left, top;
+  pointer-events: auto;
+}
+.giga-container.fixed.wandering {
+  /* cuando JS controla posición usa left/top */
+  right: auto !important;
+  bottom: auto !important;
+}
+.giga-container.fixed .giga-speech {
+  font-size: 0.78rem;
+  padding: 10px 13px;
+  max-width: 190px;
+}
+/* Pausar movimiento si el usuario hace hover (para poder leer/click) */
+.giga-container.fixed:hover {
+  transition-duration: 0.4s;
 }
 
 .giga-speech {
@@ -1650,58 +1680,391 @@ header#inicio .mascot {
 .giga-character {
   cursor: pointer;
   transition: transform 0.25s;
-  animation: gigaFloat 3.2s ease-in-out infinite;
+  /* float suave del grupo; el bob individual de cada una da más vida */
+  animation: gigaFloat 4.5s ease-in-out infinite;
   filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .giga-character:hover {
-  transform: scale(1.1) rotate(3deg);
+  transform: scale(1.08) rotate(2deg);
 }
 
 .giga-character.celebrate {
   animation: gigaCelebrate 0.8s ease;
 }
 
-@keyframes gigaPop {
-  from { opacity: 0; transform: scale(0.7) translateY(15px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+/* === DÚO Carolay + Dayan — máximo dinamismo === */
+.tutor-duo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+.tutor-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(.2,.9,.3,1);
+  transform-origin: bottom center;
+}
+.tutor-slot.speaker {
+  z-index: 3;
+}
+.tutor-slot.speaker .tutor-img {
+  border-color: #4ade80;
+  box-shadow:
+    0 0 0 3px rgba(74,222,128,0.55),
+    0 0 22px rgba(74,222,128,0.5),
+    0 8px 20px rgba(0,0,0,0.4);
 }
 
-@keyframes gigaFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-12px); }
+.tutor-img {
+  width: 78px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ffd23f;
+  box-shadow: 0 0 0 2px rgba(255,138,61,0.35), 0 6px 16px rgba(0,0,0,0.4);
+  display: block;
+  transform-origin: 50% 80%;
+  /* bob + sway independiente = sensación de brazos/cuerpo vivos */
+  animation: tutorLiveA 2.6s ease-in-out infinite;
+}
+#tutorDayan {
+  animation-name: tutorLiveA;
+  animation-duration: 2.6s;
+}
+#tutorCarolay {
+  animation-name: tutorLiveB;
+  animation-duration: 3.1s;
+  animation-delay: -0.8s;
 }
 
-@keyframes gigaBounce {
-  0%, 100% { transform: scale(1); }
-  30% { transform: scale(1.08); }
-  60% { transform: scale(0.96); }
+/* Movimiento vivo: sube/baja + inclina (como si movieran hombros/brazos) */
+@keyframes tutorLiveA {
+  0%   { transform: translateY(0) rotate(-3deg) scale(1); }
+  20%  { transform: translateY(-7px) rotate(2deg) scale(1.02); }
+  40%  { transform: translateY(-2px) rotate(-4deg) scale(1); }
+  60%  { transform: translateY(-10px) rotate(3deg) scale(1.03); }
+  80%  { transform: translateY(-3px) rotate(-2deg) scale(1.01); }
+  100% { transform: translateY(0) rotate(-3deg) scale(1); }
+}
+@keyframes tutorLiveB {
+  0%   { transform: translateY(0) rotate(3deg) scale(1); }
+  25%  { transform: translateY(-9px) rotate(-3deg) scale(1.025); }
+  50%  { transform: translateY(-1px) rotate(4deg) scale(1); }
+  75%  { transform: translateY(-8px) rotate(-2deg) scale(1.02); }
+  100% { transform: translateY(0) rotate(3deg) scale(1); }
 }
 
-@keyframes gigaCelebrate {
-  0% { transform: scale(1) rotate(0); }
-  25% { transform: scale(1.2) rotate(-8deg); }
-  50% { transform: scale(1.15) rotate(8deg); }
-  75% { transform: scale(1.2) rotate(-5deg); }
-  100% { transform: scale(1) rotate(0); }
+.tutor-mini-tag {
+  margin-top: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.5);
+  color: #ffd23f;
+  padding: 1px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255,210,63,0.3);
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+.tutor-slot.speaker .tutor-mini-tag {
+  background: #22c55e;
+  color: #04310f;
+  border-color: #4ade80;
+  transform: scale(1.1);
 }
 
-/* Giga fijo en esquina (para juegos) */
-.giga-container.fixed {
+/* brillo */
+.tutor-slot::after {
+  content: "";
+  position: absolute;
+  top: 4px; left: 12px;
+  width: 20px; height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 70%);
+  pointer-events: none;
+  animation: shine 3.2s ease-in-out infinite;
+}
+#slotCarolay::after { animation-delay: -1.5s; }
+@keyframes shine {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.7; }
+}
+
+/* === FX layer: rayos, sparks, manita === */
+.tutor-fx {
+  position: absolute;
+  inset: -20px -10px 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: visible;
+}
+.fx-bolt {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px #ffd23f);
+  transition: opacity 0.2s;
+}
+.giga-character.speaking .fx-bolt,
+.giga-character.celebrate .fx-bolt {
+  opacity: 1;
+  animation: boltZap 0.6s ease;
+}
+@keyframes boltZap {
+  0% { transform: translateX(-50%) scale(0.4) rotate(-20deg); opacity: 0; }
+  40% { transform: translateX(-50%) scale(1.3) rotate(10deg); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 0.85; }
+}
+.fx-spark {
+  position: absolute;
+  font-size: 0.7rem;
+  color: #ffd23f;
+  opacity: 0;
+  text-shadow: 0 0 6px #ff8a3d;
+}
+.fx-spark.s1 { top: 10%; left: 5%; }
+.fx-spark.s2 { top: 5%; right: 8%; }
+.fx-spark.s3 { top: 35%; right: 0%; }
+.giga-character.speaking .fx-spark,
+.giga-character.celebrate .fx-spark {
+  animation: sparkFly 0.9s ease forwards;
+}
+.giga-character.speaking .fx-spark.s2 { animation-delay: 0.1s; }
+.giga-character.speaking .fx-spark.s3 { animation-delay: 0.2s; }
+.giga-character.celebrate .fx-spark.s2 { animation-delay: 0.08s; }
+.giga-character.celebrate .fx-spark.s3 { animation-delay: 0.15s; }
+@keyframes sparkFly {
+  0% { opacity: 0; transform: translate(0,0) scale(0.5); }
+  30% { opacity: 1; transform: translate(4px,-10px) scale(1.2); }
+  100% { opacity: 0; transform: translate(10px,-28px) scale(0.6); }
+}
+.fx-hand {
+  position: absolute;
+  bottom: 28%;
+  right: -6px;
+  font-size: 1.35rem;
+  opacity: 0;
+  transform: rotate(-20deg) scale(0.5);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  transition: opacity 0.15s;
+}
+.giga-character.waving .fx-hand {
+  opacity: 1;
+  animation: handWave 0.9s ease;
+}
+@keyframes handWave {
+  0%   { opacity: 0; transform: rotate(-30deg) scale(0.5) translateY(8px); }
+  20%  { opacity: 1; transform: rotate(15deg) scale(1.15) translateY(-4px); }
+  40%  { transform: rotate(-25deg) scale(1.1) translateY(0); }
+  60%  { transform: rotate(20deg) scale(1.15) translateY(-3px); }
+  80%  { transform: rotate(-10deg) scale(1.05); }
+  100% { opacity: 0; transform: rotate(0deg) scale(0.8) translateY(6px); }
+}
+
+/* Al hablar: la speaker se inclina hacia adelante (más “gesto”) */
+.giga-character.speaking .tutor-slot.speaker {
+  animation: speakLean 0.65s ease;
+}
+@keyframes speakLean {
+  0%, 100% { transform: scale(1.08) translateY(-4px) rotate(0deg); }
+  30% { transform: scale(1.14) translateY(-12px) rotate(-4deg); }
+  60% { transform: scale(1.1) translateY(-6px) rotate(3deg); }
+}
+.giga-character.speaking .tutor-slot:not(.speaker) {
+  animation: listenNod 0.65s ease;
+}
+@keyframes listenNod {
+  0%, 100% { transform: scale(1) rotate(0); }
+  40% { transform: scale(1.02) translateY(-3px) rotate(2deg); }
+  70% { transform: scale(1) translateY(0) rotate(-1deg); }
+}
+
+/* Celebración: baile de las dos + sensación de brazos */
+.giga-character.celebrate .tutor-slot:nth-child(1) {
+  animation: duoDanceL 0.85s ease;
+}
+.giga-character.celebrate .tutor-slot:nth-child(2) {
+  animation: duoDanceR 0.85s ease;
+}
+@keyframes duoDanceL {
+  0%, 100% { transform: rotate(0) translateY(0) scale(1); }
+  15% { transform: rotate(-14deg) translateY(-14px) scale(1.12); }
+  30% { transform: rotate(8deg) translateY(-4px) scale(1.05); }
+  50% { transform: rotate(-12deg) translateY(-16px) scale(1.14); }
+  70% { transform: rotate(6deg) translateY(-6px) scale(1.06); }
+  85% { transform: rotate(-5deg) translateY(-10px) scale(1.08); }
+}
+@keyframes duoDanceR {
+  0%, 100% { transform: rotate(0) translateY(0) scale(1); }
+  15% { transform: rotate(14deg) translateY(-14px) scale(1.12); }
+  30% { transform: rotate(-8deg) translateY(-4px) scale(1.05); }
+  50% { transform: rotate(12deg) translateY(-16px) scale(1.14); }
+  70% { transform: rotate(-6deg) translateY(-6px) scale(1.06); }
+  85% { transform: rotate(5deg) translateY(-10px) scale(1.08); }
+}
+
+/* High-five: se acercan */
+.giga-character.highfive .tutor-slot:nth-child(1) {
+  animation: hfLeft 0.7s ease;
+}
+.giga-character.highfive .tutor-slot:nth-child(2) {
+  animation: hfRight 0.7s ease;
+}
+@keyframes hfLeft {
+  0%, 100% { transform: translateX(0); }
+  40% { transform: translateX(12px) translateY(-8px) rotate(8deg) scale(1.1); }
+  55% { transform: translateX(14px) translateY(-10px) scale(1.12); }
+}
+@keyframes hfRight {
+  0%, 100% { transform: translateX(0); }
+  40% { transform: translateX(-12px) translateY(-8px) rotate(-8deg) scale(1.1); }
+  55% { transform: translateX(-14px) translateY(-10px) scale(1.12); }
+}
+
+.giga-container.fixed .tutor-img {
+  width: 72px;
+  height: 72px;
+}
+.giga-container.fixed .tutor-mini-tag {
+  font-size: 0.55rem;
+}
+
+
+
+/* Speech bubble cuando están separadas */
+.tutor-split-speech {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  max-width: 180px;
-  z-index: 300;
+  z-index: 302;
+  background: #fef8ec;
+  color: #0b1f18;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 3px solid #ff8a3d;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+  width: 200px;
+  max-width: min(200px, 42vw);
+  box-sizing: border-box;
+  box-shadow: 0 5px 0 #b6900f;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85) translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.giga-container.fixed .giga-speech {
-  font-size: 0.8rem;
-  padding: 10px 13px;
-  max-width: 170px;
+.tutor-split-speech.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
-.giga-container.fixed .giga-character svg {
-  width: 100px;
-  height: 115px;
+.tutor-split-speech.happy {
+  background: #d1fae5;
+  border-color: #22c55e;
+  box-shadow: 0 5px 0 #16a34a;
+}
+.tutor-split-speech.sad {
+  background: #fee2e2;
+  border-color: #ef4444;
+  box-shadow: 0 5px 0 #dc2626;
+}
+.tutor-split-speech.excited {
+  background: #fef9c3;
+  border-color: #eab308;
+  box-shadow: 0 5px 0 #ca8a04;
+}
+
+.tutor-solo.speaker .tutor-solo-img {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.55), 0 0 20px rgba(74,222,128,0.45), 0 6px 16px rgba(0,0,0,0.4);
+  transform: scale(1.06);
+}
+.tutor-solo.speaker .tutor-mini-tag {
+  background: #22c55e;
+  color: #04310f;
+  border-color: #4ade80;
+}
+.tutor-solo.celebrate {
+  animation: soloPop 0.8s ease;
+}
+@keyframes soloPop {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.15) rotate(-6deg); }
+  50% { transform: scale(1.1) rotate(6deg); }
+  75% { transform: scale(1.12) rotate(-3deg); }
+}
+
+.tutor-solo.speaking .tutor-solo-img {
+  animation: talkBounce 0.55s ease !important;
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.55), 0 0 18px rgba(74,222,128,0.45);
+}
+
+/* === Solo clones (cuando se separan) === */
+.tutor-solo {
+  position: fixed;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 96px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.7);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s cubic-bezier(.2,.9,.3,1);
+  cursor: pointer;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));
+  /* sin transition de left/top: están fijas, evita saltos raros */
+}
+.tutor-solo.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+.tutor-solo-img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ffd23f;
+  box-shadow: 0 0 0 2px rgba(255,138,61,0.4), 0 6px 16px rgba(0,0,0,0.4);
+  animation: tutorLiveA 2.8s ease-in-out infinite;
+  display: block;
+}
+#tutorSoloDayan .tutor-solo-img {
+  animation-name: tutorLiveB;
+  animation-delay: -1s;
+}
+.tutor-solo .tutor-mini-tag {
+  margin-top: 4px;
+}
+.tutor-solo:hover {
+  transform: scale(1.08);
+}
+.tutor-solo:hover .tutor-solo-img {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.5), 0 0 18px rgba(74,222,128,0.4);
+}
+@media (max-width: 768px) {
+  .tutor-solo-img { width: 58px; height: 58px; }
 }
 
 /* Mejoras de cartas del memorama */
@@ -1754,18 +2117,27 @@ header#inicio .mascot {
    ============================================================ */
 @media (max-width: 768px) {
   .giga-container.fixed {
+    max-width: 160px;
+  }
+  .giga-container.fixed:not(.wandering) {
     bottom: 12px;
     right: 12px;
-    max-width: 150px;
   }
   .giga-container.fixed .giga-speech {
     font-size: 0.72rem;
     padding: 8px 10px;
     max-width: 145px;
   }
-  .giga-container.fixed .giga-character svg {
-    width: 80px;
-    height: 92px;
+  .giga-container.fixed .tutor-img {
+    width: 58px;
+    height: 58px;
+  }
+  .giga-container.fixed .tutor-mini-tag {
+    font-size: 0.5rem;
+    padding: 1px 5px;
+  }
+  .giga-container.fixed .tutor-duo {
+    gap: 4px;
   }
 
   /* Terminales más grandes para dedos */

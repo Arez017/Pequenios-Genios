@@ -442,7 +442,16 @@ const THEORY_PRIMARIA = [
     body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Un solo camino ➡️ si se rompe uno, se apaga todo</p>
       <p>Los componentes van <b>uno detrás del otro</b>, como amigos tomados de la mano. La corriente sale del <b>+</b>, pasa por todos y <b>regresa al −</b>.</p>
       <p>Si un componente falla → se interrumpe el camino → todo se apaga.</p>
-      <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>`,
+      <p>💡 Ejemplo: las guirnaldas de Navidad antiguas. Se fundía un foco y se apagaba toda la cadena.</p>
+      <div style="background:rgba(0,0,0,0.28);border:1px solid rgba(255,210,63,0.35);border-radius:14px;padding:12px 14px;margin-top:14px;">
+        <p style="margin:0 0 8px;font-weight:800;color:#ffd23f;text-align:center;">📐 Fórmulas en serie</p>
+        <p style="margin:6px 0;text-align:center;font-size:1.15rem;font-weight:800;color:#4ade80;">R<sub>total</sub> = R₁ + R₂ + R₃ + …</p>
+        <p style="margin:6px 0;text-align:center;font-size:1.05rem;font-weight:700;">I es <b>la misma</b> en todos · V<sub>total</sub> = V₁ + V₂ + V₃</p>
+        <p style="margin:8px 0 0;font-size:0.9rem;opacity:0.9;line-height:1.45;">
+          <b>En corto:</b> las resistencias se <b>suman</b>. La corriente es igual en todo el camino. El voltaje se reparte entre los componentes.
+        </p>
+        <p style="margin:8px 0 0;font-size:0.88rem;opacity:0.85;">Ejemplo: R₁=100 Ω y R₂=200 Ω → R<sub>total</sub> = 300 Ω</p>
+      </div>`,
     diagram:`<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg">
       <!-- Pila vertical -->
       <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
@@ -484,7 +493,17 @@ const THEORY_PRIMARIA = [
     body:`<p style="text-align:center;font-size:1.1rem;font-weight:700;color:#ffd23f;">Varios caminos ➡️ si se rompe uno, los demás siguen</p>
       <p>Cada componente tiene <b>su propia rama</b>. Todos salen del <b>+</b> y todos regresan al <b>−</b>, pero por caminos separados.</p>
       <p>Si una rama falla → las otras siguen funcionando.</p>
-      <p>💡 Ejemplo: las luces de tu casa. Apagas una y las demás siguen encendidas.</p>`,
+      <p>💡 Ejemplo: las luces de tu casa. Apagas una y las demás siguen encendidas.</p>
+      <div style="background:rgba(0,0,0,0.28);border:1px solid rgba(255,210,63,0.35);border-radius:14px;padding:12px 14px;margin-top:14px;">
+        <p style="margin:0 0 8px;font-weight:800;color:#ffd23f;text-align:center;">📐 Fórmulas en paralelo</p>
+        <p style="margin:6px 0;text-align:center;font-size:1.05rem;font-weight:800;color:#4ade80;">1/R<sub>total</sub> = 1/R₁ + 1/R₂ + 1/R₃ + …</p>
+        <p style="margin:6px 0;text-align:center;font-size:1rem;font-weight:700;">(2 resistencias) R<sub>total</sub> = (R₁ × R₂) / (R₁ + R₂)</p>
+        <p style="margin:6px 0;text-align:center;font-size:1.05rem;font-weight:700;">V es <b>el mismo</b> en todas las ramas · I<sub>total</sub> = I₁ + I₂ + I₃</p>
+        <p style="margin:8px 0 0;font-size:0.9rem;opacity:0.9;line-height:1.45;">
+          <b>En corto:</b> el voltaje es igual en cada rama. Las corrientes se <b>suman</b>. La R<sub>total</sub> es <b>menor</b> que la más pequeña.
+        </p>
+        <p style="margin:8px 0 0;font-size:0.88rem;opacity:0.85;">Ejemplo: R₁=100 Ω y R₂=100 Ω → R<sub>total</sub> = 50 Ω</p>
+      </div>`,
     diagram:`<svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg">
       
       <text x="42" y="46" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
@@ -4374,14 +4393,20 @@ function resetMedals(){
 }
 function checkAllMedals(){
   if(!window.PG) return;
-  const need = ['memo','circuito','polar','cables','quiz','lab','ohm'];
-  if(need.every(k => PG.medals[k])){
-    setTimeout(()=>{
-      document.getElementById('diplomaOverlay')?.classList.add('show');
-      PG.confetti(80);
-      PG.sfxWin();
-    }, 600);
-  }
+  // Certificado SOLO cuando se completan TODOS los juegos (8 medallas)
+  const need = ['memo','circuito','polar','cables','quiz','lab','seriepara','ohm'];
+  const allDone = need.every(k => PG.medals[k]);
+  if(!allDone) return;
+
+  // Evitar mostrar dos veces en la misma sesión
+  if(window._pgDiplomaShown) return;
+  window._pgDiplomaShown = true;
+
+  setTimeout(function(){
+    const ov = document.getElementById('diplomaOverlay');
+    if(ov) ov.classList.add('show');
+    try { PG.confetti(80); PG.sfxWin(); } catch(e){}
+  }, 700);
 }
 // Hook into award
 if(window.PG){
@@ -4396,24 +4421,198 @@ function downloadDiploma(){
   const input = document.getElementById('diplomaNameInput');
   let name = (input && input.value.trim()) || (nameEl && nameEl.textContent) || 'Un(a) pequeño(a) genio(a)';
   if(input && input.value.trim()) updateDiplomaName(input.value);
+  const safe = String(name).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fecha = new Date().toLocaleDateString('es-BO', { year:'numeric', month:'long', day:'numeric' });
   const w = window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><title>Certificado Pequeños Genios</title>
+  if(!w){ alert('Permite ventanas emergentes para descargar el certificado'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Certificado Pequeños Genios — ${safe}</title>
   <style>
-    body{font-family:Georgia,serif;text-align:center;padding:48px;color:#0b1f18;background:#fef8ec;}
-    h2{font-size:1.8rem;margin:12px 0;color:#0b3d2e;}
-    .name{font-size:1.6rem;font-weight:700;color:#0b3d2e;border-bottom:2px solid #ffd23f;display:inline-block;padding:4px 24px;margin:12px 0;}
-    p{line-height:1.5;max-width:480px;margin:8px auto;}
+    @page { size: A4 portrait; margin: 12mm; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #0b1f18;
+      background: #e8e4d8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet {
+      width: 190mm;
+      min-height: 270mm;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,138,61,0.12), transparent 40%),
+        radial-gradient(circle at 88% 10%, rgba(77,216,255,0.10), transparent 40%),
+        linear-gradient(165deg, #fefcf5 0%, #f7f0e0 100%);
+      border: 3px solid #0b3d2e;
+      box-shadow: 0 0 0 8px #fef8ec, 0 0 0 11px #ffd23f, 0 12px 40px rgba(0,0,0,0.18);
+      padding: 18mm 16mm;
+      position: relative;
+      text-align: center;
+    }
+    .sheet::before {
+      content: "";
+      position: absolute; inset: 6px;
+      border: 1.5px solid rgba(255,138,61,0.45);
+      pointer-events: none;
+    }
+    .corner {
+      position: absolute; width: 28px; height: 28px;
+      border: 3px solid #ff8a3d;
+    }
+    .corner.tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+    .corner.tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+    .corner.bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+    .corner.br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+
+    .badge {
+      display: inline-block;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      background: #ff8a3d;
+      color: #0b1f18;
+      padding: 5px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .medal { font-size: 3rem; line-height: 1; margin: 6px 0 4px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+    h1 {
+      font-size: 1.85rem;
+      margin: 6px 0 4px;
+      color: #0b3d2e;
+      letter-spacing: 0.5px;
+    }
+    .sub {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.95rem;
+      color: #3d5c4e;
+      margin: 0 0 14px;
+    }
+    .label {
+      font-size: 0.95rem;
+      margin: 10px 0 6px;
+      color: #3d5c4e;
+    }
+    .name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0b3d2e;
+      border-bottom: 3px solid #ffd23f;
+      display: inline-block;
+      padding: 4px 28px 6px;
+      margin: 4px 0 12px;
+      min-width: 180px;
+    }
+    .desc {
+      font-size: 0.98rem;
+      line-height: 1.55;
+      max-width: 420px;
+      margin: 0 auto 16px;
+      color: #1a3328;
+    }
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      max-width: 460px;
+      margin: 0 auto 18px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .skill {
+      background: #0b3d2e;
+      color: #fef8ec;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid #ffd23f;
+    }
+    .footer {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(11,61,46,0.25);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .school {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0b3d2e;
+      margin: 0 0 4px;
+    }
+    .meta {
+      font-size: 0.78rem;
+      color: #5a7266;
+      margin: 0;
+    }
+    .tutors {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #3d5c4e;
+      font-style: italic;
+    }
+    .bolt {
+      color: #e6a800;
+      font-style: normal;
+    }
+    @media print {
+      body { background: white; }
+      .sheet {
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+      }
+    }
   </style></head><body>
-  <div style="font-size:2.5rem;">🏅</div>
-  <h2>¡Certificado Pequeños Genios!</h2>
-  <p>Se otorga el presente reconocimiento a</p>
-  <div class="name">${name.replace(/</g,'')}</div>
-  <p>por dominar los fundamentos de electrónica básica:<br>componentes, polaridad, circuitos y laboratorio virtual.</p>
-  <p style="margin-top:20px;font-size:.9rem;opacity:.75;">U.E. La Primera · Fe y Alegría · El Alto, Bolivia</p>
+  <div class="sheet">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="badge">Proyecto de innovación</div>
+    <div class="medal">🏅</div>
+    <h1>¡Certificado Pequeños Genios!</h1>
+    <p class="sub">Electrónica básica jugando <span class="bolt">⚡</span></p>
+
+    <p class="label">Se otorga el presente reconocimiento a</p>
+    <div class="name">${safe}</div>
+
+    <p class="desc">
+      por completar con éxito todos los desafíos y dominar los fundamentos de
+      <strong>electrónica básica</strong>: componentes, polaridad, circuitos en serie y paralelo,
+      la Ley de Ohm y el laboratorio virtual.
+    </p>
+
+    <div class="skills">
+      <span class="skill">🧠 Memoria</span>
+      <span class="skill">🔌 Circuitos</span>
+      <span class="skill">🔋 Polaridad</span>
+      <span class="skill">🔗 Cables</span>
+      <span class="skill">🏆 Quiz</span>
+      <span class="skill">⚡ Laboratorio</span>
+      <span class="skill">💡 Serie / Paralelo</span>
+      <span class="skill">📐 Ley de Ohm</span>
+    </div>
+
+    <div class="footer">
+      <p class="school">U.E. La Primera · Fe y Alegría · El Alto, Bolivia</p>
+      <p class="meta">Fecha: ${fecha}</p>
+      <p class="tutors">Con la guía de Carolay y Dayan <span class="bolt">⚡</span></p>
+    </div>
+  </div>
   </body></html>`);
   w.document.close();
   w.focus();
-  setTimeout(()=>w.print(), 250);
+  setTimeout(function(){ try{ w.print(); }catch(e){} }, 350);
 }
 
 /* --- Borrar cable al hacer click --- */
@@ -4731,21 +4930,21 @@ window.replayTutorial = function(){
 
 
 /* ============================================================
-   GIGA - TUTOR COMPLETO + PISTAS DESPUÉS DE 5 FALLOS
+   CAROLAY GIGA - TUTOR COMPLETO DAYAN - TUTORAS DINÁMICAS CON VIDA + PISTAS DESPUÉS DE 5 FALLOS
    + MEJORAS MÓVILES PARA "CONECTA LOS CABLES"
    ============================================================ */
 const GIGA_DIALOGUES = {
-  inicio:       "¡Hola! Soy Giga, tu tutor. ¿Listo para convertirte en un pequeño genio?",
+  inicio:       "¡Hola! Somos Carolay y Dayan, tus tutoras. ¿Lista/o para convertirte en un pequeño genio?",
   componentes:  "¡Mira! Cada tarjeta es un amigo electrónico. ¡Tócalo para conocerlo!",
   teoria:       "Empecemos por la Ley de Ohm… ¡es más fácil de lo que parece!",
-  juegos:       "¡Bienvenido a la Zona de Juegos! Elige uno y practica. ¡Yo te animo!",
+  juegos:       "¡Bienvenido a la Zona de Juegos! Elige uno y practica. ¡Nosotras te animamos!",
   colores:      "¡Vamos a descifrar el código secreto de las resistencias!",
-  laboratorio:  "Aquí puedes armar circuitos sin miedo. ¡Yo estoy contigo!",
-  memorama:     "¡Encuentra los dos iguales! Yo te animo en cada movimiento.",
+  laboratorio:  "Aquí puedes armar circuitos sin miedo. ¡Estamos contigo!",
+  memorama:     "¡Encuentra los dos iguales! Te animamos en cada movimiento.",
   polaridad:    "¡Cuidado con la polaridad! El lado positivo es muy importante.",
   circuito:     "Arma el circuito en el orden correcto. ¡Tú puedes!",
   seriepara:    "Serie o paralelo… ¡vamos a descubrir la diferencia!",
-  cables:       "¡Conecta los cables! Puedes hacer clic o arrastrar. ¡Yo te ayudo!",
+  cables:       "¡Conecta los cables! Puedes hacer clic o arrastrar. ¡Te ayudamos!",
   quiz:         "¡Hora del Quiz! Demuestra lo que aprendiste.",
   ohm:          "¡Juguemos con la Ley de Ohm! Mueve los controles."
 };
@@ -4756,9 +4955,11 @@ const GIGA_TIPS = [
   "¿Sabías que el LED tiene una patita más larga? Esa es la positiva (+).",
   "¡Eres un genio! Sigue practicando.",
   "En serie la corriente es la misma, en paralelo el voltaje es el mismo.",
-  "¡Giga está orgulloso de ti!",
+  "¡Carolay y Dayan están orgullosas de ti!",
   "Si el LED no enciende, revisa la polaridad.",
-  "¡Muy bien! Estás aprendiendo rápido."
+  "¡Muy bien! Estás aprendiendo rápido.",
+  "¡Haz clic en nosotras para cambiar de tutora!",
+  "⚡ ¡Bzzzt! La electricidad es magia… ¡pero con reglas!"
 ];
 
 const GIGA_HINTS = {
@@ -4792,20 +4993,20 @@ const GIGA_HINTS = {
 };
 
 const GIGA_REACTIONS = {
-  memo_match:  ["¡Genial! Encontraste el par ⚡", "¡Sííí! ¡Otro par!", "¡Exacto! Giga está feliz 😄", "¡Increíble memoria!"],
+  memo_match:  ["¡Genial! Encontraste el par ⚡", "¡Sííí! ¡Otro par!", "¡Exacto! ¡Carolay está feliz 😄", "¡Increíble memoria!"],
   memo_fail:   ["¡Casi! No te rindas 💪", "¡Uy! Intenta otra vez", "Tranquilo, todos nos equivocamos", "¡Ánimo! La próxima la aciertas"],
-  memo_win:    ["🎉 ¡INCREÍBLE! Completaste el Memorama!", "🏆 ¡Lo lograste! Giga está orgulloso", "⚡ ¡Eres un maestro de la memoria!"],
-  polar_ok:    ["¡Correcto! Esa es la polaridad buena ⚡", "¡Bien! El positivo va con el positivo", "¡Exacto! Giga te felicita"],
+  memo_win:    ["🎉 ¡INCREÍBLE! Completaste el Memorama!", "🏆 ¡Lo lograste! Dayan está orgullosa", "⚡ ¡Eres un maestro de la memoria!"],
+  polar_ok:    ["¡Correcto! Esa es la polaridad buena ⚡", "¡Bien! El positivo va con el positivo", "¡Exacto! Carolay te felicita"],
   polar_bad:   ["¡Cuidado! Esa polaridad está al revés", "¡Uy! Revisa el lado positivo", "Casi… intenta de nuevo"],
   circuito_ok: ["¡Circuito correcto! ¡Encendió! 💡", "¡Perfecto! Todo conectado bien", "¡Eres un experto en circuitos!"],
   circuito_bad:["Falta algo… revisa el orden", "¡Casi! Revisa las conexiones", "El LED no enciende… ¿falta la resistencia?"],
   cable_ok:    ["¡Cables conectados perfecto! 🔗", "¡Bien hecho! El circuito está cerrado", "¡Excelente conexión!"],
   cable_bad:   ["Esos cables no van así…", "¡Revisa las conexiones!", "Casi… prueba otra combinación"],
-  quiz_ok:     ["¡Respuesta correcta! 🧠", "¡Sabes mucho!", "¡Giga está impresionado!"],
+  quiz_ok:     ["¡Respuesta correcta! 🧠", "¡Sabes mucho!", "¡Dayan está impresionada!"],
   quiz_bad:    ["No era esa… ¡sigue intentando!", "¡Casi! Piensa un poco más", "Tranquilo, la próxima la aciertas"],
   lab_ok:      ["¡Circuito funcionando! ⚡", "¡Se encendió! ¡Genial!", "¡Experimentaste muy bien!"],
   lab_bad:     ["Algo no está bien… revisa", "¿Falta la resistencia?", "Prueba otra combinación"],
-  win:         ["🎉 ¡Lo lograste! Eres un Pequeño Genio", "🏆 ¡Increíble trabajo!", "⚡ ¡Giga está super orgulloso de ti!"]
+  win:         ["🎉 ¡Lo lograste! Eres un Pequeño Genio", "🏆 ¡Increíble trabajo!", "⚡ ¡Carolay y Dayan están super orgullosas de ti!"]
 };
 
 // Contador de fallos por juego
@@ -4818,6 +5019,37 @@ const gigaFailCount = {
   lab: 0
 };
 
+/* === Dúo activo: ambas visibles, una "habla" (speaker) === */
+let currentTutor = 'Carolay'; // quién habla ahora
+
+function switchTutor(forceName) {
+  const slotC = document.getElementById('slotCarolay');
+  const slotD = document.getElementById('slotDayan');
+
+  if (forceName) {
+    currentTutor = forceName;
+  } else {
+    currentTutor = currentTutor === 'Carolay' ? 'Dayan' : 'Carolay';
+  }
+
+  if (slotC && slotD) {
+    slotC.classList.toggle('speaker', currentTutor === 'Carolay');
+    slotD.classList.toggle('speaker', currentTutor === 'Dayan');
+  }
+
+  // Highlight en las fijas izquierda/derecha
+  const soloC = document.getElementById('tutorSoloCarolay');
+  const soloD = document.getElementById('tutorSoloDayan');
+  if (soloC) soloC.classList.toggle('speaker', currentTutor === 'Carolay');
+  if (soloD) soloD.classList.toggle('speaker', currentTutor === 'Dayan');
+}
+
+// Al inicio Carolay habla
+function initTutorSpeaker() {
+  const slotC = document.getElementById('slotCarolay');
+  if (slotC) slotC.classList.add('speaker');
+}
+
 function setGigaMood(mood) {
   const speech = document.getElementById('gigaSpeech');
   if (!speech) return;
@@ -4827,21 +5059,63 @@ function setGigaMood(mood) {
 
 function gigaSay(text, mood) {
   const speech = document.getElementById('gigaSpeech');
-  if (!speech) return;
-  speech.textContent = text;
-  setGigaMood(mood || '');
-  speech.style.animation = 'none';
-  speech.offsetHeight;
-  speech.style.animation = 'gigaPop 0.4s ease';
+  if (speech) {
+    speech.textContent = text;
+    setGigaMood(mood || '');
+    speech.style.animation = 'none';
+    speech.offsetHeight;
+    speech.style.animation = 'gigaPop 0.4s ease';
+  }
+
+  // Si están separadas, el diálogo va al bubble flotante junto a quien habla
+  if (tutorWander && tutorWander.split) {
+    tutorShowSplitSpeech(text, mood);
+  }
+
+  const char = document.getElementById('gigaChar');
+  if (char) {
+    char.classList.add('speaking');
+    setTimeout(() => char.classList.remove('speaking'), 650);
+  }
+  // Animación de la solo que habla
+  if (tutorWander && tutorWander.split) {
+    const solo = document.getElementById(currentTutor === 'Carolay' ? 'tutorSoloCarolay' : 'tutorSoloDayan');
+    if (solo) {
+      solo.classList.add('speaking');
+      setTimeout(function(){ solo.classList.remove('speaking'); }, 650);
+    }
+  }
 }
 
 function gigaCelebrate() {
   const char = document.getElementById('gigaChar');
-  if (char) {
-    char.classList.remove('celebrate');
-    char.offsetHeight;
-    char.classList.add('celebrate');
+  const soloC = document.getElementById('tutorSoloCarolay');
+  const soloD = document.getElementById('tutorSoloDayan');
+
+  function bump(el) {
+    if (!el) return;
+    el.classList.remove('celebrate');
+    void el.offsetHeight;
+    el.classList.add('celebrate');
+    setTimeout(function(){ el.classList.remove('celebrate'); }, 900);
   }
+
+  if (tutorWander && tutorWander.split) {
+    bump(soloC);
+    bump(soloD);
+  } else if (char) {
+    char.classList.remove('celebrate', 'waving', 'highfive');
+    char.offsetHeight;
+    const roll = Math.random();
+    if (roll < 0.4) char.classList.add('celebrate');
+    else if (roll < 0.75) char.classList.add('waving');
+    else char.classList.add('highfive');
+    setTimeout(function() {
+      char.classList.remove('waving', 'highfive');
+    }, 950);
+  }
+
+  if (Math.random() > 0.5) switchTutor();
 }
 
 function gigaReact(type, gameKey) {
@@ -4881,21 +5155,371 @@ function updateGigaSpeech(section) {
   gigaSay(GIGA_DIALOGUES[section] || GIGA_DIALOGUES.inicio);
 }
 
+/* ============================================================
+   WANDER — Esquinas + a veces se separan
+   ============================================================ */
+const tutorWander = {
+  paused: false,
+  timer: null,
+  reduceMotion: false,
+  split: false,
+  cornerIdx: 3 // start bottom-right
+};
+
+function tutorGetBounds(forSplit) {
+  const el = document.getElementById('gigaGuide');
+  const w = forSplit ? 90 : ((el && el.getBoundingClientRect().width) || 180);
+  const h = forSplit ? 130 : ((el && el.getBoundingClientRect().height) || 200);
+  const pad = 14;
+  return {
+    w, h,
+    minX: pad,
+    minY: pad + 56,
+    maxX: Math.max(pad, window.innerWidth - w - pad),
+    maxY: Math.max(pad, window.innerHeight - h - pad)
+  };
+}
+
+function tutorCorners(b) {
+  return [
+    { x: b.minX, y: b.minY, name: 'tl' }, // top-left
+    { x: b.maxX, y: b.minY, name: 'tr' }, // top-right
+    { x: b.minX, y: b.maxY, name: 'bl' }, // bottom-left
+    { x: b.maxX, y: b.maxY, name: 'br' }  // bottom-right
+  ];
+}
+
+function tutorMoveGuide(x, y) {
+  const el = document.getElementById('gigaGuide');
+  if (!el) return;
+  el.classList.add('wandering');
+  el.style.left = Math.round(x) + 'px';
+  el.style.top = Math.round(y) + 'px';
+  el.style.right = 'auto';
+  el.style.bottom = 'auto';
+}
+
+function tutorEnsureSplitNodes() {
+  // Clones flotantes individuales cuando están separadas
+  let c = document.getElementById('tutorSoloCarolay');
+  let d = document.getElementById('tutorSoloDayan');
+  if (!c) {
+    c = document.createElement('div');
+    c.id = 'tutorSoloCarolay';
+    c.className = 'tutor-solo';
+    c.innerHTML = '<img src="dayan.png" alt="Carolay" class="tutor-solo-img"><span class="tutor-mini-tag">Carolay</span>';
+    c.title = 'Carolay ⚡';
+    c.addEventListener('click', function() {
+      switchTutor('Carolay');
+      gigaSay(GIGA_TIPS[Math.floor(Math.random() * GIGA_TIPS.length)], 'excited');
+      if (window.PG) PG.sfxPop();
+    });
+    document.body.appendChild(c);
+  }
+  if (!d) {
+    d = document.createElement('div');
+    d.id = 'tutorSoloDayan';
+    d.className = 'tutor-solo';
+    d.innerHTML = '<img src="carolay.png" alt="Dayan" class="tutor-solo-img"><span class="tutor-mini-tag">Dayan</span>';
+    d.title = 'Dayan ⚡';
+    d.addEventListener('click', function() {
+      switchTutor('Dayan');
+      gigaSay(GIGA_TIPS[Math.floor(Math.random() * GIGA_TIPS.length)], 'excited');
+      if (window.PG) PG.sfxPop();
+    });
+    document.body.appendChild(d);
+  }
+  return { c, d };
+}
+
+function tutorSidePositions() {
+  // Una a la izquierda, otra a la derecha (mitad vertical con un poco de variación)
+  const pad = 14;
+  const w = 100;
+  const h = 140;
+  const midY = Math.max(pad + 56, (window.innerHeight - h) / 2);
+  const jitter = function(){ return (Math.random() - 0.5) * Math.min(120, window.innerHeight * 0.15); };
+  return {
+    left:  { x: pad, y: Math.min(Math.max(pad + 56, midY + jitter()), window.innerHeight - h - pad) },
+    right: { x: Math.max(pad, window.innerWidth - w - pad), y: Math.min(Math.max(pad + 56, midY + jitter()), window.innerHeight - h - pad) }
+  };
+}
+
+function tutorEnterSplit() {
+  const guide = document.getElementById('gigaGuide');
+  if (!guide) return;
+  const { c, d } = tutorEnsureSplitNodes();
+  const sides = tutorSidePositions();
+
+  // Ocultar el dúo unido, pero NO el speech: lo movemos junto a quien habla
+  guide.classList.add('split-mode');
+  guide.style.opacity = '0';
+  guide.style.pointerEvents = 'none';
+
+  c.classList.add('show');
+  d.classList.add('show');
+  // Carolay (rojo) a la derecha, Dayan (verde) a la izquierda — o al azar L/R
+  if (Math.random() > 0.5) {
+    c.style.left = sides.left.x + 'px';  c.style.top = sides.left.y + 'px';
+    d.style.left = sides.right.x + 'px'; d.style.top = sides.right.y + 'px';
+  } else {
+    c.style.left = sides.right.x + 'px'; c.style.top = sides.right.y + 'px';
+    d.style.left = sides.left.x + 'px';  d.style.top = sides.left.y + 'px';
+  }
+  tutorWander.split = true;
+
+  // Mostrar un speech bubble flotante junto a la tutora que habla
+  tutorShowSplitSpeech(GIGA_DIALOGUES.juegos || '¡Estamos a ambos lados para ayudarte!');
+}
+
+function tutorExitSplit(targetCorner) {
+  const guide = document.getElementById('gigaGuide');
+  const c = document.getElementById('tutorSoloCarolay');
+  const d = document.getElementById('tutorSoloDayan');
+  const splitSpeech = document.getElementById('tutorSplitSpeech');
+  if (c) c.classList.remove('show');
+  if (d) d.classList.remove('show');
+  if (splitSpeech) splitSpeech.classList.remove('show');
+  if (!guide) return;
+  guide.classList.remove('split-mode');
+  const b = tutorGetBounds(false);
+  const corners = tutorCorners(b);
+  const idx = typeof targetCorner === 'number' ? targetCorner : Math.floor(Math.random() * 4);
+  tutorMoveGuide(corners[idx].x, corners[idx].y);
+  guide.style.opacity = '1';
+  guide.style.pointerEvents = 'auto';
+  tutorWander.split = false;
+  tutorWander.cornerIdx = idx;
+}
+
+function tutorShowSplitSpeech(text, mood) {
+  let box = document.getElementById('tutorSplitSpeech');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'tutorSplitSpeech';
+    box.className = 'tutor-split-speech';
+    document.body.appendChild(box);
+  }
+  box.textContent = text || '';
+  box.classList.remove('happy', 'sad', 'excited', 'show');
+  if (mood) box.classList.add(mood);
+
+  const speakerId = currentTutor === 'Carolay' ? 'tutorSoloCarolay' : 'tutorSoloDayan';
+  const speaker = document.getElementById(speakerId);
+  const vw = document.documentElement.clientWidth || window.innerWidth;
+  const vh = document.documentElement.clientHeight || window.innerHeight;
+  const bubbleW = 200;
+
+  if (speaker) {
+    const r = speaker.getBoundingClientRect();
+    // Bubble SIEMPRE hacia el centro de la pantalla (no tapa el círculo)
+    let left, top;
+    if (currentTutor === 'Carolay') {
+      // habla la de la derecha → globo a su IZQUIERDA (hacia el centro)
+      left = r.left - bubbleW - 12;
+      if (left < 8) left = 8;
+    } else {
+      // habla la de la izquierda → globo a su DERECHA (hacia el centro)
+      left = r.right + 12;
+      if (left + bubbleW > vw - 8) left = vw - bubbleW - 8;
+    }
+    top = r.top + r.height / 2 - 40;
+    top = Math.max(64, Math.min(top, vh - 100));
+    box.style.left = Math.round(left) + 'px';
+    box.style.top = Math.round(top) + 'px';
+  }
+
+  box.classList.add('show');
+  clearTimeout(tutorWander._speechHide);
+  tutorWander._speechHide = setTimeout(function(){
+    if (box) box.classList.remove('show');
+  }, 8000);
+}
+
+function tutorWanderStep() {
+  if (tutorWander.paused || tutorWander.reduceMotion) return;
+  if (document.visibilityState !== 'visible') return;
+  const guide = document.getElementById('gigaGuide');
+  if (!guide) return;
+  if (guide.matches(':hover')) return;
+
+  // ~30% de las veces se separan (si no lo están); si están separadas, ~50% se reúnen
+  if (tutorWander.split) {
+    if (Math.random() < 0.5) {
+      tutorExitSplit();
+      setTimeout(function(){ switchTutor(); }, 1200);
+    } else {
+      // Reposicionar: siempre una izq, una der (con jitter vertical)
+      const { c, d } = tutorEnsureSplitNodes();
+      const sides = tutorSidePositions();
+      // mantener quién está a qué lado, solo mover Y un poco / intercambiar a veces
+      if (Math.random() > 0.7) {
+        c.style.left = sides.left.x + 'px';  c.style.top = sides.left.y + 'px';
+        d.style.left = sides.right.x + 'px'; d.style.top = sides.right.y + 'px';
+      } else {
+        c.style.left = sides.right.x + 'px'; c.style.top = sides.right.y + 'px';
+        d.style.left = sides.left.x + 'px';  d.style.top = sides.left.y + 'px';
+      }
+      switchTutor();
+      setTimeout(function(){
+        tutorShowSplitSpeech(GIGA_TIPS[Math.floor(Math.random() * GIGA_TIPS.length)], 'excited');
+      }, 900);
+    }
+    return;
+  }
+
+  if (Math.random() < 0.32) {
+    tutorEnterSplit();
+    return;
+  }
+
+  // Mover el dúo a otra esquina (no la misma)
+  const b = tutorGetBounds(false);
+  const corners = tutorCorners(b);
+  let next = Math.floor(Math.random() * 4);
+  if (next === tutorWander.cornerIdx) next = (next + 1) % 4;
+  tutorWander.cornerIdx = next;
+  tutorMoveGuide(corners[next].x, corners[next].y);
+  if (Math.random() > 0.5) setTimeout(function(){ switchTutor(); }, 1400);
+}
+
+function startTutorWander() {
+  try {
+    tutorWander.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch(e) {}
+  if (tutorWander.reduceMotion) return;
+
+  const el = document.getElementById('gigaGuide');
+  if (!el) return;
+
+  const b = tutorGetBounds(false);
+  const corners = tutorCorners(b);
+  tutorMoveGuide(corners[3].x, corners[3].y); // bottom-right
+  tutorWander.cornerIdx = 3;
+
+  el.addEventListener('mouseenter', function(){ tutorWander.paused = true; });
+  el.addEventListener('mouseleave', function(){ tutorWander.paused = false; });
+  el.addEventListener('touchstart', function(){ tutorWander.paused = true; }, {passive:true});
+  el.addEventListener('touchend', function(){
+    setTimeout(function(){ tutorWander.paused = false; }, 2500);
+  }, {passive:true});
+
+  setTimeout(tutorWanderStep, 4500);
+  tutorWander.timer = setInterval(function() {
+    if (Math.random() > 0.12) tutorWanderStep();
+  }, 9000);
+
+  let resizeT;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function() {
+      if (tutorWander.split) {
+        tutorExitSplit(tutorWander.cornerIdx);
+      } else {
+        const b2 = tutorGetBounds(false);
+        const corners2 = tutorCorners(b2);
+        const i = tutorWander.cornerIdx % 4;
+        tutorMoveGuide(corners2[i].x, corners2[i].y);
+      }
+    }, 200);
+  });
+}
+
+
+function startTutorStaticSplit() {
+  try {
+    tutorWander.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch(e) {}
+
+  const guide = document.getElementById('gigaGuide');
+  if (!guide) return;
+
+  // Siempre modo separado, estático
+  tutorWander.split = true;
+  tutorWander.paused = true; // no wander
+
+  const { c, d } = tutorEnsureSplitNodes();
+  const place = function() {
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    const vh = document.documentElement.clientHeight || window.innerHeight;
+    // margen generoso para que el círculo NUNCA se corte (sombra + tag)
+    const padX = 20;
+    const padY = 72; // debajo del nav
+    const soloW = 96; // ancho fijo del contenedor
+    const soloH = 120;
+
+    const y = Math.max(padY, Math.min((vh - soloH) / 2, vh - soloH - 16));
+
+    d.style.left = padX + 'px';
+    d.style.top = y + 'px';
+    // derecha: vw - ancho - margen (nunca negativo / fuera)
+    c.style.left = Math.max(padX, vw - soloW - padX) + 'px';
+    c.style.top = y + 'px';
+    c.classList.add('show');
+    d.classList.add('show');
+  };
+
+  // Ocultar el dúo unido
+  guide.classList.add('split-mode');
+  guide.style.opacity = '0';
+  guide.style.pointerEvents = 'none';
+  guide.style.display = 'none';
+
+  place();
+  // Segunda pasada cuando ya tienen tamaño real (evita que se corten)
+  requestAnimationFrame(function() {
+    place();
+    setTimeout(place, 50);
+  });
+  setTimeout(function() {
+    const hash = (location.hash || '#inicio').replace('#', '') || 'inicio';
+    tutorShowSplitSpeech(GIGA_DIALOGUES[hash] || GIGA_DIALOGUES.inicio);
+  }, 450);
+
+  window.addEventListener('resize', function() {
+    place();
+    // reubicar bubble si está visible
+    const box = document.getElementById('tutorSplitSpeech');
+    if (box && box.classList.contains('show')) {
+      tutorShowSplitSpeech(box.textContent);
+    }
+  });
+}
+
 function initGiga() {
   document.querySelectorAll('nav a').forEach(function(link) {
     link.addEventListener('click', function() {
       const hash = (link.getAttribute('href') || '#inicio').replace('#', '') || 'inicio';
       updateGigaSpeech(hash);
+      switchTutor();
     });
   });
 
   const char = document.getElementById('gigaChar');
   if (char) {
     char.addEventListener('click', function() {
+      switchTutor();
+      char.classList.remove('waving');
+      char.offsetHeight;
+      char.classList.add('waving');
+      setTimeout(function(){ char.classList.remove('waving'); }, 950);
       gigaSay(GIGA_TIPS[Math.floor(Math.random() * GIGA_TIPS.length)], 'excited');
       if (window.PG) PG.sfxPop();
     });
   }
+
+  initTutorSpeaker();
+  startTutorStaticSplit(); // una izquierda, una derecha, fijas
+
+  // Auto-cambio de quién habla cada ~9s (solo highlight + diálogo)
+  setInterval(function() {
+    if (document.visibilityState === 'visible') {
+      switchTutor();
+      if (tutorWander.split) {
+        // no auto-speech cada 9s para no spamear; solo highlight
+      }
+    }
+  }, 9000);
 
   const current = (location.hash || '#inicio').replace('#', '') || 'inicio';
   updateGigaSpeech(current);
