@@ -2064,7 +2064,25 @@ header#inicio .mascot {
   box-shadow: 0 0 0 3px rgba(74,222,128,0.5), 0 0 18px rgba(74,222,128,0.4);
 }
 @media (max-width: 768px) {
-  .tutor-solo-img { width: 58px; height: 58px; }
+  .tutor-solo {
+    width: 72px;
+    z-index: 250; /* debajo de modales (certificado ~300+) */
+  }
+  .tutor-solo-img {
+    width: 56px;
+    height: 56px;
+    border-width: 2px;
+  }
+  .tutor-solo .tutor-mini-tag {
+    font-size: 0.48rem;
+    padding: 1px 5px;
+  }
+  .tutor-split-speech {
+    font-size: 0.72rem;
+    padding: 8px 12px;
+    max-width: min(200px, 80vw);
+    z-index: 251;
+  }
 }
 
 /* Mejoras de cartas del memorama */

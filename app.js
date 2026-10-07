@@ -5308,25 +5308,34 @@ function tutorShowSplitSpeech(text, mood) {
   const speaker = document.getElementById(speakerId);
   const vw = document.documentElement.clientWidth || window.innerWidth;
   const vh = document.documentElement.clientHeight || window.innerHeight;
-  const bubbleW = 200;
+  let bubbleW = 200;
 
   if (speaker) {
     const r = speaker.getBoundingClientRect();
-    // Bubble SIEMPRE hacia el centro de la pantalla (no tapa el círculo)
+    const isMobile = vw <= 768;
     let left, top;
-    if (currentTutor === 'Carolay') {
-      // habla la de la derecha → globo a su IZQUIERDA (hacia el centro)
+    if (isMobile) {
+      // Móvil: globo ARRIBA del avatar, centrado en pantalla (no tapa el círculo)
+      bubbleW = Math.min(200, vw - 24);
+      left = (vw - bubbleW) / 2;
+      top = r.top - 110;
+      if (top < 56) top = Math.max(56, r.top - 90);
+      // si aún tapa mucho, ponerlo justo encima con menos altura
+      if (top + 90 > r.top) top = Math.max(52, r.top - 95);
+    } else if (currentTutor === 'Carolay') {
       left = r.left - bubbleW - 12;
       if (left < 8) left = 8;
+      top = r.top + r.height / 2 - 40;
+      top = Math.max(64, Math.min(top, vh - 100));
     } else {
-      // habla la de la izquierda → globo a su DERECHA (hacia el centro)
       left = r.right + 12;
       if (left + bubbleW > vw - 8) left = vw - bubbleW - 8;
+      top = r.top + r.height / 2 - 40;
+      top = Math.max(64, Math.min(top, vh - 100));
     }
-    top = r.top + r.height / 2 - 40;
-    top = Math.max(64, Math.min(top, vh - 100));
     box.style.left = Math.round(left) + 'px';
     box.style.top = Math.round(top) + 'px';
+    box.style.width = bubbleW + 'px';
   }
 
   box.classList.add('show');
@@ -5442,19 +5451,35 @@ function startTutorStaticSplit() {
   const place = function() {
     const vw = document.documentElement.clientWidth || window.innerWidth;
     const vh = document.documentElement.clientHeight || window.innerHeight;
-    // margen generoso para que el círculo NUNCA se corte (sombra + tag)
-    const padX = 20;
-    const padY = 72; // debajo del nav
-    const soloW = 96; // ancho fijo del contenedor
-    const soloH = 120;
+    const isMobile = vw <= 768;
 
-    const y = Math.max(padY, Math.min((vh - soloH) / 2, vh - soloH - 16));
-
-    d.style.left = padX + 'px';
-    d.style.top = y + 'px';
-    // derecha: vw - ancho - margen (nunca negativo / fuera)
-    c.style.left = Math.max(padX, vw - soloW - padX) + 'px';
-    c.style.top = y + 'px';
+    if (isMobile) {
+      // Móvil: esquinas INFERIORES, no tapan el contenido central
+      const padX = 10;
+      const padB = 12;
+      const soloW = 72;
+      const soloH = 95;
+      const y = Math.max(8, vh - soloH - padB);
+      d.style.left = padX + 'px';
+      d.style.top = y + 'px';
+      c.style.left = Math.max(padX, vw - soloW - padX) + 'px';
+      c.style.top = y + 'px';
+      d.classList.add('mobile');
+      c.classList.add('mobile');
+    } else {
+      // Desktop: mitad vertical, izquierda / derecha
+      const padX = 20;
+      const padY = 72;
+      const soloW = 96;
+      const soloH = 120;
+      const y = Math.max(padY, Math.min((vh - soloH) / 2, vh - soloH - 16));
+      d.style.left = padX + 'px';
+      d.style.top = y + 'px';
+      c.style.left = Math.max(padX, vw - soloW - padX) + 'px';
+      c.style.top = y + 'px';
+      d.classList.remove('mobile');
+      c.classList.remove('mobile');
+    }
     c.classList.add('show');
     d.classList.add('show');
   };
