@@ -4728,3 +4728,266 @@ window.replayTutorial = function(){
   try { localStorage.removeItem('pg_tutorial_done'); } catch(e){}
   openTutorial();
 };
+
+
+/* ============================================================
+   GIGA - TUTOR COMPLETO + PISTAS DESPUÉS DE 5 FALLOS
+   + MEJORAS MÓVILES PARA "CONECTA LOS CABLES"
+   ============================================================ */
+const GIGA_DIALOGUES = {
+  inicio:       "¡Hola! Soy Giga, tu tutor. ¿Listo para convertirte en un pequeño genio?",
+  componentes:  "¡Mira! Cada tarjeta es un amigo electrónico. ¡Tócalo para conocerlo!",
+  teoria:       "Empecemos por la Ley de Ohm… ¡es más fácil de lo que parece!",
+  juegos:       "¡Bienvenido a la Zona de Juegos! Elige uno y practica. ¡Yo te animo!",
+  colores:      "¡Vamos a descifrar el código secreto de las resistencias!",
+  laboratorio:  "Aquí puedes armar circuitos sin miedo. ¡Yo estoy contigo!",
+  memorama:     "¡Encuentra los dos iguales! Yo te animo en cada movimiento.",
+  polaridad:    "¡Cuidado con la polaridad! El lado positivo es muy importante.",
+  circuito:     "Arma el circuito en el orden correcto. ¡Tú puedes!",
+  seriepara:    "Serie o paralelo… ¡vamos a descubrir la diferencia!",
+  cables:       "¡Conecta los cables! Puedes hacer clic o arrastrar. ¡Yo te ayudo!",
+  quiz:         "¡Hora del Quiz! Demuestra lo que aprendiste.",
+  ohm:          "¡Juguemos con la Ley de Ohm! Mueve los controles."
+};
+
+const GIGA_TIPS = [
+  "¡Recuerda! La corriente siempre busca un camino cerrado.",
+  "La resistencia protege al LED. ¡Nunca lo conectes solo a la pila!",
+  "¿Sabías que el LED tiene una patita más larga? Esa es la positiva (+).",
+  "¡Eres un genio! Sigue practicando.",
+  "En serie la corriente es la misma, en paralelo el voltaje es el mismo.",
+  "¡Giga está orgulloso de ti!",
+  "Si el LED no enciende, revisa la polaridad.",
+  "¡Muy bien! Estás aprendiendo rápido."
+];
+
+const GIGA_HINTS = {
+  memorama: [
+    "💡 Pista: Busca el mismo símbolo o el mismo nombre.",
+    "💡 Pista: Observa bien el dibujo del componente.",
+    "💡 Pista: LED se parece a un triángulo con una flecha."
+  ],
+  polaridad: [
+    "💡 Pista: La pata larga del LED es el positivo (+).",
+    "💡 Pista: El lado con la franja del capacitor es el negativo.",
+    "💡 Pista: En la pila, el lado más grande suele ser el positivo."
+  ],
+  cables: [
+    "💡 Pista: Empieza desde el (+) de la pila.",
+    "💡 Pista: Orden correcto: Pila (+) → Interruptor → Resistencia → LED (+) → LED (−) → Pila (−).",
+    "💡 Pista: Nunca conectes el LED directo a la pila sin resistencia."
+  ],
+  circuito: [
+    "💡 Pista: Primero la pila, luego la resistencia, después el LED.",
+    "💡 Pista: El LED tiene polaridad: pata larga = positivo."
+  ],
+  quiz: [
+    "💡 Pista: Piensa en lo que viste en la teoría.",
+    "💡 Pista: Recuerda la Ley de Ohm: I = V / R."
+  ],
+  lab: [
+    "💡 Pista: Asegúrate de cerrar el circuito.",
+    "💡 Pista: Revisa que la resistencia esté entre la pila y el LED."
+  ]
+};
+
+const GIGA_REACTIONS = {
+  memo_match:  ["¡Genial! Encontraste el par ⚡", "¡Sííí! ¡Otro par!", "¡Exacto! Giga está feliz 😄", "¡Increíble memoria!"],
+  memo_fail:   ["¡Casi! No te rindas 💪", "¡Uy! Intenta otra vez", "Tranquilo, todos nos equivocamos", "¡Ánimo! La próxima la aciertas"],
+  memo_win:    ["🎉 ¡INCREÍBLE! Completaste el Memorama!", "🏆 ¡Lo lograste! Giga está orgulloso", "⚡ ¡Eres un maestro de la memoria!"],
+  polar_ok:    ["¡Correcto! Esa es la polaridad buena ⚡", "¡Bien! El positivo va con el positivo", "¡Exacto! Giga te felicita"],
+  polar_bad:   ["¡Cuidado! Esa polaridad está al revés", "¡Uy! Revisa el lado positivo", "Casi… intenta de nuevo"],
+  circuito_ok: ["¡Circuito correcto! ¡Encendió! 💡", "¡Perfecto! Todo conectado bien", "¡Eres un experto en circuitos!"],
+  circuito_bad:["Falta algo… revisa el orden", "¡Casi! Revisa las conexiones", "El LED no enciende… ¿falta la resistencia?"],
+  cable_ok:    ["¡Cables conectados perfecto! 🔗", "¡Bien hecho! El circuito está cerrado", "¡Excelente conexión!"],
+  cable_bad:   ["Esos cables no van así…", "¡Revisa las conexiones!", "Casi… prueba otra combinación"],
+  quiz_ok:     ["¡Respuesta correcta! 🧠", "¡Sabes mucho!", "¡Giga está impresionado!"],
+  quiz_bad:    ["No era esa… ¡sigue intentando!", "¡Casi! Piensa un poco más", "Tranquilo, la próxima la aciertas"],
+  lab_ok:      ["¡Circuito funcionando! ⚡", "¡Se encendió! ¡Genial!", "¡Experimentaste muy bien!"],
+  lab_bad:     ["Algo no está bien… revisa", "¿Falta la resistencia?", "Prueba otra combinación"],
+  win:         ["🎉 ¡Lo lograste! Eres un Pequeño Genio", "🏆 ¡Increíble trabajo!", "⚡ ¡Giga está super orgulloso de ti!"]
+};
+
+// Contador de fallos por juego
+const gigaFailCount = {
+  memorama: 0,
+  polaridad: 0,
+  cables: 0,
+  circuito: 0,
+  quiz: 0,
+  lab: 0
+};
+
+function setGigaMood(mood) {
+  const speech = document.getElementById('gigaSpeech');
+  if (!speech) return;
+  speech.classList.remove('happy', 'sad', 'excited');
+  if (mood) speech.classList.add(mood);
+}
+
+function gigaSay(text, mood) {
+  const speech = document.getElementById('gigaSpeech');
+  if (!speech) return;
+  speech.textContent = text;
+  setGigaMood(mood || '');
+  speech.style.animation = 'none';
+  speech.offsetHeight;
+  speech.style.animation = 'gigaPop 0.4s ease';
+}
+
+function gigaCelebrate() {
+  const char = document.getElementById('gigaChar');
+  if (char) {
+    char.classList.remove('celebrate');
+    char.offsetHeight;
+    char.classList.add('celebrate');
+  }
+}
+
+function gigaReact(type, gameKey) {
+  const list = GIGA_REACTIONS[type];
+  if (!list) return;
+
+  // Contar fallos
+  if (type.includes('fail') || type.includes('bad')) {
+    if (gameKey && gigaFailCount[gameKey] !== undefined) {
+      gigaFailCount[gameKey]++;
+      // Después de 5 fallos → dar pista
+      if (gigaFailCount[gameKey] >= 5 && GIGA_HINTS[gameKey]) {
+        const hints = GIGA_HINTS[gameKey];
+        const hint = hints[Math.floor(Math.random() * hints.length)];
+        gigaSay(hint, 'excited');
+        gigaFailCount[gameKey] = 0; // reset después de dar pista
+        if (window.PG) PG.sfxPop();
+        return;
+      }
+    }
+  }
+
+  // Si acierta → resetear contador
+  if (type.includes('ok') || type.includes('match') || type.includes('win')) {
+    if (gameKey) gigaFailCount[gameKey] = 0;
+  }
+
+  const msg = list[Math.floor(Math.random() * list.length)];
+  let mood = 'excited';
+  if (type.includes('ok') || type.includes('match') || type.includes('win')) mood = 'happy';
+  if (type.includes('bad') || type.includes('fail')) mood = 'sad';
+  gigaSay(msg, mood);
+  if (mood === 'happy' || mood === 'excited') gigaCelebrate();
+}
+
+function updateGigaSpeech(section) {
+  gigaSay(GIGA_DIALOGUES[section] || GIGA_DIALOGUES.inicio);
+}
+
+function initGiga() {
+  document.querySelectorAll('nav a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      const hash = (link.getAttribute('href') || '#inicio').replace('#', '') || 'inicio';
+      updateGigaSpeech(hash);
+    });
+  });
+
+  const char = document.getElementById('gigaChar');
+  if (char) {
+    char.addEventListener('click', function() {
+      gigaSay(GIGA_TIPS[Math.floor(Math.random() * GIGA_TIPS.length)], 'excited');
+      if (window.PG) PG.sfxPop();
+    });
+  }
+
+  const current = (location.hash || '#inicio').replace('#', '') || 'inicio';
+  updateGigaSpeech(current);
+}
+
+document.addEventListener('DOMContentLoaded', initGiga);
+
+// Funciones globales
+window.gigaReact = gigaReact;
+window.gigaSay = gigaSay;
+window.gigaCelebrate = gigaCelebrate;
+window.updateGigaSpeech = updateGigaSpeech;
+
+/* ============================================================
+   MEMORAMA CON REACCIONES + PISTAS DESPUÉS DE 5 FALLOS
+   ============================================================ */
+function flipMemo(el) {
+  if (memoState.lock || el.classList.contains('flip') || el.classList.contains('matched')) return;
+  el.classList.add('flip');
+  memoState.flipped.push(el);
+
+  if (memoState.flipped.length === 2) {
+    memoState.moves++;
+    const movesEl = document.getElementById('memoMoves');
+    if (movesEl) movesEl.textContent = memoState.moves;
+    memoState.lock = true;
+    const a = memoState.flipped[0];
+    const b = memoState.flipped[1];
+
+    if (a.dataset.id === b.dataset.id) {
+      setTimeout(function() {
+        a.classList.add('matched');
+        b.classList.add('matched');
+        memoState.matched++;
+        const pairsEl = document.getElementById('memoPairs');
+        if (pairsEl) pairsEl.textContent = memoState.matched;
+
+        gigaReact('memo_match', 'memorama');
+        if (window.PG) PG.sfxOk();
+
+        if (memoState.matched >= memoState.pairs) {
+          setTimeout(function() {
+            gigaReact('memo_win', 'memorama');
+            if (window.PG) {
+              PG.confetti(60);
+              PG.award('memo', 'Maestro de la Memoria');
+              PG.sfxWin();
+            }
+          }, 600);
+          if (typeof saveScore === 'function') saveScore('memo_moves', memoState.moves);
+        }
+        memoState.flipped = [];
+        memoState.lock = false;
+      }, 420);
+    } else {
+      setTimeout(function() {
+        a.classList.remove('flip');
+        b.classList.remove('flip');
+        memoState.flipped = [];
+        memoState.lock = false;
+        gigaReact('memo_fail', 'memorama');
+        if (window.PG) PG.sfxBad();
+      }, 750);
+    }
+  }
+}
+
+/* ============================================================
+   MEJORA MÓVIL PARA "CONECTA LOS CABLES"
+   (soporta clic y arrastre / touch)
+   ============================================================ */
+(function improveWireTouch() {
+  // Esperar a que el juego de cables exista
+  const check = setInterval(function() {
+    const board = document.getElementById('wireBoard') || document.querySelector('.wire-board, #wireSvg, .cb-slots');
+    if (!board) return;
+    clearInterval(check);
+
+    // Añadir soporte táctil mejorado a los terminales
+    document.addEventListener('touchstart', function(e) {
+      const term = e.target.closest('[data-term], .wire-term, .terminal');
+      if (term) {
+        e.preventDefault();
+        term.classList.add('touch-active');
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchend', function(e) {
+      const term = e.target.closest('[data-term], .wire-term, .terminal');
+      if (term) {
+        term.classList.remove('touch-active');
+      }
+    });
+  }, 1000);
+})();
