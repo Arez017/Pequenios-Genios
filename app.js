@@ -455,7 +455,7 @@ const THEORY_PRIMARIA = [
           Otro ejemplo: R₁ = 220 Ω + R₂ = 220 Ω → R<sub>total</sub> = 440 Ω
         </p>
       </div>`,
-    diagram:`<svg viewBox="0 0 460 160" xmlns="http://www.w3.org/2000/svg">
+diagram:`<svg viewBox="0 0 460 160" xmlns="http://www.w3.org/2000/svg">
   <!-- Pila vertical -->
   <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
   <line x1="26" y1="48" x2="58" y2="48" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
@@ -483,9 +483,11 @@ const THEORY_PRIMARIA = [
   <polygon points="300,20 312,28 300,36" fill="#fde047"/>
   <text x="300" y="16" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
 
-  <!-- 440 Ω bien al costado (como en tu imagen) -->
-  <text x="420" y="55" text-anchor="middle" fill="#4ade80" font-size="22" font-weight="800">440</text>
-  <text x="420" y="75" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="700">Ω</text>
+  <!-- Rt + símbolo de resistencia en verde -->
+  <polyline points="405,28 410,28 414,18 420,38 426,18 432,38 436,28 445,28" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="425" y="52" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">Rt</text>
+  <text x="425" y="75" text-anchor="middle" fill="#4ade80" font-size="20" font-weight="800">440</text>
+  <text x="425" y="93" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">Ω</text>
 
   <!-- bajada y retorno RECTO al − -->
   <line x1="380" y1="28" x2="380" y2="120" stroke="#fde047" stroke-width="3.5"/>
@@ -514,7 +516,7 @@ const THEORY_PRIMARIA = [
           Otro ejemplo: R₁ = 220 Ω y R₂ = 220 Ω → R<sub>total</sub> = 110 Ω
         </p>
       </div>`,
-    diagram:`<svg viewBox="0 0 460 190" xmlns="http://www.w3.org/2000/svg">
+diagram:`<svg viewBox="0 0 460 190" xmlns="http://www.w3.org/2000/svg">
   
   <text x="42" y="46" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
   <line x1="26" y1="68" x2="58" y2="68" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
@@ -541,9 +543,11 @@ const THEORY_PRIMARIA = [
   <text x="326" y="92" fill="#fb923c" font-size="12" font-weight="700">R2 = 220</text>
   <line x1="300" y1="106" x2="300" y2="155" stroke="#fde047" stroke-width="3"/>
 
-  <!-- 110 Ω bien al costado (sin pegarse) -->
-  <text x="430" y="95" text-anchor="middle" fill="#4ade80" font-size="20" font-weight="800">110</text>
-  <text x="430" y="115" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">Ω</text>
+  <!-- Rt + símbolo de resistencia en verde -->
+  <polyline points="410,70 415,70 419,60 425,80 431,60 437,80 441,70 450,70" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="430" y="95" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">Rt</text>
+  <text x="430" y="118" text-anchor="middle" fill="#4ade80" font-size="20" font-weight="800">110</text>
+  <text x="430" y="136" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">Ω</text>
 </svg>`
   },
 {
