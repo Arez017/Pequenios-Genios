@@ -451,42 +451,49 @@ const THEORY_PRIMARIA = [
           <b>En corto:</b> las resistencias se <b>suman</b>. La corriente es igual en todo el camino. El voltaje se reparte entre los componentes.
         </p>
         <p style="margin:8px 0 0;font-size:0.88rem;opacity:0.85;">Ejemplo: R₁=100 Ω y R₂=200 Ω → R<sub>total</sub> = 300 Ω</p>
+        <p style="margin:10px 0 0;font-size:0.95rem;font-weight:700;color:#ffd23f;text-align:center;">
+          Otro ejemplo: R₁ = 220 Ω + R₂ = 220 Ω → R<sub>total</sub> = 440 Ω
+        </p>
       </div>`,
-    diagram:`<svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg">
-      <!-- Pila vertical -->
-      <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="26" y1="48" x2="58" y2="48" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
-      <line x1="34" y1="62" x2="50" y2="62" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
-      <text x="42" y="86" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
-      <text x="42" y="100" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+    diagram:`<svg viewBox="0 0 460 160" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pila vertical -->
+  <text x="42" y="28" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
+  <line x1="26" y1="48" x2="58" y2="48" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+  <line x1="34" y1="62" x2="50" y2="62" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+  <text x="42" y="86" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
+  <text x="42" y="100" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
 
-      <!-- Cable superior RECTO: desde + de la pila -->
-      <line x1="42" y1="48" x2="42" y2="28" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="42" y1="28" x2="100" y2="28" stroke="#fde047" stroke-width="3.5"/>
+  <!-- Cable superior RECTO: desde + de la pila -->
+  <line x1="42" y1="48" x2="42" y2="28" stroke="#fde047" stroke-width="3.5"/>
+  <line x1="42" y1="28" x2="100" y2="28" stroke="#fde047" stroke-width="3.5"/>
 
-      <!-- R1 en línea (zigzag horizontal) -->
-      <polyline points="100,28 108,28 114,16 122,40 130,16 138,40 144,28 160,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="130" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1</text>
+  <!-- R1 en línea (zigzag horizontal) -->
+  <polyline points="100,28 108,28 114,16 122,40 130,16 138,40 144,28 160,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+  <text x="130" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R1 = 220</text>
 
-      <!-- tramo recto entre R1 y R2 -->
-      <line x1="160" y1="28" x2="180" y2="28" stroke="#fde047" stroke-width="3.5"/>
+  <!-- tramo recto entre R1 y R2 -->
+  <line x1="160" y1="28" x2="180" y2="28" stroke="#fde047" stroke-width="3.5"/>
 
-      <!-- R2 en línea -->
-      <polyline points="180,28 188,28 194,16 202,40 210,16 218,40 224,28 240,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
-      <text x="210" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2</text>
+  <!-- R2 en línea -->
+  <polyline points="180,28 188,28 194,16 202,40 210,16 218,40 224,28 240,28" fill="none" stroke="#fb923c" stroke-width="3" stroke-linejoin="round"/>
+  <text x="210" y="52" text-anchor="middle" fill="#fb923c" font-size="12" font-weight="700">R2 = 220</text>
 
-      <!-- cierre superior e ida a la derecha -->
-      <line x1="240" y1="28" x2="380" y2="28" stroke="#fde047" stroke-width="3.5"/>
-      <polygon points="300,20 312,28 300,36" fill="#fde047"/>
-      <text x="300" y="16" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
+  <!-- cierre superior e ida a la derecha -->
+  <line x1="240" y1="28" x2="380" y2="28" stroke="#fde047" stroke-width="3.5"/>
+  <polygon points="300,20 312,28 300,36" fill="#fde047"/>
+  <text x="300" y="16" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
 
-      <!-- bajada y retorno RECTO al − -->
-      <line x1="380" y1="28" x2="380" y2="120" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="380" y1="120" x2="42" y2="120" stroke="#fde047" stroke-width="3.5"/>
-      <line x1="42" y1="120" x2="42" y2="62" stroke="#fde047" stroke-width="3.5"/>
-      <polygon points="220,128 208,120 220,112" fill="#fb923c"/>
-      <text x="220" y="144" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
-    </svg>`
+  <!-- 440 Ω bien al costado (como en tu imagen) -->
+  <text x="420" y="55" text-anchor="middle" fill="#4ade80" font-size="22" font-weight="800">440</text>
+  <text x="420" y="75" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="700">Ω</text>
+
+  <!-- bajada y retorno RECTO al − -->
+  <line x1="380" y1="28" x2="380" y2="120" stroke="#fde047" stroke-width="3.5"/>
+  <line x1="380" y1="120" x2="42" y2="120" stroke="#fde047" stroke-width="3.5"/>
+  <line x1="42" y1="120" x2="42" y2="62" stroke="#fde047" stroke-width="3.5"/>
+  <polygon points="220,128 208,120 220,112" fill="#fb923c"/>
+  <text x="220" y="144" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+</svg>`
   },
 {
     title:'Circuito en paralelo',
@@ -503,29 +510,41 @@ const THEORY_PRIMARIA = [
           <b>En corto:</b> el voltaje es igual en cada rama. Las corrientes se <b>suman</b>. La R<sub>total</sub> es <b>menor</b> que la más pequeña.
         </p>
         <p style="margin:8px 0 0;font-size:0.88rem;opacity:0.85;">Ejemplo: R₁=100 Ω y R₂=100 Ω → R<sub>total</sub> = 50 Ω</p>
+        <p style="margin:10px 0 0;font-size:0.95rem;font-weight:700;color:#ffd23f;text-align:center;">
+          Otro ejemplo: R₁ = 220 Ω y R₂ = 220 Ω → R<sub>total</sub> = 110 Ω
+        </p>
       </div>`,
-    diagram:`<svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg">
-      
-      <text x="42" y="46" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
-      <line x1="26" y1="68" x2="58" y2="68" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
-      <line x1="34" y1="82" x2="50" y2="82" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
-      <text x="42" y="108" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
-      <text x="42" y="122" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
-    
-      <path d="M42 46 V18 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
-      <polygon points="120,12 132,18 120,24" fill="#fde047"/>
-      <text x="250" y="12" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
-      <path d="M42 108 V155 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
-      <text x="250" y="172" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
-      <line x1="170" y1="18" x2="170" y2="50" stroke="#fde047" stroke-width="3"/>
-      <path d="M170 50 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
-      <text x="196" y="92" fill="#fb923c" font-size="12" font-weight="700">R1</text>
-      <line x1="170" y1="106" x2="170" y2="155" stroke="#fde047" stroke-width="3"/>
-      <line x1="300" y1="18" x2="300" y2="50" stroke="#fde047" stroke-width="3"/>
-      <path d="M300 50 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
-      <text x="326" y="92" fill="#fb923c" font-size="12" font-weight="700">R2</text>
-      <line x1="300" y1="106" x2="300" y2="155" stroke="#fde047" stroke-width="3"/>
-    </svg>`
+    diagram:`<svg viewBox="0 0 460 190" xmlns="http://www.w3.org/2000/svg">
+  
+  <text x="42" y="46" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="800">+</text>
+  <line x1="26" y1="68" x2="58" y2="68" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+  <line x1="34" y1="82" x2="50" y2="82" stroke="#fde047" stroke-width="4" stroke-linecap="round"/>
+  <text x="42" y="108" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="800">−</text>
+  <text x="42" y="122" text-anchor="middle" fill="#fef8ec" font-size="11" font-weight="700">PILA</text>
+
+  <path d="M42 46 V18 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+  <polygon points="120,12 132,18 120,24" fill="#fde047"/>
+  <text x="250" y="12" text-anchor="middle" fill="#fde047" font-size="11" font-weight="700">SALE DEL POSITIVO (+)</text>
+  
+  <path d="M42 108 V155 H400 V55" fill="none" stroke="#fde047" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="250" y="172" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="700">REGRESA AL NEGATIVO (−)</text>
+  
+  <!-- R1 -->
+  <line x1="170" y1="18" x2="170" y2="50" stroke="#fde047" stroke-width="3"/>
+  <path d="M170 50 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="196" y="92" fill="#fb923c" font-size="12" font-weight="700">R1 = 220</text>
+  <line x1="170" y1="106" x2="170" y2="155" stroke="#fde047" stroke-width="3"/>
+  
+  <!-- R2 -->
+  <line x1="300" y1="18" x2="300" y2="50" stroke="#fde047" stroke-width="3"/>
+  <path d="M300 50 v8 l-12 10 24 10 -24 10 12 10 v8" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="326" y="92" fill="#fb923c" font-size="12" font-weight="700">R2 = 220</text>
+  <line x1="300" y1="106" x2="300" y2="155" stroke="#fde047" stroke-width="3"/>
+
+  <!-- 110 Ω bien al costado (sin pegarse) -->
+  <text x="430" y="95" text-anchor="middle" fill="#4ade80" font-size="20" font-weight="800">110</text>
+  <text x="430" y="115" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">Ω</text>
+</svg>`
   },
 {
     title:'Ley de Ohm: la fórmula mágica',
