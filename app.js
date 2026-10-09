@@ -296,12 +296,12 @@ const SYMBOL_LABELS = {
    ============================================================ */
 /* Videos opcionales por tema (pegá el ID de YouTube cuando lo tengas) */
 const THEORY_VIDEOS = {
-  '¿Qué es un circuito eléctrico?': { id: '', title: '¿Qué es un circuito?' },
-  'Polaridad: el sentido importa': { id: '', title: 'Polaridad del LED' },
-  'Simbología electrónica': { id: '', title: 'Símbolos electrónicos' },
-  'Circuito en serie': { id: '', title: 'Circuito en serie' },
-  'Circuito en paralelo': { id: '', title: 'Circuito en paralelo' },
-  'Ley de Ohm: la fórmula mágica': { id: '', title: 'Ley de Ohm' }
+  '¿Qué es un circuito eléctrico?': { id: 'a4mY3YMNLz8', title: '¿Qué es un circuito?' },
+  'Polaridad: el sentido importa': { id: 'dfX65z5hjpA', title: 'Polaridad del LED' },
+  'Simbología electrónica': { id: '65NP0aycYY4', title: 'Símbolos electrónicos' },
+  'Circuito en serie': { id: 'qnfztlaUa0s', title: 'Circuito en serie' },
+  'Circuito en paralelo': { id: 'qnfztlaUa0s', title: 'Circuito en paralelo' },
+  'Ley de Ohm: la fórmula mágica': { id: 'YEnODeoN7Ys', title: 'Ley de Ohm' }
 };
 
 const THEORY_PRIMARIA = [
